@@ -1,5 +1,5 @@
-{ mkDerivation, base, containers, haskeline, hedgehog, lens, mtl
-, stdenv, typed-process, vector
+{ mkDerivation, base, bytestring, containers, haskeline, hedgehog
+, lens, mtl, process, stdenv, turtle, typed-process, vector
 }:
 mkDerivation {
   pname = "fp-eedee";
@@ -8,7 +8,9 @@ mkDerivation {
   libraryHaskellDepends = [
     base containers haskeline lens mtl typed-process vector
   ];
-  testHaskellDepends = [ base hedgehog lens typed-process ];
+  testHaskellDepends = [
+    base bytestring hedgehog lens process turtle typed-process
+  ];
   doHaddock = false;
   license = "unknown";
   hydraPlatforms = stdenv.lib.platforms.none;
