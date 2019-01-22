@@ -21,3 +21,4 @@ cabal.project.local
 .ghc.environment.*
 level0*/*app_db.db
 level0*/result
+test/ed*txt
