@@ -1,11 +1,13 @@
 {-# LANGUAGE KindSignatures    #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 module Main where
 
 import           Turtle
 
+import Control.Lens (snoc)
 import           Control.Monad.IO.Class     (MonadIO, liftIO)
-import           Debug.Trace                (traceShowId)
+import           Debug.Trace                (traceShowM)
 
 import           Hedgehog
 import qualified Hedgehog.Gen               as Gen
@@ -16,7 +18,7 @@ import qualified Data.Text                  as T
 import qualified Data.Text.IO               as T
 
 import           System.Exit                (exitFailure, exitSuccess)
-import           System.IO                  (BufferMode (..), Handle, hClose,
+import           System.IO                  (BufferMode (..), Handle, hClose, hIsReadable,
                                              hFlush, hGetBuffering, hGetLine,
                                              hPutStrLn, hSetBuffering)
 import qualified System.Process.Typed       as TP
@@ -27,7 +29,7 @@ import           Data.ByteString.Lazy.Char8 (ByteString)
 import qualified Data.ByteString.Lazy.Char8 as BS
 
 newtype Buffer (v :: * -> *) =
-  Buffer Text
+  Buffer [Text]
   deriving (Show, Eq)
 
 data Cmd_PrintAll (v :: * -> *) =
@@ -53,24 +55,25 @@ cAppendText
   -> Command n m Buffer
 cAppendText edProc =
   let
-    gen _ = Just $ Cmd_Append <$> Gen.text (Range.linear 1 100) Gen.alphaNum
+    gen _ = Just $ Cmd_Append <$> 
+      Gen.filter (\case "a" -> False; xs  -> True) 
+        (Gen.text (Range.linear 1 100) Gen.alphaNum)
 
     execute (Cmd_Append t) = evalIO $ do
-      -- sendToEd ["a",t,".","w"] edfp
-      -- readEdFile edfp
       let ec = edCmd edProc
       ec "a"
       ec t
       ec "."
       ec ",p"
-      T.pack <$> hGetLine (_edOut edProc)
+      readPrintedLines edProc
   in
     Command gen execute
-    [ Update $ \(Buffer b) (Cmd_Append i) _out ->
-        Buffer (b <> i)
+    [ Update $ \(Buffer b) (Cmd_Append i) out ->
+        Buffer (snoc b i)
 
     , Ensure $ \(Buffer _old) (Buffer new) (Cmd_Append _i) out ->
-        new === out
+        -- This seems like I'm testing 'snoc', not ed.
+        new === snoc _old _i
     ]
 
 cPrintAll
@@ -85,12 +88,12 @@ cPrintAll edProc =
     gen _ = Just $ Gen.constant Cmd_PrintAll
 
     execute _ = evalIO $ do
-      -- readEdFile edfp
       edCmd edProc ",p"
-      BS.pack <$> hGetLine (_edOut edProc)
+      readPrintedLines edProc
   in
     Command gen execute
-    [ Ensure $ \(Buffer old) (Buffer new) _ _ -> old === new
+    [ Require $ \(Buffer cur) _ -> not $ null cur
+    , Ensure $ \(Buffer old) (Buffer new) _ _out -> old === new
     ]
 
 edProcConfig =
@@ -110,6 +113,9 @@ sendToEd cmds f =
 readEdFile :: Turtle.FilePath -> IO Text
 readEdFile f = T.readFile (T.unpack $ format fp f)
 
+readPrintedLines :: EdProc -> IO Text
+readPrintedLines ed = T.pack <$> hGetLine (_edOut ed)
+
 prop_ap :: EdProc -> Property
 prop_ap edProc = property $ do
   let
@@ -119,7 +125,11 @@ prop_ap edProc = property $ do
   actions <- forAll $ Gen.sequential (Range.linear 1 10) initialState cmds
 
   -- Reset the ed buffer
-  evalIO $ edCmd edProc ",d"
+  evalIO $ do
+    edCmd edProc "a"
+    edCmd edProc "avoiding invalid address error :/"
+    edCmd edProc "."
+    edCmd edProc ",d"
 
   executeSequential initialState actions
 
@@ -137,6 +147,8 @@ main = do
     hSetBuffering stdout LineBuffering
 
     let edProc = EdProc stdin stdout ph
+
+    edCmd edProc "H"
 
     b <- checkSequential $ Group "ed (real deal)"
        [ ("property_a_p", prop_ap edProc)
