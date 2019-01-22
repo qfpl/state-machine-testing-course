@@ -37,7 +37,7 @@ main1 = do
 
 main2 :: IO Bool
 main2 = checkSequential $ Group "Ed Black-Box State Machine Tests"
-  [ ("Cmds: [(.)a,a,(.)d,p]", EF.prop_ed_blackbox_file)
+  [ ("Cmds: [<n>a,a,<n>d,p]", EF.prop_ed_blackbox_file)
   ]
 
 main :: IO Bool

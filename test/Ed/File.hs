@@ -167,7 +167,7 @@ prop_ed_blackbox_file = property $ do
     initialState = Buffer mempty
 
   -- Generate a sequence of Commands to apply to our state machine
-  actions <- forAll $ Gen.sequential (Range.linear 1 10) initialState cmds
+  actions <- forAll $ Gen.sequential (Range.linear 1 100) initialState cmds
 
   -- Reset the ed buffer
   evalIO $ resetEdFile edFile
