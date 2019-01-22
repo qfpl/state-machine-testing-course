@@ -153,6 +153,9 @@ cDeleteLine edFile =
         . bifold
         . first (take (fromIntegral n - 1))
         $ splitAt (fromIntegral n) b
+
+    , Ensure $ \_ (Buffer new) _ out ->
+        T.unlines new === out
     ]
 
 prop_ed_blackbox_file :: Property
