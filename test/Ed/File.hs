@@ -4,7 +4,7 @@ module Ed.File (prop_ed_blackbox_file) where
 
 import           Prelude           hiding (FilePath)
 
-import           Control.Lens      (snoc)
+import           Control.Lens      (snoc, (^?), ix)
 
 import           Data.Bifoldable   (bifold)
 import           Data.Bifunctor    (first, second)
@@ -154,8 +154,10 @@ cDeleteLine edFile =
         . first (take (fromIntegral n - 1))
         $ splitAt (fromIntegral n) b
 
-    , Ensure $ \_ (Buffer new) _ out ->
+    , Ensure $ \(Buffer old) (Buffer new) (Cmd_DeleteLine n) out -> do
         T.unlines new === out
+        let n' = fromIntegral n
+        new ^? ix n' === old ^? ix (n' + 1)
     ]
 
 prop_ed_blackbox_file :: Property
