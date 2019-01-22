@@ -20,12 +20,6 @@ library
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.11 && <4.13
-                     , haskeline
-                     , lens
-                     , mtl
-                     , containers
-                     , vector
-                     , typed-process
 
   hs-source-dirs:      src
   default-language:    Haskell2010
@@ -43,7 +37,6 @@ test-suite ed-state
   build-depends:       base >= 4.11 && < 4.13
                      , lens
                      , hedgehog
-                     , bytestring
                      , text
                      , process
                      , turtle
