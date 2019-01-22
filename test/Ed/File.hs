@@ -70,10 +70,9 @@ cPrintAll edFile =
   in
     Command gen execute
     [ Require $ \(Buffer cur) _ -> not $ null cur
-    , Ensure $ \(Buffer old) (Buffer new) _ _out -> old === new
-    , Ensure $ \(Buffer _old) (Buffer new) _ out -> out === T.unlines new
+    , Ensure  $ \(Buffer old) (Buffer new) _ _   -> old === new
+    , Ensure  $ \_            (Buffer new) _ out -> out === T.unlines new
     ]
-
 
 prop_ed_blackbox_file :: Property
 prop_ed_blackbox_file = property $ do
