@@ -2,28 +2,31 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Ed.File (prop_ed_blackbox_file) where
 
-import           Prelude        hiding (FilePath)
+import           Prelude           hiding (FilePath)
 
-import           Control.Lens   (snoc)
+import           Control.Lens      (snoc)
 
-import qualified Data.Text      as T
-import qualified Data.Text.IO   as T
+import qualified Data.Text         as T
+import qualified Data.Text.IO      as T
 
 import           Hedgehog
-import qualified Hedgehog.Gen   as Gen
-import qualified Hedgehog.Range as Range
+import qualified Hedgehog.Gen      as Gen
+import qualified Hedgehog.Range    as Range
 
-import           Ed.Types       (Buffer (..), Cmd_Append (..),
-                                 Cmd_PrintAll (..))
+import           Ed.Types          (Buffer (..), Cmd_Append (..),
+                                    Cmd_PrintAll (..))
 
 import           Turtle
+
+import           System.Posix.Temp (mkstemp)
+
 
 resetEdFile :: FilePath -> IO ()
 resetEdFile edFile = sh $
   testfile edFile >>= (`when` (rm edFile)) >> touch edFile
 
 edCmdsOnFile :: [Text] -> FilePath -> IO ()
-edCmdsOnFile cmds edFile = sh .
+edCmdsOnFile cmds edFile = sh $
   procs "ed" ["-s", format fp edFile] . select . textToLines $ T.unlines cmds
 
 readEdFile :: FilePath -> IO Text
@@ -74,15 +77,23 @@ cPrintAll edFile =
 
 prop_ed_blackbox_file :: Property
 prop_ed_blackbox_file = property $ do
-  let
-    edFile = "test" </> "ed_test_file.txt"
+  -- Create our file to apply our ed commands to
+  edFile <- evalIO $ decodeString . fst <$> mkstemp "/tmp/ed_test_file_"
 
+  let
+    -- Prepare our list of possible commands
     cmds = ($ edFile) <$> [cAppendText, cPrintAll]
+    -- Initialise our 'state'
     initialState = Buffer mempty
 
+  -- Generate a sequence of Commands to apply to our state machine
   actions <- forAll $ Gen.sequential (Range.linear 1 10) initialState cmds
 
   -- Reset the ed buffer
   evalIO $ resetEdFile edFile
 
+  -- Run the tests!
   executeSequential initialState actions
+
+  -- Clean up our temp files
+  evalIO . sh $ rm edFile

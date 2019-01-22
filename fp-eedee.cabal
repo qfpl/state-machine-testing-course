@@ -41,3 +41,4 @@ test-suite ed-state
                      , process
                      , turtle
                      , typed-process
+                     , unix
