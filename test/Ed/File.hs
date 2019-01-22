@@ -158,6 +158,7 @@ cDeleteLine edFile =
         T.unlines new === out
         let n' = fromIntegral n
         new ^? ix n' === old ^? ix (n' + 1)
+        new ^? ix (n' - 1) === old ^? ix n'
     ]
 
 prop_ed_blackbox_file :: Property
