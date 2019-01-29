@@ -73,7 +73,10 @@ cAppendAt edFile =
         ln >= 0 && ln < fromIntegral (length b) && not (null b)
 
     , Update $ \(Buffer b) (Cmd_AppendAt ln i) _ ->
-        Buffer . bifold . second (i:) . splitAt (fromIntegral ln) $ b
+        Buffer
+        . bifold
+        . second (i:)
+        . splitAt (fromIntegral ln) $ b
 
     , Ensure $ \(Buffer _old) (Buffer new) (Cmd_AppendAt ln i) out -> do
         T.unlines new === out
@@ -141,7 +144,11 @@ cDeleteLine edFile =
       Cmd_DeleteLine <$> Gen.word (Range.linear 1 (fromIntegral $ length b))
 
     execute (Cmd_DeleteLine n) = evalIO $ do
-      edCmdsOnFile edFile [format (d%"d") n, "w", "q"]
+      edCmdsOnFile edFile
+        [ format (d%"d") n
+        , "w"
+        , "q"
+        ]
       readEdFile edFile
   in
     Command gen execute
@@ -157,7 +164,7 @@ cDeleteLine edFile =
     , Ensure $ \(Buffer old) (Buffer new) (Cmd_DeleteLine n) out -> do
         T.unlines new === out
         let n' = fromIntegral n
-        new ^? ix n' === old ^? ix (n' + 1)
+        new ^? ix n'       === old ^? ix (n' + 1)
         new ^? ix (n' - 1) === old ^? ix n'
     ]
 

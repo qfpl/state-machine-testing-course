@@ -17,9 +17,11 @@ import           Ed.Types
 main1 :: IO ()
 main1 = do
   let p = (P.shell "ed") { P.std_in = P.CreatePipe, P.std_out = P.CreatePipe }
+
   b <- P.withCreateProcess p $ \(Just stdin) (Just stdout) _ ph -> do
 
-    hSetBuffering stdout LineBuffering
+    hSetBuffering stdin NoBuffering
+    hSetBuffering stdout NoBuffering
 
     let edProc = EdProc stdin stdout ph
 
@@ -40,5 +42,5 @@ main2 = checkSequential $ Group "Ed Black-Box State Machine Tests"
   [ ("Cmds: [<n>a,a,<n>d,p]", EF.prop_ed_blackbox_file)
   ]
 
-main :: IO Bool
-main = main2
+main :: IO ()
+main = main1

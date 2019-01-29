@@ -6,7 +6,7 @@ version:             0.1.0.0
 -- synopsis:
 -- description:
 -- license:
-license-file:        LICENSE
+license-file:        LICENCE
 author:              Sean Chalmers
 maintainer:          sclhiannan@gmail.com
 -- copyright:
@@ -20,6 +20,8 @@ library
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.11 && <4.13
+
+  -- Nothing to see here, move along
 
   hs-source-dirs:      src
   default-language:    Haskell2010
@@ -35,10 +37,11 @@ test-suite ed-state
   main-is:             Main.hs
   ghc-options:         -Wall -threaded
   build-depends:       base >= 4.11 && < 4.13
-                     , lens
-                     , hedgehog
-                     , text
-                     , process
-                     , turtle
-                     , typed-process
-                     , unix
+                     , hedgehog       >= 0.6 && < 0.7
+                     , text           >= 1.2.3 && < 1.3
+                     , unix           >= 2.7.2 && < 2.8
+                     , process        >= 1.6.3 && < 1.7
+                     , lens           >= 4.16.1 && < 4.17
+                     , turtle         >= 1.5.10 && < 1.6
+                     , typed-process  >= 0.2.3 && < 0.3
+                     , bytestring

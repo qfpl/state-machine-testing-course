@@ -1,7 +1,7 @@
 module Ed.Command where
 
 data Cmd
-  = Insert 
+  = Insert
   | Delete
   | Append
   | Write (Maybe FilePath)
