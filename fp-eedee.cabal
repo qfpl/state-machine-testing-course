@@ -5,7 +5,7 @@ name:                fp-eedee
 version:             0.1.0.0
 -- synopsis:
 -- description:
--- license:
+license:             BSD3
 license-file:        LICENCE
 author:              Sean Chalmers
 maintainer:          sclhiannan@gmail.com
@@ -16,22 +16,35 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  -- exposed-modules:
+  exposed-modules:     CoffeeMachine
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.11 && <4.13
+  build-depends:       base >= 4.11 && < 4.13
+                     , mtl >= 2.2.2 && < 2.3
+                     , lens > 4.15 && < 4.18
 
   -- Nothing to see here, move along
 
   hs-source-dirs:      src
   default-language:    Haskell2010
 
+test-suite coffee-state
+  type:                exitcode-stdio-1.0
+  default-language:    Haskell2010
+  main-is:             Main.hs
+  hs-source-dirs:      coffee-state
+  ghc-options:         -Wall -threaded
+  build-depends:       base >= 4.11 && < 4.13
+                     , fp-eedee
+                     , hedgehog >= 0.6 && < 0.7
+                     , lens > 4.15 && < 4.18
+
 test-suite ed-state
   other-modules:       Ed.Types
                      , Ed.File
                      , Ed.Memory
 
-  type:                exitcode-stdio-1.0 
+  type:                exitcode-stdio-1.0
   default-language:    Haskell2010
   hs-source-dirs:      test
   main-is:             Main.hs
@@ -41,7 +54,7 @@ test-suite ed-state
                      , text           >= 1.2.3 && < 1.3
                      , unix           >= 2.7.2 && < 2.8
                      , process        >= 1.6.3 && < 1.7
-                     , lens           >= 4.16.1 && < 4.17
+                     , lens           >= 4.15 && < 4.18
                      , turtle         >= 1.5.10 && < 1.6
                      , typed-process  >= 0.2.3 && < 0.3
                      , bytestring
