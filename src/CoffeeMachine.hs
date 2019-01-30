@@ -1,6 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase                 #-}
 {-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE TupleSections              #-}
 
 module CoffeeMachine where
 
@@ -9,7 +10,7 @@ import Control.Lens.Operators
 import Control.Lens.TH (makeLenses, makePrisms)
 import Control.Monad (when)
 import Control.Monad.Except (Except, MonadError, runExcept, throwError)
-import Control.Monad.State (MonadState, StateT, evalStateT)
+import Control.Monad.State (MonadState, StateT, execStateT)
 
 data MilkSugar = MilkSugar
   { _milk :: Int
@@ -44,6 +45,12 @@ data MachineState = MachineState
 
 $(makeLenses ''MachineState)
 
+initialState = MachineState
+  { _coins = 0
+  , _drinkSetting = HotChocolate
+  , _mug = Nothing
+  }
+
 data MachineError
   = NotEnoughCoins
   | NoMug
@@ -51,68 +58,53 @@ data MachineError
   | MugInTheWay
   deriving Show
 
-newtype Machine a = Machine (StateT MachineState (Except MachineError) a)
-  deriving ( Functor
-           , Applicative
-           , Monad
-           , MonadError MachineError
-           , MonadState MachineState
-           )
+insertCoins :: Int -> MachineState -> MachineState
+insertCoins n = coins %~ (+n)
 
-runMachine :: Machine a -> Either MachineError a
-runMachine (Machine m) = runExcept . evalStateT m $ MachineState
-  { _coins = 0
-  , _drinkSetting = HotChocolate
-  , _mug = Nothing
-  }
+refund :: MachineState -> (Int, MachineState)
+refund = coins <<.~ 0
 
-insertCoins :: Int -> Machine ()
-insertCoins n = coins += n
+addMug :: MachineState -> Either MachineError MachineState
+addMug st = let oldMug = st ^. mug
+            in case oldMug of
+                 Nothing -> Right $ st & mug ?~ Mug Nothing
+                 Just{} -> Left MugInTheWay
 
-refund :: Machine Int
-refund = coins <<.= 0
+takeMug :: MachineState -> Either MachineError (Mug, MachineState)
+takeMug st = let (oldMug, st') = st & mug <<.~ Nothing
+             in maybe (Left NoMug) (Right . (,st')) oldMug
 
-addMug :: Machine ()
-addMug = do
-  oldMug <- use mug
-  case oldMug of
-    Nothing -> mug .= Just (Mug Nothing)
-    Just{} -> throwError MugInTheWay
+hotChocolate :: MachineState -> MachineState
+hotChocolate = drinkSetting .~ HotChocolate
 
-takeMug :: Machine Mug
-takeMug = do
-  oldMug <- mug <<.= Nothing
-  maybe (throwError NoMug) pure oldMug
+coffee :: MachineState -> MachineState
+coffee = drinkSetting .~ Coffee (MilkSugar 0 0)
 
-hotChocolate :: Machine ()
-hotChocolate = drinkSetting .= HotChocolate
+hipsterCoffee :: MachineState -> MachineState
+hipsterCoffee = drinkSetting .~ HipsterCoffee
 
-coffee :: Machine ()
-coffee = drinkSetting .= Coffee (MilkSugar 0 0)
+addMilk :: MachineState -> MachineState
+addMilk = drinkSetting . (_Coffee `failing` _Tea) . milk +~ 1
 
-hipsterCoffee :: Machine ()
-hipsterCoffee = drinkSetting .= HipsterCoffee
+addSugar :: MachineState -> MachineState
+addSugar = drinkSetting . (_Coffee `failing` _Tea) . sugar +~ 1
 
-addMilk :: Machine ()
-addMilk = drinkSetting . (_Coffee `failing` _Tea) . milk += 1
+tea :: MachineState -> MachineState
+tea = drinkSetting .~ Tea (MilkSugar 0 0)
 
-addSugar :: Machine ()
-addSugar = drinkSetting . (_Coffee `failing` _Tea) . sugar += 1
+dispense :: MachineState -> Either MachineError MachineState
+dispense = runExcept . execStateT go where
+  go = do
+    drink <- use drinkSetting
 
-tea :: Machine ()
-tea = drinkSetting .= Tea (MilkSugar 0 0)
+    let cost = drinkCost drink
+    credit <- use coins
+    when (credit < cost) $ throwError NotEnoughCoins
 
-dispense :: Machine ()
-dispense = do
-  drink <- use drinkSetting
-
-  let cost = drinkCost drink
-  credit <- use coins
-  when (credit < cost) $ throwError NotEnoughCoins
-
-  m <- use mug >>= maybe (throwError NoMug) pure
-  case m of
-    Mug Just{} -> throwError MugFull
-    Mug Nothing -> do
-      coins -= cost
-      mug .= Just (Mug (Just drink))
+    m <- use mug >>= maybe (throwError NoMug) pure
+    case m of
+      Mug Just{} -> throwError MugFull
+      Mug Nothing -> do
+        coins -= cost
+        mug .= Just (Mug (Just drink))
+    pure ()
