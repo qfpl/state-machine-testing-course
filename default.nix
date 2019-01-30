@@ -23,8 +23,9 @@ let
     [ # Include our beloved and standard text editor
       pkgs.ed
       # A development tool for great justice
-      pkgs.haskell.lib.justStaticExecutables pkgs.haskellPackages.ghcid
+      (pkgs.haskell.lib.justStaticExecutables pkgs.haskellPackages.ghcid)
+      (pkgs.haskell.lib.justStaticExecutables pkgs.haskellPackages.cabal-install)
     ];
 in
   # Remove the need for 'shell.nix'.
-  pkgs.haskell.lib.shellAware drv
+  pkgs.haskell.lib.shellAware drvWithTools
