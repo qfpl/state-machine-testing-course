@@ -55,14 +55,3 @@ test-suite level04
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
   hs-source-dirs:      level04
-
-test-suite coffee-state
-  type:                exitcode-stdio-1.0
-  default-language:    Haskell2010
-  main-is:             Main.hs
-  hs-source-dirs:      coffee-state
-  ghc-options:         -Wall -threaded
-  build-depends:       base >= 4.11 && < 4.13
-                     , fp-eedee
-                     , hedgehog >= 0.6 && < 0.7
-                     , lens > 4.15 && < 4.18
