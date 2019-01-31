@@ -19,6 +19,9 @@ module CoffeeMachine
   , milk
   , sugar
 
+  , MachineError(..)
+  , Mug(..)
+
   , newMachine
   , reset
   , peek
@@ -39,7 +42,7 @@ module CoffeeMachine
   , dispense
   ) where
 
-import Control.Lens (Iso', failing, use, iso)
+import Control.Lens (failing, use)
 import Control.Lens.Operators
 import Control.Lens.TH (makeLenses, makePrisms)
 import Control.Monad (when)
@@ -109,21 +112,21 @@ insertCoins :: MonadIO m => Int -> Machine -> m ()
 insertCoins c = update $ coins +~ c
 
 refund :: MonadIO m => Machine -> m Int
-refund (Machine m) = liftIO $ atomicModifyIORef' m (swap . (coins <<.~ 0))
+refund (Machine ref) = liftIO $ atomicModifyIORef' ref (swap . (coins <<.~ 0))
 
 addMug :: MonadIO m => Machine -> m (Either MachineError ())
-addMug (Machine m) = liftIO . atomicModifyIORef' m $ \st ->
+addMug (Machine ref) = liftIO . atomicModifyIORef' ref $ \st ->
   let oldMug = st ^. mug
   in case oldMug of
        Nothing -> (st & mug ?~ Mug Nothing, Right ())
        Just{} -> (st, Left MugInTheWay)
 
 takeMug :: MonadIO m => Machine -> m (Either MachineError Mug)
-takeMug (Machine m) = liftIO . atomicModifyIORef' m $ \st ->
+takeMug (Machine ref) = liftIO . atomicModifyIORef' ref $ \st ->
   let (mMug, st') = st & mug <<.~ Nothing
   in case mMug of
        Nothing -> (st, Left NoMug)
-       Just mg -> (st', Right mg)
+       Just m -> (st', Right m)
 
 coffee :: MonadIO m => Machine -> m ()
 coffee = update $ drinkSetting .~ Coffee (MilkSugar 0 0)
@@ -141,10 +144,10 @@ addSugar :: MonadIO m => Machine -> m ()
 addSugar = update $ drinkSetting . (_Coffee `failing` _Tea) . sugar +~ 1
 
 update :: MonadIO m => (MachineState -> MachineState) -> Machine -> m ()
-update f (Machine m) = liftIO $ atomicModifyIORef' m ((,()) . f)
+update f (Machine ref) = liftIO $ atomicModifyIORef' ref ((,()) . f)
 
 dispense :: MonadIO m => Machine -> m (Either MachineError ())
-dispense (Machine m) = liftIO . atomicModifyIORef' m $
+dispense (Machine ref) = liftIO . atomicModifyIORef' ref $
   swap . runState (runExceptT go)
   where
     go = do

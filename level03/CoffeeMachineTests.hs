@@ -6,7 +6,7 @@ module CoffeeMachineTests (stateMachineTests) where
 import qualified CoffeeMachine as C
 import           Control.Lens (view)
 import           Control.Monad.IO.Class (MonadIO)
-import qualified Data.IORef as R
+import           Data.Function ((&))
 import           Data.Kind (Type)
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
@@ -24,9 +24,9 @@ instance HTraversable SetDrinkType where
 
 cSetDrinkType
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => R.IORef C.MachineState
+  => C.Machine
   -> Command g m Model
-cSetDrinkType ref = Command gen exec
+cSetDrinkType mach = Command gen exec
   [ Update $ \_ (SetDrinkType d) _ -> Model d
   , Ensure $ \_ (Model d) _ drink -> case (d, drink) of
       (Coffee, C.Coffee{}) -> success
@@ -40,21 +40,21 @@ cSetDrinkType ref = Command gen exec
 
     exec :: SetDrinkType Concrete -> m C.Drink
     exec (SetDrinkType d) = evalIO $ do
-      R.modifyIORef ref $ case d of
+      mach & case d of
         Coffee -> C.coffee
         HotChocolate -> C.hotChocolate
         Tea -> C.tea
-      view C.drinkSetting <$> R.readIORef ref
+      view C.drinkSetting <$> C.peek mach
 
 stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
-  r <- evalIO $ R.newIORef C.initialState
+  mach <- C.newMachine
 
   let initialModel = Model HotChocolate
-      commands = ($ r) <$>
+      commands = ($ mach) <$>
         [ cSetDrinkType
         ]
 
   actions <- forAll $ Gen.sequential (Range.linear 1 100) initialModel commands
-  evalIO $ R.writeIORef r C.initialState
+  evalIO $ C.reset mach
   executeSequential initialModel actions

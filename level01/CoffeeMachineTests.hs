@@ -6,7 +6,6 @@ module CoffeeMachineTests (stateMachineTests) where
 import qualified CoffeeMachine as C
 import           Control.Lens (view)
 import           Control.Monad.IO.Class (MonadIO)
-import qualified Data.IORef as R
 import           Data.Kind (Type)
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
@@ -32,9 +31,9 @@ instance HTraversable SetDrinkTea where
 
 cSetDrinkCoffee
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => R.IORef C.MachineState
+  => C.Machine
   -> Command g m Model
-cSetDrinkCoffee ref = Command gen exec
+cSetDrinkCoffee mach = Command gen exec
   [ Update $ \_ _ _ -> Model Coffee
   , Ensure $ \_ _ _ drink -> case drink of
       C.Coffee{} -> success
@@ -46,14 +45,14 @@ cSetDrinkCoffee ref = Command gen exec
 
     exec :: SetDrinkCoffee Concrete -> m C.Drink
     exec _ = evalIO $ do
-      R.modifyIORef ref C.coffee
-      view C.drinkSetting <$> R.readIORef ref
+      C.coffee mach
+      view C.drinkSetting <$> C.peek mach
 
 cSetDrinkHotChocolate
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => R.IORef C.MachineState
+  => C.Machine
   -> Command g m Model
-cSetDrinkHotChocolate ref = Command gen exec
+cSetDrinkHotChocolate mach = Command gen exec
   [ Update $ \_ _ _ -> Model HotChocolate
   , Ensure $ \_ _ _ drink -> case drink of
       C.HotChocolate -> success
@@ -65,14 +64,14 @@ cSetDrinkHotChocolate ref = Command gen exec
 
     exec :: SetDrinkHotChocolate Concrete -> m C.Drink
     exec _ = evalIO $ do
-      R.modifyIORef ref C.hotChocolate
-      view C.drinkSetting <$> R.readIORef ref
+      C.hotChocolate mach
+      view C.drinkSetting <$> C.peek mach
 
 cSetDrinkTea
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => R.IORef C.MachineState
+  => C.Machine
   -> Command g m Model
-cSetDrinkTea ref = Command gen exec
+cSetDrinkTea mach = Command gen exec
   [ Update $ \_ _ _ -> Model Tea
   , Ensure $ \_ _ _ drink -> case drink of
       C.Tea{} -> success
@@ -84,20 +83,20 @@ cSetDrinkTea ref = Command gen exec
 
     exec :: SetDrinkTea Concrete -> m C.Drink
     exec _ = evalIO $ do
-      R.modifyIORef ref C.tea
-      view C.drinkSetting <$> R.readIORef ref
+      C.tea mach
+      view C.drinkSetting <$> C.peek mach
 
 stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
-  r <- evalIO $ R.newIORef C.initialState
+  mach <- C.newMachine
 
   let initialModel = Model HotChocolate
-      commands = ($ r) <$>
+      commands = ($ mach) <$>
         [ cSetDrinkCoffee
         , cSetDrinkHotChocolate
         , cSetDrinkTea
         ]
 
   actions <- forAll $ Gen.sequential (Range.linear 1 100) initialModel commands
-  evalIO $ R.writeIORef r C.initialState
+  evalIO $ C.reset mach
   executeSequential initialModel actions
