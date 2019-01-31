@@ -5,7 +5,7 @@
 
 module CoffeeMachine where
 
-import Control.Lens (failing, use)
+import Control.Lens (Iso', failing, use, iso)
 import Control.Lens.Operators
 import Control.Lens.TH (makeLenses, makePrisms)
 import Control.Monad (when)
@@ -54,7 +54,7 @@ data MachineError
   | NoMug
   | MugFull
   | MugInTheWay
-  deriving Show
+  deriving (Eq, Show)
 
 insertCoins :: Int -> MachineState -> MachineState
 insertCoins n = coins %~ (+n)
