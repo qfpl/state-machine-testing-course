@@ -7,6 +7,7 @@ import qualified CoffeeMachine as C
 import           Control.Lens (view)
 import           Control.Monad.IO.Class (MonadIO)
 import qualified Data.IORef as R
+import           Data.Kind (Type)
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
@@ -14,11 +15,11 @@ import           Test.Tasty (TestTree)
 import           Test.Tasty.Hedgehog (testProperty)
 
 data DrinkType = Coffee | HotChocolate | Tea
-newtype Model (v :: * -> *) = Model DrinkType
+newtype Model (v :: Type -> Type) = Model DrinkType
 
-data SetDrinkCoffee (v :: * -> *) = SetDrinkCoffee deriving Show
-data SetDrinkHotChocolate (v :: * -> *) = SetDrinkHotChocolate deriving Show
-data SetDrinkTea (v :: * -> *) = SetDrinkTea deriving Show
+data SetDrinkCoffee (v :: Type -> Type) = SetDrinkCoffee deriving Show
+data SetDrinkHotChocolate (v :: Type -> Type) = SetDrinkHotChocolate deriving Show
+data SetDrinkTea (v :: Type -> Type) = SetDrinkTea deriving Show
 
 instance HTraversable SetDrinkCoffee where
   htraverse _ _ = pure SetDrinkCoffee
