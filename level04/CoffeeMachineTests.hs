@@ -6,11 +6,10 @@ module CoffeeMachineTests (stateMachineTests) where
 
 import           Data.Kind              (Type)
 import qualified CoffeeMachine          as C
-import           Control.Lens           (makeLenses, to, view, (+~), (.~), (^.),
-                                         (^?))
+import           Control.Lens           (makeLenses, to, view)
+import           Control.Lens.Operators ((+~), (.~), (^.), (^?))
 import           Control.Monad.IO.Class (MonadIO)
 import           Data.Function          ((&))
-import qualified Data.IORef             as R
 import           Data.Maybe             (isJust)
 import           Hedgehog
 import qualified Hedgehog.Gen           as Gen
@@ -46,9 +45,9 @@ instance HTraversable SetDrinkType where
 
 cSetDrinkType
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => R.IORef C.MachineState
+  => C.Machine
   -> Command g m Model
-cSetDrinkType ref = Command gen exec
+cSetDrinkType mach = Command gen exec
   [ Update $ \m (SetDrinkType d) _ -> m
     & modelDrinkType .~ d
     & modelMilk .~ 0
@@ -66,11 +65,11 @@ cSetDrinkType ref = Command gen exec
 
     exec :: SetDrinkType Concrete -> m C.Drink
     exec (SetDrinkType d) = evalIO $ do
-      R.modifyIORef ref $ case d of
+      mach & case d of
         Coffee       -> C.coffee
         HotChocolate -> C.hotChocolate
         Tea          -> C.tea
-      view C.drinkSetting <$> R.readIORef ref
+      view C.drinkSetting <$> C.peek mach
 
 milkOrSugar :: DrinkAdditive -> a -> a ->  a
 milkOrSugar Milk m  _ = m
@@ -80,12 +79,12 @@ milkOrSugarExec
   :: ( MonadTest m
      , MonadIO m
      )
-  => R.IORef C.MachineState
+  => C.Machine
   -> AddMilkSugar Concrete
   -> m C.Drink
-milkOrSugarExec ref (AddMilkSugar additive) = do
-  evalIO $ R.modifyIORef ref (milkOrSugar additive C.addMilk C.addSugar)
-  view C.drinkSetting <$> evalIO (R.readIORef ref)
+milkOrSugarExec mach (AddMilkSugar additive) = do
+  evalIO $ milkOrSugar additive C.addMilk C.addSugar mach
+  view C.drinkSetting <$> C.peek mach
 
 genAddMilkSugarCommand
   :: MonadGen g
@@ -98,9 +97,9 @@ genAddMilkSugarCommand isDrinkType m
 
 cAddMilkSugarSad
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => R.IORef C.MachineState
+  => C.Machine
   -> Command g m Model
-cAddMilkSugarSad ref = Command (genAddMilkSugarCommand (== HotChocolate)) (milkOrSugarExec ref)
+cAddMilkSugarSad mach = Command (genAddMilkSugarCommand (== HotChocolate)) (milkOrSugarExec mach)
   [ Require $ \m _ ->
       not (m ^. modelHasMug) || m ^. modelDrinkType == HotChocolate
 
@@ -110,7 +109,7 @@ cAddMilkSugarSad ref = Command (genAddMilkSugarCommand (== HotChocolate)) (milkO
 
 cAddMilkSugarHappy
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => R.IORef C.MachineState
+  => C.Machine
   -> Command g m Model
 cAddMilkSugarHappy ref = Command (genAddMilkSugarCommand (/= HotChocolate)) (milkOrSugarExec ref)
   [ Require $ \m _ ->
@@ -142,35 +141,33 @@ genTakeMug m | m ^. modelHasMug = Just $ pure TakeMug
 
 cTakeMugSad
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => R.IORef C.MachineState
+  => C.Machine
   -> Command g m Model
-cTakeMugSad ref = Command genTakeMug exec
+cTakeMugSad mach = Command genTakeMug exec
   [ Require $ \m _ -> m ^. modelHasMug . to not
   , Ensure $ \_ _ _ e -> either (=== C.NoMug) (const failure) e
   ]
   where
-    exec :: TakeMug Concrete -> m (Either C.MachineError (C.Mug, C.MachineState))
-    exec _ = evalIO $ C.takeMug <$> R.readIORef ref
+    exec :: TakeMug Concrete -> m (Either C.MachineError C.Mug)
+    exec _ = evalIO $ C.takeMug mach
 
 cTakeMugHappy
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => R.IORef C.MachineState
+  => C.Machine
   -> Command g m Model
-cTakeMugHappy ref = Command genTakeMug exec
+cTakeMugHappy mach = Command genTakeMug exec
   [ Require $ \m _ -> m ^. modelHasMug
   , Update $ \m _ _ -> m & modelHasMug .~ False
   ]
   where
-    exec :: TakeMug Concrete -> m ()
-    exec _ = do
-      ms <- evalIO $ R.readIORef ref
-      evalEither (C.takeMug ms) >>= evalIO . R.writeIORef ref . snd
+    exec :: TakeMug Concrete -> m C.Mug
+    exec _ = evalIO (C.takeMug mach) >>= evalEither
 
 cAddMugHappy
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => R.IORef C.MachineState
+  => C.Machine
   -> Command g m Model
-cAddMugHappy ref = Command genAddMug exec
+cAddMugHappy mach = Command genAddMug exec
   [ Require $ \m _ -> m ^. modelHasMug . to not
   , Update $ \m _ _ -> m & modelHasMug .~ True
   , Ensure $ \_ _ _ -> assert . isJust
@@ -178,29 +175,27 @@ cAddMugHappy ref = Command genAddMug exec
   where
     exec :: AddMug Concrete -> m (Maybe C.Mug)
     exec _ = do
-      ms <- evalIO $ R.readIORef ref
-      ms' <- evalEither (C.addMug ms)
-      evalIO $ R.writeIORef ref ms'
-      pure $ view C.mug ms'
+      evalIO (C.addMug mach) >>= evalEither
+      evalIO $ view C.mug <$> C.peek mach
 
 cAddMugSad
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => R.IORef C.MachineState
+  => C.Machine
   -> Command g m Model
-cAddMugSad ref = Command genAddMug exec
+cAddMugSad mach = Command genAddMug exec
   [ Require $ \m _ -> m ^. modelHasMug
   , Ensure $ \ _ _ _ res -> either (=== C.MugInTheWay) (const failure) res
   ]
   where
-    exec :: AddMug Concrete -> m (Either C.MachineError C.MachineState)
-    exec _ = evalIO $ C.addMug <$> R.readIORef ref
+    exec :: AddMug Concrete -> m (Either C.MachineError ())
+    exec _ = evalIO $ C.addMug mach
 
 stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
-  r <- evalIO $ R.newIORef C.initialState
+  mach <- evalIO C.newMachine
 
   let initialModel = Model HotChocolate False 0 0
-      commands = ($ r) <$>
+      commands = ($ mach) <$>
         [ cSetDrinkType
         , cAddMugHappy
         , cAddMugSad
@@ -211,5 +206,5 @@ stateMachineTests = testProperty "State Machine Tests" . property $ do
         ]
 
   actions <- forAll $ Gen.sequential (Range.linear 1 100) initialModel commands
-  evalIO $ R.writeIORef r C.initialState
+  evalIO $ C.reset mach
   executeSequential initialModel actions
