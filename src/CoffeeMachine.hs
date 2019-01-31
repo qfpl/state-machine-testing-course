@@ -23,7 +23,6 @@ $(makeLenses ''MilkSugar)
 data Drink
   = HotChocolate
   | Coffee MilkSugar
-  | HipsterCoffee -- ^ Hipster barista disallows adding milk/sugar.
   | Tea MilkSugar
   deriving Show
 
@@ -32,7 +31,6 @@ $(makePrisms ''Drink)
 drinkCost :: Drink -> Int
 drinkCost HotChocolate = 2
 drinkCost (Coffee (MilkSugar m s)) = 4 + m + s
-drinkCost HipsterCoffee = 9
 drinkCost (Tea (MilkSugar m s)) = 3 + m + s
 
 newtype Mug = Mug (Maybe Drink) deriving Show
@@ -79,9 +77,6 @@ hotChocolate = drinkSetting .~ HotChocolate
 
 coffee :: MachineState -> MachineState
 coffee = drinkSetting .~ Coffee (MilkSugar 0 0)
-
-hipsterCoffee :: MachineState -> MachineState
-hipsterCoffee = drinkSetting .~ HipsterCoffee
 
 addMilk :: MachineState -> MachineState
 addMilk = drinkSetting . (_Coffee `failing` _Tea) . milk +~ 1

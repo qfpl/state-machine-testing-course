@@ -14,18 +14,16 @@ import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 import           System.Exit
 
-data DrinkType = T | C | HC | Hipster
+data DrinkType = T | C | HC
 newtype CoffeeModel (v :: * -> *) = CoffeeModel DrinkType
 
 data SetDrinkC (v :: * -> *) = SetDrinkC deriving Show
 data SetDrinkHC (v :: * -> *) = SetDrinkHC deriving Show
-data SetDrinkHipster (v :: * -> *) = SetDrinkHipster deriving Show
 data SetDrinkT (v :: * -> *) = SetDrinkT deriving Show
 data AddMug (v :: * -> *) = AddMug deriving Show
 
 instance HTraversable SetDrinkC where htraverse _ _ = pure SetDrinkC
 instance HTraversable SetDrinkHC where htraverse _ _ = pure SetDrinkHC
-instance HTraversable SetDrinkHipster where htraverse _ _ = pure SetDrinkHipster
 instance HTraversable SetDrinkT where htraverse _ _ = pure SetDrinkT
 instance HTraversable AddMug where htraverse _ _ = pure AddMug
 
@@ -67,25 +65,6 @@ cSetDrinkHC ref = Command gen exec
       modifyIORef ref C.hotChocolate
       view C.drinkSetting <$> readIORef ref
 
-cSetDrinkHipster
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => IORef C.MachineState
-  -> Command g m CoffeeModel
-cSetDrinkHipster ref = Command gen exec
-  [ Update $ \_ _ _ -> CoffeeModel Hipster
-  , Ensure $ \_ _ _ drink -> case drink of
-      C.HipsterCoffee -> success
-      _ -> failure
-  ]
-  where
-    gen :: CoffeeModel Symbolic -> Maybe (g (SetDrinkHipster Symbolic))
-    gen _ = Just $ pure SetDrinkHipster
-
-    exec :: SetDrinkHipster Concrete -> m C.Drink
-    exec _ = evalIO $ do
-      modifyIORef ref C.hipsterCoffee
-      view C.drinkSetting <$> readIORef ref
-
 cSetDrinkT
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => IORef C.MachineState
@@ -125,12 +104,11 @@ main = do
   let commands = ($ r) <$>
         [ cSetDrinkC
         , cSetDrinkHC
-        , cSetDrinkHipster
         , cSetDrinkT
 
         , cAddMug
         ]
-      initialModel = CoffeeModel Hipster
+      initialModel = CoffeeModel T
   b <- checkSequential $ Group "coffee machine"
     [ ("state_coffee_machine", property $ do
           actions <- forAll $ Gen.sequential (Range.linear 1 100) initialModel commands
