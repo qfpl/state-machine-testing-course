@@ -8,7 +8,7 @@ larger test suite.
 
 The first thing we'll need is a model of the coffee machine. The model
 for a test does not have to replicate the entire system perfectly; we
-start small, capturing the things we understand as we build out
+start small, capturing the things we understand as we build our
 commands and observe their interactions. Open up
 `level01/CoffeeMachineTests.hs`, where you'll find the following model
 defined for you:
