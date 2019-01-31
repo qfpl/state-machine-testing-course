@@ -10,8 +10,8 @@ import qualified Data.IORef as R
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import           Test.Tasty
-import           Test.Tasty.Hedgehog
+import           Test.Tasty (TestTree)
+import           Test.Tasty.Hedgehog (testProperty)
 
 data DrinkType = Coffee | HotChocolate | Tea
 newtype Model (v :: * -> *) = Model DrinkType
