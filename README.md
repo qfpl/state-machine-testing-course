@@ -5,11 +5,8 @@ testing, using the [Hedgehog package](https://hackage.haskell.org/package/hedgeh
 
 ## Requirements
 
-- Written enough Haskell code that `Functor`, `Applicative`, and `Monad` are all
-  familiar.
-- Tried property-based testing or are familiar with what it is.
-- Like your own automated QA department to provide greater assurance about the
-  workings of your complicated application(s).
+- You would like an automated minion to unleash hell on your application,
+  breaking it in strange and fascinating ways.
 
 ## Course Structure
 
@@ -29,4 +26,4 @@ testing, using the [Hedgehog package](https://hackage.haskell.org/package/hedgeh
   
 - Flexing the model
   - `Require`
-  - Better model transition coverage with positive and negative tests.
+  - Better coverage with positive and negative tests.
