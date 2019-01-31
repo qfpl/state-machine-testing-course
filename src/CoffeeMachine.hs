@@ -3,14 +3,51 @@
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TupleSections              #-}
 
-module CoffeeMachine where
+module CoffeeMachine
+  ( Machine
+  , MachineState(..)
+  , coins
+  , drinkSetting
+  , mug
+
+  , Drink(..)
+  , _HotChocolate
+  , _Coffee
+  , _Tea
+
+  , MilkSugar(..)
+  , milk
+  , sugar
+
+  , newMachine
+  , reset
+  , peek
+
+  , insertCoins
+  , refund
+
+  , addMug
+  , takeMug
+
+  , coffee
+  , hotChocolate
+  , tea
+
+  , addMilk
+  , addSugar
+
+  , dispense
+  ) where
 
 import Control.Lens (Iso', failing, use, iso)
 import Control.Lens.Operators
 import Control.Lens.TH (makeLenses, makePrisms)
 import Control.Monad (when)
-import Control.Monad.Except (Except, MonadError, runExcept, throwError)
-import Control.Monad.State (MonadState, StateT, execStateT)
+import Control.Monad.Except (runExceptT, throwError)
+import Control.Monad.IO.Class (MonadIO(..))
+import Control.Monad.State (runState)
+import Data.IORef (IORef, atomicModifyIORef', newIORef, readIORef)
+import Data.Tuple (swap)
 
 data MilkSugar = MilkSugar
   { _milk :: Int
@@ -29,9 +66,9 @@ data Drink
 $(makePrisms ''Drink)
 
 drinkCost :: Drink -> Int
-drinkCost HotChocolate = 2
+drinkCost HotChocolate = 3
 drinkCost (Coffee (MilkSugar m s)) = 4 + m + s
-drinkCost (Tea (MilkSugar m s)) = 3 + m + s
+drinkCost (Tea (MilkSugar m s)) = 2 + m + s
 
 newtype Mug = Mug (Maybe Drink) deriving Show
 
@@ -43,6 +80,18 @@ data MachineState = MachineState
 
 $(makeLenses ''MachineState)
 
+newtype Machine = Machine (IORef MachineState)
+
+newMachine :: MonadIO m => m Machine
+newMachine = liftIO . fmap Machine $ newIORef initialState
+
+reset :: MonadIO m => Machine -> m ()
+reset = update (const initialState)
+
+peek :: MonadIO m => Machine -> m MachineState
+peek (Machine m) = liftIO $ readIORef m
+
+initialState :: MachineState
 initialState = MachineState
   { _coins = 0
   , _drinkSetting = HotChocolate
@@ -56,50 +105,59 @@ data MachineError
   | MugInTheWay
   deriving (Eq, Show)
 
-insertCoins :: Int -> MachineState -> MachineState
-insertCoins n = coins %~ (+n)
+insertCoins :: MonadIO m => Int -> Machine -> m ()
+insertCoins c = update $ coins +~ c
 
-refund :: MachineState -> (Int, MachineState)
-refund = coins <<.~ 0
+refund :: MonadIO m => Machine -> m Int
+refund (Machine m) = liftIO $ atomicModifyIORef' m (swap . (coins <<.~ 0))
 
-addMug :: MachineState -> Either MachineError MachineState
-addMug st = let oldMug = st ^. mug
-            in case oldMug of
-                 Nothing -> Right $ st & mug ?~ Mug Nothing
-                 Just{} -> Left MugInTheWay
+addMug :: MonadIO m => Machine -> m (Either MachineError ())
+addMug (Machine m) = liftIO . atomicModifyIORef' m $ \st ->
+  let oldMug = st ^. mug
+  in case oldMug of
+       Nothing -> (st & mug ?~ Mug Nothing, Right ())
+       Just{} -> (st, Left MugInTheWay)
 
-takeMug :: MachineState -> Either MachineError (Mug, MachineState)
-takeMug st = let (oldMug, st') = st & mug <<.~ Nothing
-             in maybe (Left NoMug) (Right . (,st')) oldMug
+takeMug :: MonadIO m => Machine -> m (Either MachineError Mug)
+takeMug (Machine m) = liftIO . atomicModifyIORef' m $ \st ->
+  let (mMug, st') = st & mug <<.~ Nothing
+  in case mMug of
+       Nothing -> (st, Left NoMug)
+       Just mg -> (st', Right mg)
 
-hotChocolate :: MachineState -> MachineState
-hotChocolate = drinkSetting .~ HotChocolate
+coffee :: MonadIO m => Machine -> m ()
+coffee = update $ drinkSetting .~ Coffee (MilkSugar 0 0)
 
-coffee :: MachineState -> MachineState
-coffee = drinkSetting .~ Coffee (MilkSugar 0 0)
+hotChocolate :: MonadIO m => Machine -> m ()
+hotChocolate = update $ drinkSetting .~ HotChocolate
 
-addMilk :: MachineState -> MachineState
-addMilk = drinkSetting . (_Coffee `failing` _Tea) . milk +~ 1
+tea :: MonadIO m => Machine -> m ()
+tea = update $ drinkSetting .~ Tea (MilkSugar 0 0)
 
-addSugar :: MachineState -> MachineState
-addSugar = drinkSetting . (_Coffee `failing` _Tea) . sugar +~ 1
+addMilk :: MonadIO m => Machine -> m ()
+addMilk = update $ drinkSetting . (_Coffee `failing` _Tea) . milk +~ 1
 
-tea :: MachineState -> MachineState
-tea = drinkSetting .~ Tea (MilkSugar 0 0)
+addSugar :: MonadIO m => Machine -> m ()
+addSugar = update $ drinkSetting . (_Coffee `failing` _Tea) . sugar +~ 1
 
-dispense :: MachineState -> Either MachineError MachineState
-dispense = runExcept . execStateT go where
-  go = do
-    drink <- use drinkSetting
+update :: MonadIO m => (MachineState -> MachineState) -> Machine -> m ()
+update f (Machine m) = liftIO $ atomicModifyIORef' m ((,()) . f)
 
-    let cost = drinkCost drink
-    credit <- use coins
-    when (credit < cost) $ throwError NotEnoughCoins
+dispense :: MonadIO m => Machine -> m (Either MachineError ())
+dispense (Machine m) = liftIO . atomicModifyIORef' m $
+  swap . runState (runExceptT go)
+  where
+    go = do
+      drink <- use drinkSetting
 
-    m <- use mug >>= maybe (throwError NoMug) pure
-    case m of
-      Mug Just{} -> throwError MugFull
-      Mug Nothing -> do
-        coins -= cost
-        mug .= Just (Mug (Just drink))
-    pure ()
+      let cost = drinkCost drink
+      credit <- use coins
+      when (credit < cost) $ throwError NotEnoughCoins
+
+      mMug <- use mug >>= maybe (throwError NoMug) pure
+      case mMug of
+        Mug Just{} -> throwError MugFull
+        Mug Nothing -> do
+          coins -= cost
+          mug .= Just (Mug (Just drink))
+      pure ()
