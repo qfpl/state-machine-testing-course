@@ -34,7 +34,35 @@ test-suite level01
                      , fp-eedee
                      , hedgehog >= 0.6 && < 0.7
                      , lens > 4.15 && < 4.18
-                     , tasty >= 1.2 && < 1.3
+                     , tasty >= 1.1 && < 1.3
+                     , tasty-hedgehog >= 0.2 && < 0.3
+
+test-suite level02
+  type:                exitcode-stdio-1.0
+  default-language:    Haskell2010
+  main-is:             Main.hs
+  other-modules:       CoffeeMachineTests
+  hs-source-dirs:      level02
+  ghc-options:         -Wall -threaded
+  build-depends:       base >= 4.11 && < 4.13
+                     , fp-eedee
+                     , hedgehog >= 0.6 && < 0.7
+                     , lens > 4.15 && < 4.18
+                     , tasty >= 1.1 && < 1.3
+                     , tasty-hedgehog >= 0.2 && < 0.3
+
+test-suite level03
+  type:                exitcode-stdio-1.0
+  default-language:    Haskell2010
+  main-is:             Main.hs
+  other-modules:       CoffeeMachineTests
+  hs-source-dirs:      level03
+  ghc-options:         -Wall -threaded
+  build-depends:       base >= 4.11 && < 4.13
+                     , fp-eedee
+                     , hedgehog >= 0.6 && < 0.7
+                     , lens > 4.15 && < 4.18
+                     , tasty >= 1.1 && < 1.3
                      , tasty-hedgehog >= 0.2 && < 0.3
 
 test-suite coffee-state
