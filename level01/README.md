@@ -198,7 +198,7 @@ Some things to notice:
 * Our generation function can always run. Some generators won't always
   be runnable, and will return `Nothing`.
 
-* The `C.drink` in our `exec` function fixes our `output` type; this
+* The `C.Drink` in our `exec` function fixes our `output` type; this
   type will show up when we add callbacks.
 
 * Our list of callbacks is empty. This is wrong, and we will fix it
