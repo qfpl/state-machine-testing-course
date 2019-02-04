@@ -52,9 +52,9 @@ check out the asides below:
   are, because the test hasn't run yet!
 
   Hedgehog works around this with two types:
-  [`Symbolic`](https://hackage.haskell.org/package/hedgehog-0.6.1/docs/Hedgehog.html#t:Symbolic)
+  [`Symbolic`](https://hackage.haskell.org/package/hedgehog/docs/Hedgehog.html#t:Symbolic)
   and
-  [`Concrete`](https://hackage.haskell.org/package/hedgehog-0.6.1/docs/Hedgehog.html#t:Concrete)
+  [`Concrete`](https://hackage.haskell.org/package/hedgehog/docs/Hedgehog.html#t:Concrete)
   . In the generation phase of the test, your model is a `Model
   Symbolic`, but once it starts executing it becomes a `Model
   Concrete` and you can pull out real values from the model.
@@ -63,12 +63,12 @@ check out the asides below:
 *****
 
 Now that we have our model, we need to build some commands to act on
-it. The core type you need to understand is
-[`Command`](https://hackage.haskell.org/package/hedgehog-0.6.1/docs/Hedgehog.html#t:Command),
+it. The core type to understand is
+[`Command`](https://hackage.haskell.org/package/hedgehog/docs/Hedgehog.html#t:Command),
 reproduced here with some type variables renamed:
 
 ```haskell
-data Command g m (state :: (* -> *) -> *) =
+data Command g m (state :: (Type -> Type) -> Type) =
   forall input output.
   (HTraversable input, Show (input Symbolic), Typeable output) =>
   Command {
@@ -92,9 +92,134 @@ data Command g m (state :: (* -> *) -> *) =
     }
 ```
 
+Here are some important things to understand about `Command`:
 
+* When we pass our list of commands to `Hedgehog.Gen.sequential` (to
+  generate the random sequences), we'll need `(MonadGen g, MonadTest
+  m)`.
 
- is walk through the `test-suite` component to familiarise ourselves
+* We'll often need `MonadIO m` as well, so we can interact with the
+  system being tested.
+
+* `commandGen` can decline to return an `input` by returning
+  `Nothing`. This can be faster than generating inputs and pruning
+  them back with a `Require` callback.
+
+* The kind of `state` matches the kind of our `Model` type from
+  before.
+
+* The `input` and `output` type variables are existential, so each
+  `Command` can choose ones that make sense.
+
+* The `input` type must be `HTraversable`, which we'll talk about
+  soon.
+
+* The list of callbacks is how we:
+
+  - Assert preconditions on actions, which guarantees that shrunken
+    command sequences stay valid,
+
+  - Update our model as actions are performed, and
+
+  - Assert postconditions on actions, checking that our system
+    actually behaves correctly.
+
+## Your first command
+
+We're going to walk through a simple command to select tea on the
+machine. After that, you'll need to set up similar commands to select
+coffee and hot chocolate. You'll retain more if you type all this out
+by hand, and use typed holes and a running `ghcid` session so you can
+watch the types coming together.
+
+Our goal is to write a function of this type:
+
+```haskell
+cSetDrinkTea
+  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  -> C.Machine
+  -> Command g m Model
+```
+
+`C.Machine` is our coffee machine type from the library, a `newtype`
+wrapper around an `IORef`. Later, we will pass the same `C.Machine` to
+all our `Command`-returning functions so the tests all operate on the
+same thing. We're writing the `forall` explicitly so we can use `{-#
+LANGUAGE ScopedTypeVariables #-}` and write `g` and `m` in type
+signatures for helper functions.
+
+To write `cSetDrinkTea`, we'll need to pick a type for the input, so
+let's define one:
+
+```haskell
+data SetDrinkTea (v :: Type -> Type) = SetDrinkTea deriving Show
+```
+
+We know from the type of `Command` that we'll need a
+[`HTraversable`](https://hackage.haskell.org/package/hedgehog/docs/Hedgehog.html#t:HTraversable)
+instance, so let's look at the class definition now:
+
+```haskell
+class HTraversable t where
+  htraverse :: Applicative f => (forall a. g a -> f (h a)) -> t g -> f (t h)
+```
+
+Hedgehog uses this class with `(g ~ Symbolic, h ~ Concrete)` to
+convert `Symbolic` values to `Concrete` values inside inputs, so you
+have the real values when you run the command sequence against the
+real system. Because our type doesn't have any `Var`s in it, we can
+ignore the function, and because we don't have any data in our input
+type we can ignore that argument too:
+
+```haskell
+instance HTraversable SetDrinkTea where htraverse _ _ = pure SetDrinkTea
+```
+
+Now, let's write the bulk of the `cSetDrinkTea` function:
+
+```haskell
+cSetDrinkTea
+  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  => C.Machine
+  -> Command g m Model
+cSetDrinkTea mach = Command gen exec []
+  where
+    gen :: Model Symbolic -> Maybe (g (SetDrinkTea Symbolic))
+    gen _ = Just $ pure SetDrinkTea
+
+    exec :: SetDrinkTea Concrete -> m C.Drink
+    exec _ = evalIO $ do
+      C.tea mach
+      view C.drinkSetting <$> C.peek mach
+```
+
+Some things to notice:
+
+* Our generation function can always run. Some generators won't always
+  be runnable, and will return `Nothing`.
+
+* The `C.Drink` in our `exec` function fixes our `output` type; this
+  type will show up when we add callbacks.
+
+* Our list of callbacks is empty. This is wrong, and we will fix it
+  now.
+
+## Adding Callbacks
+
+We now need to look at the
+[`Callback`](https://hackage.haskell.org/package/hedgehog/docs/Hedgehog.html#t:Callback)
+type:
+
+```haskell
+data Callback input output state
+  = Require (state Symbolic -> input Symbolic -> Bool)
+  | Update (forall v. Ord1 v => state v -> input v -> Var output v -> state v)
+  | Ensure (state Concrete -> state Concrete -> input Concrete -> output -> Test ())
+```
+
+The list of `Callbacks` in a `Command`
+
+is walk through the `test-suite` component to familiarise ourselves
 with the libraries we.
 
 We're using [`tasty`](https://hackage.haskell.org/package/tasty) to
