@@ -8,6 +8,7 @@ module CoffeeMachine
   , MachineState(..)
   , coins
   , drinkSetting
+  , drinkCost
   , mug
 
   , Drink(..)
@@ -28,6 +29,7 @@ module CoffeeMachine
 
   , insertCoins
   , refund
+  , currentDrinkCost
 
   , addMug
   , takeMug
@@ -56,7 +58,7 @@ data MilkSugar = MilkSugar
   { _milk :: Int
   , _sugar :: Int
   }
-  deriving Show
+  deriving (Eq, Show)
 
 $(makeLenses ''MilkSugar)
 
@@ -64,7 +66,7 @@ data Drink
   = HotChocolate
   | Coffee MilkSugar
   | Tea MilkSugar
-  deriving Show
+  deriving (Eq, Show)
 
 $(makePrisms ''Drink)
 
@@ -73,7 +75,7 @@ drinkCost HotChocolate = 3
 drinkCost (Coffee (MilkSugar m s)) = 4 + m + s
 drinkCost (Tea (MilkSugar m s)) = 2 + m + s
 
-newtype Mug = Mug (Maybe Drink) deriving Show
+newtype Mug = Mug (Maybe Drink) deriving (Eq, Show)
 
 data MachineState = MachineState
   { _coins :: Int
@@ -113,6 +115,9 @@ insertCoins c = update $ coins +~ c
 
 refund :: MonadIO m => Machine -> m Int
 refund (Machine ref) = liftIO $ atomicModifyIORef' ref (swap . (coins <<.~ 0))
+
+currentDrinkCost :: MonadIO m => Machine -> m Int
+currentDrinkCost = fmap (drinkCost . _drinkSetting) . peek
 
 addMug :: MonadIO m => Machine -> m (Either MachineError ())
 addMug (Machine ref) = liftIO . atomicModifyIORef' ref $ \st ->
