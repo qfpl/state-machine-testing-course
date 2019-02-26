@@ -14,10 +14,20 @@ We will use the `takeMug` function as an example. If we were to include a
 pass randomly, only when this command happened to be included in the right
 order.
 
-However if we expanded our model to track whether we had added a mug, then we
-could prevent the `takeMug` command from being a valid command. Unless our
-criteria over a mug being placed was satisified.
+However if we expanded our model to track whether we had added a mug. Then we
+could prevent the `takeMug` command from being a valid command unless our
+criteria had been satisified.
 
 The type of drink we have selected is another example of this. If we wanted to
 check that the buttons to add milk or sugar were working correctly, then we need
 to make sure we have the correct type of drink selected.
+
+The goal for this level is to implement the following commands:
+
+* Add Milk/Sugar
+* Add Mug
+* Take Mug
+
+Be sure to check both the positive (happy) and negative (sad) paths! You will
+have to ensure that your `Command`s have the correct pre-conditions and
+`Require` checks.

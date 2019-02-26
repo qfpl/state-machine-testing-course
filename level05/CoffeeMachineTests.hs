@@ -19,8 +19,16 @@ import qualified Hedgehog.Range         as Range
 import           Test.Tasty             (TestTree)
 import           Test.Tasty.Hedgehog    (testProperty)
 
-data DrinkType = Coffee | HotChocolate | Tea deriving (Bounded, Enum, Show, Eq)
-data DrinkAdditive = Milk | Sugar deriving (Bounded, Enum, Show)
+data DrinkType 
+  = Coffee 
+  | HotChocolate 
+  | Tea 
+  deriving (Bounded, Enum, Show, Eq)
+
+data DrinkAdditive 
+  = Milk 
+  | Sugar 
+  deriving (Bounded, Enum, Show)
 
 data MugStatus
   = Empty
@@ -130,7 +138,7 @@ genAddMilkSugarCommand
   -> Model Symbolic
   -> Maybe (g (AddMilkSugar Symbolic))
 genAddMilkSugarCommand isDrinkType m
-  | isDrinkType (m ^. modelDrinkType) = Just (AddMilkSugar <$> Gen.enumBounded)
+  | isDrinkType (m ^. modelDrinkType) = pure $ AddMilkSugar <$> Gen.enumBounded
   | otherwise                         = Nothing
 
 cAddMilkSugarSad
