@@ -6,6 +6,7 @@
 4. Midly buzzed
 5. Visibly oscillating
 6. I CAN SEE THROUGH TIME
+7. TIME SEES THROUGH YOU
 
 # Coffee State Machine Testing Levels
 

@@ -17,7 +17,7 @@ let
   };
 
   # The course, yey.
-  drv = pkgs.haskellPackages.callPackage ./fp-eedee.nix {};
+  drv = pkgs.haskellPackages.callPackage ./state-machine-testing-course.nix {};
 
   drvWithTools = pkgs.haskell.lib.addBuildTools drv
     [ # Include our beloved and standard text editor

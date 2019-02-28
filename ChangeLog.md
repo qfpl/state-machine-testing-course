@@ -1,4 +1,4 @@
-# Revision history for fp-eedee
+# Revision history for state-machine-testing-course
 
 ## 0.1.0.0 -- YYYY-mm-dd
 

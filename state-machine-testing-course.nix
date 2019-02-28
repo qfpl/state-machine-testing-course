@@ -2,7 +2,7 @@
 , tasty-hedgehog
 }:
 mkDerivation {
-  pname = "fp-eedee";
+  pname = "state-machine-testing-course";
   version = "0.1.0.0";
   src = ./.;
   libraryHaskellDepends = [ base lens mtl ];

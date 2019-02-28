@@ -66,3 +66,7 @@ a course about testing, each level is a separate `test-suite` in the
 - Flexing the model
   - `Require`
   - Better coverage with positive and negative tests.
+
+- Pre-conditions
+
+- Phases and growing models
