@@ -25,6 +25,5 @@ other `Command`s are able to check more easily.
 
 In this level we're going to check the following steps:
 
-* Inserting coins
-* Refunding coins
+* Current Credit
 * Dispensing a drink

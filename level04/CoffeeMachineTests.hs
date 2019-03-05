@@ -44,6 +44,16 @@ instance HTraversable AddMilkSugar where
 instance HTraversable SetDrinkType where
   htraverse _ (SetDrinkType d) = pure $ SetDrinkType d
 
+data RefundCoins (v :: Type -> Type) = RefundCoins deriving Show
+
+instance HTraversable RefundCoins where
+  htraverse _ _ = pure RefundCoins
+
+newtype InsertCoins (v :: Type -> Type) = InsertCoins Int deriving Show
+
+instance HTraversable InsertCoins where
+  htraverse _ (InsertCoins n) = pure (InsertCoins n)
+
 cSetDrinkType
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
