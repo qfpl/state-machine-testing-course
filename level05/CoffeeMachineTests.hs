@@ -289,8 +289,10 @@ cCheckCredit _ = Command gen (\_ -> pure ())
 
       in m
          & modelDrinkCost .~ cost
-         & modelSufficientCredit .~ if m ^. modelCoins > cost then TooMuch
-                                    else if m ^. modelCoins == cost then Enough else TooLittle
+         & modelSufficientCredit .~ case (m ^. modelCoins) `compare` cost of
+                                      GT -> TooMuch
+                                      EQ -> Enough
+                                      _  -> TooLittle
   ]
   where
     gen :: Model Symbolic -> Maybe (g (CheckCredit Symbolic))
