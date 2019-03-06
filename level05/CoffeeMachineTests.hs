@@ -19,15 +19,15 @@ import qualified Hedgehog.Range         as Range
 import           Test.Tasty             (TestTree)
 import           Test.Tasty.Hedgehog    (testProperty)
 
-data DrinkType 
-  = Coffee 
-  | HotChocolate 
-  | Tea 
+data DrinkType
+  = Coffee
+  | HotChocolate
+  | Tea
   deriving (Bounded, Enum, Show, Eq)
 
-data DrinkAdditive 
-  = Milk 
-  | Sugar 
+data DrinkAdditive
+  = Milk
+  | Sugar
   deriving (Bounded, Enum, Show)
 
 data MugStatus

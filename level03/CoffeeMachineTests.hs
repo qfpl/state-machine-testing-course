@@ -1,10 +1,11 @@
 {-# LANGUAGE KindSignatures      #-}
+{-# LANGUAGE TemplateHaskell     #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module CoffeeMachineTests (stateMachineTests) where
 
 import qualified CoffeeMachine as C
-import           Control.Lens (view, (^?))
+import           Control.Lens (makeLenses, to, view, (^?), (.~), (^.), (+~))
 import           Control.Monad.IO.Class (MonadIO)
 import           Data.Function ((&))
 import           Data.Kind (Type)
@@ -23,13 +24,18 @@ data Model (v :: Type -> Type) = Model
   , _modelHasMug    :: Bool
   , _modelMilk      :: Int
   , _modelSugar     :: Int
+  , _modelCoins     :: Int
   }
+$(makeLenses ''Model)
 
 newtype SetDrinkType (v :: Type -> Type) = SetDrinkType DrinkType deriving Show
-newtype AddMilkSugar (v :: Type -> Type) = AddMilkSugar DrinkAdditive deriving Show
 
 data AddMug (v :: Type -> Type) = AddMug deriving Show
 data TakeMug (v :: Type -> Type) = TakeMug deriving Show
+
+newtype AddMilkSugar (v :: Type -> Type) = AddMilkSugar DrinkAdditive deriving Show
+newtype InsertCoins (v :: Type -> Type)  = InsertCoins Int deriving Show
+data RefundCoins (v :: Type -> Type)     = RefundCoins deriving Show
 
 instance HTraversable AddMug where
   htraverse _ _ = pure AddMug
@@ -43,16 +49,21 @@ instance HTraversable AddMilkSugar where
 instance HTraversable SetDrinkType where
   htraverse _ (SetDrinkType d) = pure $ SetDrinkType d
 
+instance HTraversable RefundCoins where
+  htraverse _ _ = pure RefundCoins
+
+instance HTraversable InsertCoins where
+  htraverse _ (InsertCoins n) = pure (InsertCoins n)
+
 cSetDrinkType
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
   -> Command g m Model
 cSetDrinkType mach = Command gen exec
-  [ Update $ \m (SetDrinkType d) _ -> m {
-      _modelDrinkType = d,
-      _modelMilk      = 0,
-      _modelSugar     = 0
-      }
+  [ Update $ \m (SetDrinkType d) _ -> m
+      & modelDrinkType .~ d
+      & modelMilk      .~ 0
+      & modelSugar     .~ 0
 
   , Ensure $ \_ newM _ drink -> case (_modelDrinkType newM, drink) of
       (Coffee, C.Coffee{})           -> success
@@ -78,8 +89,8 @@ cTakeMug
   => C.Machine
   -> Command g m Model
 cTakeMug mach = Command gen exec
-  [ Require $ \(Model _ hasMug _ _) _ -> hasMug
-  , Update $ \m _ _ -> m { _modelHasMug = False }
+  [ Require $ \m _ -> m ^. modelHasMug
+  , Update $ \m _ _ -> m & modelHasMug .~ False
   ]
   where
     gen :: MonadGen g => Model Symbolic -> Maybe (g (TakeMug Symbolic))
@@ -94,8 +105,8 @@ cAddMug
   => C.Machine
   -> Command g m Model
 cAddMug mach = Command gen exec
-  [ Require $ \m _ -> not $ _modelHasMug m
-  , Update $ \m _ _ -> m { _modelHasMug = True }
+  [ Require $ \m _ -> m ^. modelHasMug . to not
+  , Update $ \m _ _ -> m & modelHasMug .~ True
   , Ensure $ \_ _ _ -> assert . isJust
   ]
   where
@@ -120,20 +131,20 @@ cAddMilkSugar mach = Command gen exec
   [ Require $ \m _ -> HotChocolate /= _modelDrinkType m
 
   , Update $ \m (AddMilkSugar additive) _ -> case additive of
-      Milk -> m { _modelMilk = _modelMilk m + 1 }
-      Sugar -> m { _modelSugar = _modelSugar m + 1}
+      Milk -> m & modelMilk +~ 1
+      Sugar -> m & modelSugar +~ 1
 
   , Ensure $ \oldM newM (AddMilkSugar additive) mug' ->
-      let (additiveFn, sl) = milkOrSugar additive (_modelMilk, C.milk) (_modelSugar, C.sugar)
+      let (additiveL, sL) = milkOrSugar additive (modelMilk, C.milk) (modelSugar, C.sugar)
 
           drinkAdditiveQty = case _modelDrinkType newM of
-            Coffee -> mug' ^? C._Coffee . sl
-            Tea    -> mug' ^? C._Tea . sl
+            Coffee -> mug' ^? C._Coffee . sL
+            Tea    -> mug' ^? C._Tea . sL
             _      -> Nothing
 
       in do
-        (additiveFn newM) - (additiveFn oldM) === 1
-        Just (additiveFn newM) === drinkAdditiveQty
+        (newM ^. additiveL) - (oldM ^. additiveL) === 1
+        Just (newM ^. additiveL) === drinkAdditiveQty
   ]
   where
     gen :: MonadGen g => Model Symbolic -> Maybe (g (AddMilkSugar Symbolic))
@@ -145,16 +156,57 @@ cAddMilkSugar mach = Command gen exec
       milkOrSugar additive C.addMilk C.addSugar mach
       view C.drinkSetting <$> C.peek mach
 
+cInsertCoins
+  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  => C.Machine
+  -> Command g m Model
+cInsertCoins mach = Command gen exec
+  [ Update $ \m (InsertCoins coins) _ -> m & modelCoins +~ coins
+
+  , Ensure $ \oldM newM (InsertCoins coins) currentCoins -> do
+      newM ^. modelCoins         === currentCoins
+      oldM ^. modelCoins + coins === currentCoins
+      newM ^. modelCoins - coins === oldM ^. modelCoins
+  ]
+  where
+    gen :: Model Symbolic -> Maybe (g (InsertCoins Symbolic))
+    gen _ = Just $ InsertCoins <$> Gen.int (Range.linear 0 100)
+
+    exec :: InsertCoins Concrete -> m Int
+    exec (InsertCoins coins) = evalIO $ do
+      C.insertCoins coins mach
+      view C.coins <$> C.peek mach
+
+cRefundCoins
+  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  => C.Machine
+  -> Command g m Model
+cRefundCoins mach = Command gen exec
+  [ Update $ \m _ _ -> m & modelCoins .~ 0
+
+  , Ensure $ \oldM newM _ refundCoins -> do
+      oldM ^. modelCoins - refundCoins === 0
+      newM ^. modelCoins + refundCoins === oldM ^. modelCoins
+  ]
+  where
+    gen :: Model Symbolic -> Maybe (g (RefundCoins Symbolic))
+    gen _ = Just $ pure RefundCoins
+
+    exec :: RefundCoins Concrete -> m Int
+    exec _ = evalIO (C.refund mach)
+
 stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
   mach <- C.newMachine
 
-  let initialModel = Model HotChocolate False 0 0
+  let initialModel = Model HotChocolate False 0 0 0 
       commands = ($ mach) <$>
         [ cSetDrinkType
         , cAddMug
         , cTakeMug
         , cAddMilkSugar
+        , cInsertCoins
+        , cRefundCoins
         ]
 
   actions <- forAll $ Gen.sequential (Range.linear 1 100) initialModel commands
