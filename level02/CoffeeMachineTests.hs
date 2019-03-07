@@ -8,21 +8,24 @@ import           Control.Lens (view)
 import           Control.Monad.IO.Class (MonadIO)
 import           Data.Kind (Type)
 import           Data.Maybe (isJust)
+import           Data.Function ((&))
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 import           Test.Tasty (TestTree)
 import           Test.Tasty.Hedgehog (testProperty)
 
-data DrinkType = Coffee | HotChocolate | Tea
+data DrinkType
+  = Coffee
+  | HotChocolate
+  | Tea
+  deriving (Enum, Bounded, Eq, Show)
 
 data Model (v :: Type -> Type) = Model DrinkType Bool
 
 data AddMug (v :: Type -> Type) = AddMug deriving Show
 data TakeMug (v :: Type -> Type) = TakeMug deriving Show
-data SetDrinkCoffee (v :: Type -> Type) = SetDrinkCoffee deriving Show
-data SetDrinkHotChocolate (v :: Type -> Type) = SetDrinkHotChocolate deriving Show
-data SetDrinkTea (v :: Type -> Type) = SetDrinkTea deriving Show
+newtype SetDrinkType (v :: Type -> Type) = SetDrinkType DrinkType deriving Show
 
 instance HTraversable AddMug where
   htraverse _ _ = pure AddMug
@@ -30,70 +33,32 @@ instance HTraversable AddMug where
 instance HTraversable TakeMug where
   htraverse _ _ = pure TakeMug
 
-instance HTraversable SetDrinkCoffee where
-  htraverse _ _ = pure SetDrinkCoffee
+instance HTraversable SetDrinkType where
+  htraverse _ (SetDrinkType dt) = pure (SetDrinkType dt)
 
-instance HTraversable SetDrinkHotChocolate where
-  htraverse _ _ = pure SetDrinkHotChocolate
-
-instance HTraversable SetDrinkTea where
-  htraverse _ _ = pure SetDrinkTea
-
-cSetDrinkCoffee
+cSetDrinkType
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
   -> Command g m Model
-cSetDrinkCoffee mach = Command gen exec
-  [ Update $ \(Model _ hasMug) _ _ -> Model Coffee hasMug
-  , Ensure $ \_ _ _ drink -> case drink of
-      C.Coffee{} -> success
-      _ -> failure
+cSetDrinkType mach = Command gen exec
+  [ Update $ \(Model _ hasMug) (SetDrinkType d) _ -> Model d hasMug
+
+  , Ensure $ \_ (Model dt _) _ drink -> case (dt, drink) of
+      (Coffee, C.Coffee{})           -> success
+      (HotChocolate, C.HotChocolate) -> success
+      (Tea, C.Tea{})                 -> success
+      _                              -> failure
   ]
   where
-    gen :: Model Symbolic -> Maybe (g (SetDrinkCoffee Symbolic))
-    gen _ = Just $ pure SetDrinkCoffee
+    gen :: Model Symbolic -> Maybe (g (SetDrinkType Symbolic))
+    gen _ = pure $ SetDrinkType <$> Gen.enumBounded
 
-    exec :: SetDrinkCoffee Concrete -> m C.Drink
-    exec _ = evalIO $ do
-      C.coffee mach
-      view C.drinkSetting <$> C.peek mach
-
-cSetDrinkHotChocolate
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => C.Machine
-  -> Command g m Model
-cSetDrinkHotChocolate mach = Command gen exec
-  [ Update $ \(Model _ hasMug) _ _ -> Model HotChocolate hasMug
-  , Ensure $ \_ _ _ drink -> case drink of
-      C.HotChocolate -> success
-      _ -> failure
-  ]
-  where
-    gen :: Model Symbolic -> Maybe (g (SetDrinkHotChocolate Symbolic))
-    gen _ = Just $ pure SetDrinkHotChocolate
-
-    exec :: SetDrinkHotChocolate Concrete -> m C.Drink
-    exec _ = evalIO $ do
-      C.hotChocolate mach
-      view C.drinkSetting <$> C.peek mach
-
-cSetDrinkTea
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => C.Machine
-  -> Command g m Model
-cSetDrinkTea mach = Command gen exec
-  [ Update $ \(Model _ hasMug) _ _ -> Model Tea hasMug
-  , Ensure $ \_ _ _ drink -> case drink of
-      C.Tea{} -> success
-      _ -> failure
-  ]
-  where
-    gen :: Model Symbolic -> Maybe (g (SetDrinkTea Symbolic))
-    gen _ = Just $ pure SetDrinkTea
-
-    exec :: SetDrinkTea Concrete -> m C.Drink
-    exec _ = evalIO $ do
-      C.tea mach
+    exec :: SetDrinkType Concrete -> m C.Drink
+    exec (SetDrinkType d) = evalIO $ do
+      mach & case d of
+        Coffee       -> C.coffee
+        HotChocolate -> C.hotChocolate
+        Tea          -> C.tea
       view C.drinkSetting <$> C.peek mach
 
 cTakeMug
@@ -137,9 +102,7 @@ stateMachineTests = testProperty "State Machine Tests" . property $ do
 
   let initialModel = Model HotChocolate False
       commands = ($ mach) <$>
-        [ cSetDrinkCoffee
-        , cSetDrinkHotChocolate
-        , cSetDrinkTea
+        [ cSetDrinkType
         , cTakeMug
         , cAddMug
         ]

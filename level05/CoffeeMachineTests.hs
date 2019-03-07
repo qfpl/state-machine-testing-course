@@ -292,7 +292,7 @@ cCheckCredit _ = Command gen (\_ -> pure ())
          & modelSufficientCredit .~ case (m ^. modelCoins) `compare` cost of
                                       GT -> TooMuch
                                       EQ -> Enough
-                                      _  -> TooLittle
+                                      LT -> TooLittle
   ]
   where
     gen :: Model Symbolic -> Maybe (g (CheckCredit Symbolic))

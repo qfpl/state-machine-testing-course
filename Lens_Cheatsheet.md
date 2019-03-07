@@ -46,17 +46,28 @@ let foo = Foo "Fred" 33
 
 ### As 'getters'
 
-| Function/Operator | Example                             |
-| `view`            | `view fooFieldA foo == "Fred"`      |
-| `^.`              | `foo ^. fooFieldA == "Fred"`        |
-| `to`              | `foo ^. fooFieldA . to length == 4` |
+| # | Function/Operator   | Example                                  |
+| 1 | `view`              | `view fooFieldA foo           == "Fred"` |
+| 2 | `^.` (infix `view`) | `foo ^. fooFieldA             == "Fred"` |
+| 3 | `to`                | `foo ^. fooFieldA . to length == 4`      |
+
+#### Non-lens equivalents:
+
+| #   | Example                             |
+| 1,2 | `_fooFieldA foo          == "Fred"` |
+| 3   | `length (_fooFieldA foo) == 4`      |
 
 ### As 'setters'
 
-| Function/Operator | Example                                              |
-| `set`             | `set fooFieldA "Sally" foo == Foo "Sally" 33`        |
-| `.~`              | `foo & fooFieldA .~ "Sally" == Foo "Sally" 33`       |
-| `+~`              | `foo & fooFieldB +~ 3 == Foo "Fred" 36`              |
-| `over`            | `over fooFieldA (fmap toUpper) foo == Foo "FRED" 33` |
-|                   |                                                      |
+| # | Function/Operator  | Example                                               |
+| 1 | `set`              | `set fooFieldA "Sally" foo         == Foo "Sally" 33` |
+| 2 | `.~` (infix `set`) | `foo & fooFieldA .~ "Sally"        == Foo "Sally" 33` |
+| 3 | `+~`               | `foo & fooFieldB +~ 3              == Foo "Fred" 36`  |
+| 4 | `over`             | `over fooFieldA (fmap toUpper) foo == Foo "FRED" 33`  |
 
+#### Non-lens equivalents:
+
+|   # | Example                                                                |
+| 1,2 | `foo { _fooFieldA = "Sally" }                       == Foo "Sally" 33` |
+|   3 | `foo { _fooFieldB = _fooFieldB foo + 3 }            == Foo "Fred" 36`  |
+|   4 | `foo { _fooFieldB = fmap toUpper (_fooFieldA foo) } == Foo "FRED" 33`  |
