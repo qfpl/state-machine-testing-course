@@ -30,3 +30,6 @@ addMilk :: MonadIO m => Machine -> m ()
 --
 addSugar :: MonadIO m => Machine -> m ()
 ```
+
+You may implement this as one or two commands. As these functions have a lot in
+common, we recommend implementing this as a single `Command`.

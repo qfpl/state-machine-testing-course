@@ -7,3 +7,11 @@ execute a command when the 'ideal' requirements have not been satisfied.
 
 In this level you will write commands to ensure both the positive and negative
 paths are tested.
+
+Some negative operations to test:
+
+* Adding milk or sugar to a hot chocolate
+* Taking a mug that isn't there
+* Adding a mug when one is there
+
+Can you think of any others?
