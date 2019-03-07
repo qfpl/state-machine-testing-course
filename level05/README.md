@@ -25,5 +25,18 @@ other `Command`s are able to check more easily.
 
 In this level we're going to check the following steps:
 
-* Current Credit
-* Dispensing a drink
+### Current Credit
+
+The function for checking the cost of the current drink cofiguration is:
+
+```haskell
+currentDrinkCost :: MonadIO m => Machine -> m Int
+```
+
+### Dispensing a drink
+
+The function for dispensing a drink is:
+
+```haskell
+dispense :: MonadIO m => Machine -> m (Either MachineError ())
+```
