@@ -4,8 +4,8 @@ We will be using lenses in the content of the course, and we encourage
 you to use them as well. A `Lens' s a` accesses exactly one `a` within
 some structure `s`.
 
-This document will contain enough examples to provide a cheat-sheet
-for the lens/prism-using code in this course:
+This document contains examples and explanations to provide an easily
+digestible introduction to the lenses that are used in this course:
 
 ## Generating Lenses
 
