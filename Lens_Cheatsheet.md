@@ -76,11 +76,49 @@ let foo = Foo "Fred" 33
 |   3 | `foo { _fooFieldB = _fooFieldB foo + 3 }            == Foo "Fred" 36`  |
 |   4 | `foo { _fooFieldB = fmap toUpper (_fooFieldA foo) } == Foo "FRED" 33`  |
 
-## Prisms
+# Prisms
 
-TODO
+Prisms are like lenses for sum types. Instead of focusing on exactly
+one value, a `Prism' s a` will extract at most one `a` from `s`.
 
-## Composing
+## Generating Prisms
+
+Prisms are generated using the `makePrisms` template haskell function:
+
+```haskell
+data Bar = Baz Foo | Quux Bool
+$(makePrisms ''Bar)
+```
+
+This will generate prisms `_Baz :: Prism' Bar Foo` and `_Quux ::
+Prism' Bar Bool`.
+
+### Using Prisms
+
+Given the two prisms above, and the following values:
+
+```haskell
+let
+  baz = Baz (Foo "Fred" 33)
+  quux = Quux True
+```
+
+#### Previewing
+
+| # | Function/Operator        | Example                                    |
+|---|--------------------------|--------------------------------------------|
+| 1 | `preview`                | `preview _Baz baz == Just (Foo "Fred" 33)` |
+| 2 | `preview`                | `preview _Baz quux == Nothing`             |
+| 3 | `(^?)` (infix `preview`) | `quux ^? _Quux == Just True`               |
+| 4 | `(^?)` (infix `preview`) | `baz ^? _Quux == Nothing`                  |
+
+#### Reviewing
+
+| # | Function/Operator      | Example                     |
+| 1 | `review`               | `review _Quux True == quux` |
+| 2 | `(#)` (infix `review`) | `_Quux # True == quux`      |
+
+# Composing
 
 `Lens`es (and other optics like `Prism`s) compose with each other using `(.)`.
 
