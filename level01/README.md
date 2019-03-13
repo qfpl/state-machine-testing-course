@@ -114,15 +114,7 @@ Here are some important things to understand about `Command`:
 * The `input` type must be `HTraversable`, which we'll talk about
   soon.
 
-* The list of callbacks is how we:
-
-  - Assert preconditions on actions, which guarantees that shrunken
-    command sequences stay valid,
-
-  - Update our model as actions are performed, and
-
-  - Assert postconditions on actions, checking that our system
-    actually behaves correctly.
+* The list of callbacks will be explored later.
 
 ## Your first command
 
@@ -206,7 +198,8 @@ Some things to notice:
 
 ## Adding Callbacks
 
-We now need to look at the
+The main thing we are missing is code to test that our command
+actually worked. To add that, we need to look at the
 [`Callback`](https://hackage.haskell.org/package/hedgehog/docs/Hedgehog.html#t:Callback)
 type:
 
@@ -217,10 +210,46 @@ data Callback input output state
   | Ensure (state Concrete -> state Concrete -> input Concrete -> output -> Test ())
 ```
 
-The list of `Callbacks` in a `Command`
+The list of `Callbacks` in a `Command` is technically optional but in
+practice you'll almost always use it. It is how we:
 
-is walk through the `test-suite` component to familiarise ourselves
-with the libraries we.
+  - Assert preconditions on actions, which guarantees that shrunken
+    command sequences stay valid,
+
+  - Update our model as actions are performed, and
+
+  - Assert postconditions on actions, checking that our system
+    actually behaves correctly.
+
+For our current situation, we need to do two things:
+
+  - update the model with the new drink type (an `Update` callback), and
+  - ensure that our command actually worked on the real system (an
+    `Ensure` callback).
+
+We know from the context that `state ~ Model`, `input ~ Model` and
+`output ~ C.Drink`, so the callback constructors will have these
+types:
+
+  - `Update :: forall v. Ord1 v => Model v -> Model v -> Var C.Drink v -> Model v`
+  - `Ensure :: Model Concrete -> Model Concrete -> Model Concrete -> C.Drink -> Test ()`
+
+For `Update`, the `forall v.` ensures that our updates will work on
+both `Concrete` and `Symbolic` values, but in this case our commands
+are so simple that we can disregard all arguments and just return a
+new `Model`.
+
+For `Ensure`, we can disregard most of the arguments as well, except
+for the final `C.Drink` argument. This came from the exec part of our
+`Command`, and we use it to check that the real system's behavior
+matches our model.
+
+With type holes and a bit of patience, that gives us enough
+information to build out three commands: one to set each drink type.
+
+The next thing to do is walk through the `test-suite` component to
+familiarise ourselves with the libraries, and make sure the state
+machine tests are wired into the test suite.
 
 We're using [`tasty`](https://hackage.haskell.org/package/tasty) to
 define the test suite, and
@@ -234,4 +263,7 @@ largely the same across levels. It defines a single `TestTree` which
 imports the actual `stateMachineTests :: TestTree` from
 `level01/CoffeeMachineTests.hs`.
 
- test is drink selection
+The function `Hedgehog.Gen.sequential` turns a list of commands into a
+generator for random sequences of sequential commands. This is what we
+run to test our system. Note that the call to `C.reset` is _after_ the
+`Gen.sequential` call: this is how we reset the model between tests.
