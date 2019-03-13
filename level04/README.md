@@ -1,13 +1,15 @@
 # Level 04 - Positive & Negative Testing
 
-In a previous level you implemented commands with pre-conditions to ensure they
-are only run when they are guaranteed to succeed. However this only tests the
-'positive' path within the application. To be thorough we need to check what
-happens if we execute a command when the 'ideal' requirements have not been
-satisfied.
+In a previous level you implemented commands with pre-conditions to
+ensure they are only run when they are guaranteed to succeed. However
+this only tests the 'positive' path within the application. To be
+thorough we need commands that do the 'wrong' thing. These 'negative'
+commands should use `Ensure` callbacks to verify that errors are
+correctly raised, and that the state doesn't change in unexpected
+ways.
 
-In this level you will write commands to ensure both the positive and negative
-paths are tested.
+In this level you will write negative commands to complement your
+existing positive ones.
 
 Some negative operations to test:
 
