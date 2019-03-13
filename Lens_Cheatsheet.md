@@ -1,8 +1,10 @@
 # Lens - A Cheatsheet
 
-We will be using lenses in the content of the course, and we encourage
-you to use them as well. A `Lens' s a` accesses exactly one `a` within
-some structure `s`.
+We will be using lenses in the content of the course, and we encourage you to
+use them as well. A `Lens` is a generalised combination of a "getter" and a
+"setter", the type signature for a `Lens` may be read as:
+
+A `Lens' s a` accesses exactly one `a` within some structure `s`.
 
 This document contains examples and explanations to provide an easily
 digestible introduction to the lenses that are used in this course:
