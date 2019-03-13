@@ -1,13 +1,11 @@
 # Lens - A Cheatsheet
 
 We will be using lenses in the content of the course, and we encourage
-you to use them as well. We'll mostly use lenses in their simplest
-form, as generalised "getters" and "setters". We may also use prisms,
-which can be thought of as a combination of a constructor and
-first-class pattern.
+you to use them as well. A `Lens' s a` accesses exactly one `a` within
+some structure `s`.
 
-This document will contain examples and explanations to provide an
-easily digestible to the lenses that are used in this course:
+This document will contain enough examples to provide a cheat-sheet
+for the lens/prism-using code in this course:
 
 ## Generating Lenses
 
@@ -87,6 +85,7 @@ Prisms are generated using the `makePrisms` template haskell function:
 
 ```haskell
 data Bar = Baz Foo | Quux Bool
+
 $(makePrisms ''Bar)
 ```
 
