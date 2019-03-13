@@ -120,6 +120,12 @@ let
 
 # Composing
 
-`Lens`es (and other optics like `Prism`s) compose with each other using `(.)`.
+`Lens`es (and other optics like `Prism`s) compose with each other
+using `(.)` giving an effect that looks a lot like dot-notation in
+other languages. This composition is where the payoffs really start,
+as it's possible to reach deep into data structures without doing many
+levels of `case`-expressions:
 
-TODO
+```haskell
+baz ^? _Baz . fooFieldA == Just "Fred"
+```
