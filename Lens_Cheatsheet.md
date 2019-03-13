@@ -6,8 +6,8 @@ form, as generalised "getters" and "setters". We may also use prisms,
 which can be thought of as a combination of a constructor and
 first-class pattern.
 
-This document will contain examples and explanations to provide an
-easily digestible to the lenses that are used in this course:
+This document contains examples and explanations to provide an easily digestible
+introduction to the lenses that are used in this course:
 
 ## Generating Lenses
 
