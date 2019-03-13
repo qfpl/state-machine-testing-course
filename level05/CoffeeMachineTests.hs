@@ -19,15 +19,15 @@ import qualified Hedgehog.Range         as Range
 import           Test.Tasty             (TestTree)
 import           Test.Tasty.Hedgehog    (testProperty)
 
-data DrinkType 
-  = Coffee 
-  | HotChocolate 
-  | Tea 
+data DrinkType
+  = Coffee
+  | HotChocolate
+  | Tea
   deriving (Bounded, Enum, Show, Eq)
 
-data DrinkAdditive 
-  = Milk 
-  | Sugar 
+data DrinkAdditive
+  = Milk
+  | Sugar
   deriving (Bounded, Enum, Show)
 
 data MugStatus
@@ -289,8 +289,10 @@ cCheckCredit _ = Command gen (\_ -> pure ())
 
       in m
          & modelDrinkCost .~ cost
-         & modelSufficientCredit .~ if m ^. modelCoins > cost then TooMuch
-                                    else if m ^. modelCoins == cost then Enough else TooLittle
+         & modelSufficientCredit .~ case (m ^. modelCoins) `compare` cost of
+                                      GT -> TooMuch
+                                      EQ -> Enough
+                                      LT -> TooLittle
   ]
   where
     gen :: Model Symbolic -> Maybe (g (CheckCredit Symbolic))

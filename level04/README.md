@@ -1,33 +1,20 @@
-# Level 04 - Pre-conditions
+# Level 04 - Positive & Negative Testing
 
-We're starting to build up an nice list of commands. So far they have all
-separate parts of our model. There are no dependencies so Hedgehog is free to
-generate and shrink as it chooses, any sequence of commands is as valid as any
-other.
+In a previous level you implemented commands with pre-conditions to
+ensure they are only run when they are guaranteed to succeed. However
+this only tests the 'positive' path within the application. To be
+thorough we need commands that do the 'wrong' thing. These 'negative'
+commands should use `Ensure` callbacks to verify that errors are
+correctly raised, and that the state doesn't change in unexpected
+ways.
 
-But we need a way to ensure that our commands will only run when it makes sense
-to do so. Otherwise we will have commands that execute and fail our tests when
-those commands should never have been included to begin with.
+In this level you will write negative commands to complement your
+existing positive ones.
 
-We will use the `takeMug` function as an example. If we were to include a
-`Command` for this function without an appropriate `Require`, our tests would
-pass randomly, only when this command happened to be included in the right
-order.
+Some negative operations to test:
 
-However if we expanded our model to track whether we had added a mug. Then we
-could prevent the `takeMug` command from being a valid command unless our
-criteria had been satisified.
+* Adding milk or sugar to a hot chocolate
+* Taking a mug that isn't there
+* Adding a mug when one is there
 
-The type of drink we have selected is another example of this. If we wanted to
-check that the buttons to add milk or sugar were working correctly, then we need
-to make sure we have the correct type of drink selected.
-
-The goal for this level is to implement the following commands:
-
-* Add Milk/Sugar
-* Add Mug
-* Take Mug
-
-Be sure to check both the positive (happy) and negative (sad) paths! You will
-have to ensure that your `Command`s have the correct pre-conditions and
-`Require` checks.
+Can you think of any others?

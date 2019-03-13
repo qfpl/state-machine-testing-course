@@ -7,13 +7,4 @@
 5. Visibly oscillating
 6. I CAN SEE THROUGH TIME
 7. TIME SEES THROUGH YOU
-
-# Coffee State Machine Testing Levels
-
-1. First tests
-   - a. Set up hedgehog, inc. tasty-hedgehog
-   - b. No-arg commands to switch drink
-2. Collect drink-switch commands into one command
-3. Add/remove mug
-   - a. Note breakage
-   - b. `Require` callback - need happy/sad commands to test things properly
+8. Cthulu: "Is it really you? After all this time!"

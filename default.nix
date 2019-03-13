@@ -20,9 +20,7 @@ let
   drv = pkgs.haskellPackages.callPackage ./state-machine-testing-course.nix {};
 
   drvWithTools = pkgs.haskell.lib.addBuildTools drv
-    [ # Include our beloved and standard text editor
-      pkgs.ed
-      # A development tool for great justice
+    [ # A development tool for great justice
       (pkgs.haskell.lib.justStaticExecutables pkgs.haskellPackages.ghcid)
       (pkgs.haskell.lib.justStaticExecutables pkgs.haskellPackages.cabal-install)
     ];
