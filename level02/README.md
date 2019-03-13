@@ -6,7 +6,7 @@ without our machine exploding. Yay. Note that because of how we've built these
 only when we have actions that can always run, regardless of the current state
 of the system.
 
-What about when we have `Command`s that do not make sense to, run unless the
+What about when we have `Command`s that do not make sense to run unless the
 system has reached a particular state? If we do not manage this, we are re left
 with a non-deterministic test suite because some `Command`s _might_ be generated
 in an absurd order.

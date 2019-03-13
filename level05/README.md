@@ -21,11 +21,11 @@ This style of `Command` acts as a 'transition' within the state machine that
 we're building. These 'transition' `Command`s serve to restrict the generated
 tests to valid subsets of `Command`s.
 
-Transition `Commands** collect complicated logic for transitions into a single
-location and set values on the model that other `Command`s are able to check
-more easily.
+Transition `Commands` collect the logic for transitions into a single location
+and set values on the model that other `Command`s are able to check more
+easily.
 
-The goal for this level is to write a `Command** that dispenses a drink and
+The goal for this level is to write a `Command` that dispenses a drink and
 checks that this drink matches our expectations, based on our current model of
 what the drink should be.
 
