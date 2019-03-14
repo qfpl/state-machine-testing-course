@@ -6,9 +6,8 @@ sequence of random actions is valid. This is only okay when our actions can run
 regardless of the current state of the system.
 
 What about `Command`s that only make sense when the system has reached a
-particular state? If we do not manage this, we are re left with a
-non-deterministic test suite because some `Command`s _might_ be generated in an
-absurd order.
+particular state? If we cannot handle these, we are left with non-deterministic
+tests because some actions _might_ be generated in an absurd order.
 
 We solve this by using the `Require` callback, which allows Hedgehog to test
 that a `Command` is valid in the current sequence. We will use the `takeMug`
