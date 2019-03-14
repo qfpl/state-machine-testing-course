@@ -199,7 +199,7 @@ stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
   mach <- C.newMachine
 
-  let initialModel = Model HotChocolate False 0 0 0 
+  let initialModel = Model HotChocolate False 0 0 0
       commands = ($ mach) <$>
         [ cSetDrinkType
         , cAddMug

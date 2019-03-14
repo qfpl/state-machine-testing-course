@@ -17,4 +17,10 @@ Some negative operations to test:
 * Taking a mug that isn't there
 * Adding a mug when one is there
 
-Can you think of any others?
+Some of these operations don't change the state of the "real system"
+being tested, while others return `Left MachineError`. You will have
+to write appropriate `Update` and `Ensure` callbacks, depending on the
+behaviour of the command being tested.
+
+Can you think of any commands you've written so far, that should have
+negative versions?

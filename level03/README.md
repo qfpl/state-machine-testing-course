@@ -27,9 +27,8 @@ We can add either milk or sugar with the following functions:
 
 ```haskell
 addMilk :: MonadIO m => Machine -> m ()
---
 addSugar :: MonadIO m => Machine -> m ()
 ```
 
-You may implement this as one or two commands. As these functions have a lot in
-common, we recommend implementing this as a single `Command`.
+You may implement this as one or two commands. As these functions have
+a lot in common, try doing it as a single `Command`.
