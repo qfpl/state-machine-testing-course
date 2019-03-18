@@ -1,0 +1,19 @@
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/reveal.js/3.0.0/
+#+OPTIONS: reveal_title_slide:"<h1>%t</h1><h2>%a</h2><h4>Queensland&nbsp;Functional&nbsp;Programming&nbsp;Lab</h4><h3>%e</h3>"
+#+OPTIONS: num:nil
+#+OPTIONS: toc:nil
+
+#+TITLE: Property Base Your State Machine (WIP)
+#+AUTHOR: Sean Chalmers, Jack Kelly
+
+random amusing slide idea(s):
+
+- building applications:
+  - Expectation: obedient working dog
+  - Reality: a deep one
+
+topics to cover from conference submission:
+* Introduction to property-based testing
+* How it applies to state-machine testing
+* What state-machine offers
+* Some cool examples of applications of state-machine testing
