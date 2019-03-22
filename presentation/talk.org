@@ -8,28 +8,32 @@
 
 random amusing slide idea(s):
 
-- building applications:
-  - Expectation: obedient working dog
-  - Reality: chtulu
-
 topics to cover from conference submission:
-* Introduction to property-based testing
-  - Unapologetic
-  - Unexpected
-  - Enlightening
-  - Empowering
+* programs are weird and complex
+  - hard to test properly
+  - settle for some unit tests of expected use, and maybe some regression checks
+  - checking an entire process or workflow is difficult
+
+* single slide to introduce broad property-based testing concepts
   - hands off the mundane aspects to the computer
+  - define properties not brittle unit tests
+  - frustratingly thorough 
 
 * How it applies to state-machine testing
   - retain PDD benefits
   - still allows the mundane part to be fobbed off to the computer
 
 * What state-machine offers
-  - See "building applications"
+  - "building applications"
+    - Expectation: obedient puppy
+    - Reality: cthulu
   - lifts benefits of having & knowing properties from entire functions to entire processes  (!bigdeal!)
   - can aid in larger design decisions by making state/transitions explicit
 
 * Some cool examples of applications of state-machine testing
   - direct ((our)coffee machine/turnstile)
   - external (wordpress/webdriver)
-  - gimmicky (water jug problem - http://clrnd.com.ar/posts/2017-04-21-the-water-jug-problem-in-hedgehog.html)
+
+* important notes:
+  - jack: the thing that made the name click for me: **each command is a transition**. 
+    - I carried around a model of "you sketch out a state machine like you do in automata theory class" for far too long
