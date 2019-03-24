@@ -10,6 +10,9 @@ random amusing slide idea(s):
 
 topics to cover from conference submission:
 * programs are weird and complex
+  - "building applications"
+    - Expectation: An obedient puppy
+    - Reality: Several screeching eldrich horrors
   - hard to test properly
   - settle for some unit tests of expected use, and maybe some regression checks
   - checking an entire process or workflow is difficult
@@ -19,14 +22,13 @@ topics to cover from conference submission:
   - define properties not brittle unit tests
   - frustratingly thorough 
 
-* How it applies to state-machine testing
+* What is state-machine testing
+
+* Why is state-machine testing
   - retain PDD benefits
   - still allows the mundane part to be fobbed off to the computer
 
 * What state-machine offers
-  - "building applications"
-    - Expectation: obedient puppy
-    - Reality: cthulu
   - lifts benefits of having & knowing properties from entire functions to entire processes  (!bigdeal!)
   - can aid in larger design decisions by making state/transitions explicit
 
