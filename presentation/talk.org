@@ -6,36 +6,51 @@
 #+TITLE: Property Base Your State Machine (WIP)
 #+AUTHOR: Sean Chalmers, Jack Kelly
 
-random amusing slide idea(s):
-
 topics to cover from conference submission:
+
 * programs are weird and complex
   - "building applications"
     - Expectation: An obedient puppy
     - Reality: Several screeching eldrich horrors
   - hard to test properly
-  - settle for some unit tests of expected use, and maybe some regression checks
+  - settle for some unit tests of expected usage, and /maybe/ some regression checks
   - checking an entire process or workflow is difficult
 
 * single slide to introduce broad property-based testing concepts
   - hands off the mundane aspects to the computer
   - define properties not brittle unit tests
-  - frustratingly thorough 
+  - frustratingly thorough ;)
 
 * What is state-machine testing
+  Testing behaviour with randomised interactions.
 
 * Why is state-machine testing
-  - retain PDD benefits
-  - still allows the mundane part to be fobbed off to the computer
+  All the benefits of property based testing, lifted to the level of application behaviour.
 
-* What state-machine offers
-  - lifts benefits of having & knowing properties from entire functions to entire processes  (!bigdeal!)
-  - can aid in larger design decisions by making state/transitions explicit
+* How is state-machine testing
+  - Your model
+  - `Command` : [`Require`, `Update`, `Ensure`]
+
+* Machines that grow
+  New feature ~ New `Command`
+  - Leave it to the framework to weave the new transition in.
+
+* Won't save you from awful tests
+  Must be said, not a silver bullet for the shitzu of bad testing.
+
+* Danger, Wil Robinson
+  In danger of writing a terrible duplicate of what you're testing.
+
+* Some tips
+  - Test positive *AND* negative cases.
+  - Don't write a `Command` and then forget to add it to the list!
+  - Use classification to understand the tests that are being generated.
 
 * Some cool examples of applications of state-machine testing
   - direct ((our)coffee machine/turnstile)
   - external (wordpress/webdriver)
 
 * important notes:
-  - jack: the thing that made the name click for me: **each command is a transition**. 
-    - I carried around a model of "you sketch out a state machine like you do in automata theory class" for far too long
+  - jack: the thing that made the name click for me: **each command is a transition**.
+    - I carried around a model of "you sketch out a state machine like you do in
+      automata theory class" for far too long
