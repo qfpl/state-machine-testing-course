@@ -6,8 +6,6 @@
 #+TITLE: Property Base Your State Machine (WIP)
 #+AUTHOR: Sean Chalmers, Jack Kelly
 
-topics to cover from conference submission:
-
 * programs are weird and complex
   - "building applications"
     - Expectation: An obedient puppy
@@ -16,7 +14,7 @@ topics to cover from conference submission:
   - settle for some unit tests of expected usage, and /maybe/ some regression checks
   - checking an entire process or workflow is difficult
 
-* single slide to introduce broad property-based testing concepts
+* briefly introduce broad property-based testing concepts
   - hands off the mundane aspects to the computer
   - define properties not brittle unit tests
   - frustratingly thorough ;)
@@ -36,15 +34,19 @@ topics to cover from conference submission:
   - Leave it to the framework to weave the new transition in.
 
 * Won't save you from awful tests
-  Must be said, not a silver bullet for the shitzu of bad testing.
+  Not a silver bullet for the shitzu of bad testing!
 
 * Danger, Wil Robinson
   In danger of writing a terrible duplicate of what you're testing.
+  - Your model should be a tiny collection of "has this transition occurred" and
+    the minimum amount of information required to make informed conclusions
+    about pre/post-conditions.
 
 * Some tips
   - Test positive *AND* negative cases.
   - Don't write a `Command` and then forget to add it to the list!
-  - Use classification to understand the tests that are being generated.
+  - Use classification to understand your test-case distribution
+    - point to https://www.youtube.com/watch?v=NcJOiQlzlXQ
 
 * Some cool examples of applications of state-machine testing
   - direct ((our)coffee machine/turnstile)
