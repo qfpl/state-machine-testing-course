@@ -26,26 +26,9 @@ address this in a future level. Later on we'll also go into more detail about
 how to factor out smaller "state transitions" to simplify your `Require`
 callbacks.
 
-The goals for this level are to implement `Commands` for the following
-functions, including sensible `Require` callbacks:
+# Your Tasks
 
-### Add Mug
-
-We add a mug using the `addMug` function:
-
-```haskell
-addMug :: MonadIO m => Machine -> m (Either MachineError ())
-```
-
-### Take Mug
-
-Similarly, we may remove a mug with the `takeMug` function:
-
-```haskell
-takeMug :: MonadIO m => Machine -> m (Either MachineError Mug)
-```
-
-### Collapse the `DrinkType` commands to one
+## Collapse the `DrinkType` commands to one
 
 The drink commands we set up in the previous level contain a lot of repeated
 boilerplate. We are able to use generators to express the three options for
@@ -58,3 +41,25 @@ setting drink types as one `Command`. Collapse the following three `Command`s:
 Into a single `Command`:
 
 * `cSetDrinkType`
+
+## New Commands: Add/Remove Mug
+
+Implement `Commands` for the following functions, including sensible
+`Require` callbacks:
+
+### Add Mug
+
+We add a mug to the `Machine` using the `addMug` function:
+
+```haskell
+addMug :: MonadIO m => Machine -> m (Either MachineError ())
+```
+
+### Take Mug
+
+Similarly, we remove a mug from the `Machine` with the `takeMug`
+function:
+
+```haskell
+takeMug :: MonadIO m => Machine -> m (Either MachineError Mug)
+```
