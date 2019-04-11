@@ -16,18 +16,13 @@ import           Test.Tasty.Hedgehog (testProperty)
 data DrinkType = Coffee | HotChocolate | Tea
 newtype Model (v :: Type -> Type) = Model DrinkType
 
+-- You will need to define data types for the SetDrinkTea and
+-- SetDrinkHotChocolate commands, along with HTraversable instances.
+
 data SetDrinkCoffee (v :: Type -> Type) = SetDrinkCoffee deriving Show
-data SetDrinkHotChocolate (v :: Type -> Type) = SetDrinkHotChocolate deriving Show
-data SetDrinkTea (v :: Type -> Type) = SetDrinkTea deriving Show
 
 instance HTraversable SetDrinkCoffee where
   htraverse _ _ = pure SetDrinkCoffee
-
-instance HTraversable SetDrinkHotChocolate where
-  htraverse _ _ = pure SetDrinkHotChocolate
-
-instance HTraversable SetDrinkTea where
-  htraverse _ _ = pure SetDrinkTea
 
 cSetDrinkCoffee
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
@@ -48,43 +43,22 @@ cSetDrinkCoffee mach = Command gen exec
       C.coffee mach
       view C.drinkSetting <$> C.peek mach
 
+-- You will need to implement these two command generators. Do not
+-- copy and change cSetDrinkCoffee without first working through the
+-- types. Replace `undefined` with a typed hole and pay attention to
+-- the type of each argument.
+
 cSetDrinkHotChocolate
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
   -> Command g m Model
-cSetDrinkHotChocolate mach = Command gen exec
-  [ Update $ \_ _ _ -> Model HotChocolate
-  , Ensure $ \_ _ _ drink -> case drink of
-      C.HotChocolate -> success
-      _ -> failure
-  ]
-  where
-    gen :: Model Symbolic -> Maybe (g (SetDrinkHotChocolate Symbolic))
-    gen _ = Just $ pure SetDrinkHotChocolate
-
-    exec :: SetDrinkHotChocolate Concrete -> m C.Drink
-    exec _ = evalIO $ do
-      C.hotChocolate mach
-      view C.drinkSetting <$> C.peek mach
+cSetDrinkHotChocolate = undefined
 
 cSetDrinkTea
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
   -> Command g m Model
-cSetDrinkTea mach = Command gen exec
-  [ Update $ \_ _ _ -> Model Tea
-  , Ensure $ \_ _ _ drink -> case drink of
-      C.Tea{} -> success
-      _ -> failure
-  ]
-  where
-    gen :: Model Symbolic -> Maybe (g (SetDrinkTea Symbolic))
-    gen _ = Just $ pure SetDrinkTea
-
-    exec :: SetDrinkTea Concrete -> m C.Drink
-    exec _ = evalIO $ do
-      C.tea mach
-      view C.drinkSetting <$> C.peek mach
+cSetDrinkTea = undefined
 
 stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
