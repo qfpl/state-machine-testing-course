@@ -26,7 +26,7 @@ but if you're the sort of person who needs to dig through the details,
 check out the asides below:
 
 <details>
-  <summary>Kind Signatures? Wha?</summary>
+  <summary>Kind Signatures?</summary>
 
   A _kind_ is the "type" of a type. The kind `Type` is the kind of
   types that can have values. Consider `Maybe` - its type argument
@@ -40,7 +40,7 @@ check out the asides below:
 </details>
 
 <details>
-  <summary>What's the type parameter used for? I need to know!</summary>
+  <summary>What's the type parameter used for?</summary>
 
   Hedgehog generates complete command sequences before it runs any
   commands, and not every command can be run at any time. Example: if
@@ -118,16 +118,14 @@ Here are some important things to understand about `Command`:
 
 ## Your first command
 
-We're going to walk through a simple command to select tea on the
+We're going to walk through a simple command to select coffee on the
 machine. After that, you'll need to set up similar commands to select
-coffee and hot chocolate. You'll retain more if you type all this out
-by hand, and use typed holes and a running `ghcid` session so you can
-watch the types coming together.
+hot chocolate and tea.
 
 Our goal is to write a function of this type:
 
 ```haskell
-cSetDrinkTea
+cSetDrinkCoffee
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   -> C.Machine
   -> Command g m Model
@@ -140,11 +138,11 @@ same thing. We're writing the `forall` explicitly so we can use `{-#
 LANGUAGE ScopedTypeVariables #-}` and write `g` and `m` in type
 signatures for helper functions.
 
-To write `cSetDrinkTea`, we'll need to pick a type for the input, so
+To write `cSetDrinkCoffee`, we'll need to pick a type for the input, so
 let's define one:
 
 ```haskell
-data SetDrinkTea (v :: Type -> Type) = SetDrinkTea deriving Show
+data SetDrinkCoffee (v :: Type -> Type) = SetDrinkCoffee deriving Show
 ```
 
 We know from the type of `Command` that we'll need a
@@ -164,24 +162,24 @@ ignore the function, and because we don't have any data in our input
 type we can ignore that argument too:
 
 ```haskell
-instance HTraversable SetDrinkTea where htraverse _ _ = pure SetDrinkTea
+instance HTraversable SetDrinkCoffee where htraverse _ _ = pure SetDrinkCoffee
 ```
 
-Now, let's write the bulk of the `cSetDrinkTea` function:
+Now, let's write the bulk of the `cSetDrinkCoffee` function:
 
 ```haskell
-cSetDrinkTea
+cSetDrinkCoffee
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
   -> Command g m Model
-cSetDrinkTea mach = Command gen exec []
+cSetDrinkCoffee mach = Command gen exec []
   where
-    gen :: Model Symbolic -> Maybe (g (SetDrinkTea Symbolic))
-    gen _ = Just $ pure SetDrinkTea
+    gen :: Model Symbolic -> Maybe (g (SetDrinkCoffee Symbolic))
+    gen _ = Just $ pure SetDrinkCoffee
 
-    exec :: SetDrinkTea Concrete -> m C.Drink
+    exec :: SetDrinkCoffee Concrete -> m C.Drink
     exec _ = evalIO $ do
-      C.tea mach
+      C.coffee mach
       view C.drinkSetting <$> C.peek mach
 ```
 
@@ -267,3 +265,11 @@ The function `Hedgehog.Gen.sequential` turns a list of commands into a
 generator for random sequences of sequential commands. This is what we
 run to test our system. Note that the call to `C.reset` is _after_ the
 `Gen.sequential` call: this is how we reset the model between tests.
+
+# Your Task
+
+Complete the definitions of `setDrinkHotChocolate` and `setDrinkTea`,
+and define necessary types and `HTraversable` instances for these
+commands. You'll retain more if you type out the other two commands by
+hand, and use typed holes and a running `ghcid` session so you can
+watch the types coming together.
