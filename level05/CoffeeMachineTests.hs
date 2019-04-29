@@ -30,6 +30,10 @@ data DrinkAdditive
   | Sugar
   deriving (Bounded, Enum, Show)
 
+drinkAdditive :: a -> a -> DrinkAdditive -> a
+drinkAdditive m _ Milk  = m
+drinkAdditive _ s Sugar = s
+
 data MugStatus
   = Empty
   | Full
@@ -117,10 +121,6 @@ cSetDrinkType mach = Command gen exec
         Tea          -> C.tea
       view C.drinkSetting <$> C.peek mach
 
-milkOrSugar :: DrinkAdditive -> a -> a ->  a
-milkOrSugar Milk m  _ = m
-milkOrSugar Sugar _ s = s
-
 milkOrSugarExec
   :: ( MonadTest m
      , MonadIO m
@@ -129,7 +129,7 @@ milkOrSugarExec
   -> AddMilkSugar Concrete
   -> m C.Drink
 milkOrSugarExec mach (AddMilkSugar additive) = do
-  evalIO $ milkOrSugar additive C.addMilk C.addSugar mach
+  evalIO $ drinkAdditive C.addMilk C.addSugar additive mach
   view C.drinkSetting <$> C.peek mach
 
 genAddMilkSugarCommand
@@ -162,11 +162,11 @@ cAddMilkSugarHappy ref = Command (genAddMilkSugarCommand (/= HotChocolate)) (mil
       hasMug m && m ^. modelDrinkType /= HotChocolate
 
   , Update $ \m (AddMilkSugar additive) _ -> m
-      & milkOrSugar additive modelMilk modelSugar +~ 1
+      & drinkAdditive modelMilk modelSugar additive +~ 1
       & modelSufficientCredit .~ TooLittle
 
   , Ensure $ \oldM newM (AddMilkSugar additive) mug' ->
-      let (mL, sl) = milkOrSugar additive (modelMilk, C.milk) (modelSugar, C.sugar)
+      let (mL, sl) = drinkAdditive (modelMilk, C.milk) (modelSugar, C.sugar) additive
 
           drinkAdditiveQty = case newM ^. modelDrinkType of
             Coffee -> mug' ^? C._Coffee . sl
