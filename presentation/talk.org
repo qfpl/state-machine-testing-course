@@ -6,7 +6,7 @@
 #+TITLE: Property Base Your State Machine (WIP)
 #+AUTHOR: Sean Chalmers, Jack Kelly
 
-* programs are weird and complex
+* Programs are weird and complex
   - "building applications"
     - Expectation: An obedient puppy
     - Reality: Several screeching eldrich horrors
@@ -14,7 +14,7 @@
   - settle for some unit tests of expected usage, and /maybe/ some regression checks
   - checking an entire process or workflow is difficult
 
-* briefly introduce broad property-based testing concepts
+* Briefly introduce broad property-based testing concepts
   - hands off the mundane aspects to the computer
   - define properties not brittle unit tests
   - frustratingly thorough ;)
@@ -26,8 +26,14 @@
   All the benefits of property based testing, lifted to the level of application behaviour.
 
 * How is state-machine testing
-  - Your model
-  - `Command` : [`Require`, `Update`, `Ensure`]
+
+** Model = State
+** Command = Transition
+
+** Phases - Execution Model
+*** Generate, ~Require~
+*** Execute, ~Update~ 
+*** Shrink, ~Ensure~ 
 
 * Machines that grow
   New feature ~ New `Command`
@@ -42,15 +48,13 @@
     the minimum amount of information required to make informed conclusions
     about pre/post-conditions.
 
-* Some tips
-  - Test positive *AND* negative cases.
-  - Don't write a `Command` and then forget to add it to the list!
+* Bonus awesome
   - Use classification to understand your test-case distribution
     - point to https://www.youtube.com/watch?v=NcJOiQlzlXQ
 
 * Some cool examples of applications of state-machine testing
   - direct ((our)coffee machine/turnstile)
-  - external (wordpress/webdriver)
+  - external (wordpress, levelDB)
 
 * important notes:
   - jack: the thing that made the name click for me: **each command is a transition**.
