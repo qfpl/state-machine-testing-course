@@ -116,6 +116,7 @@ let
 #### Reviewing
 
 | # | Function/Operator      | Example                     |
+|---|------------------------|-----------------------------|
 | 1 | `review`               | `review _Quux True == quux` |
 | 2 | `(#)` (infix `review`) | `_Quux # True == quux`      |
 

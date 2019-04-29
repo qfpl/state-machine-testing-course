@@ -49,20 +49,15 @@ a course about testing, each level is a separate `test-suite` in the
 
 ## Course Structure
 
-- [0] Setting Up
+0. Setting Up
   - Preparing the project
   - Setting [hedgehog](https://hackage.haskell.org/package/hedgehog)
   - Structuring your tests using [tasty-hedgehog](https://hackage.haskell.org/package/tasty-hedgehog)
-
-- [1] First tests
+1. First tests
   - Terminology and `Command` structure
   - Some simple commands
   - Discussion of test feedback and interpreting errors
-
-- [2] `Require` & Pre-conditions
-
-- [3] More Commands
-  
-- [4] Positive & Negative Testing
-
-- [5] Phases and growing models
+2. `Require` & Pre-conditions
+3. More Commands
+4. Positive & Negative Testing
+5. Phases and growing models
