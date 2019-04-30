@@ -159,7 +159,7 @@ cAddMilkSugarHappy
   -> Command g m Model
 cAddMilkSugarHappy ref = Command (genAddMilkSugarCommand (/= HotChocolate)) (milkOrSugarExec ref)
   [ Require $ \m _ ->
-      hasMug m && m ^. modelDrinkType /= HotChocolate
+      m ^. modelDrinkType /= HotChocolate
 
   , Update $ \m (AddMilkSugar additive) _ -> m
       & drinkAdditive modelMilk modelSugar additive +~ 1
@@ -240,10 +240,7 @@ cInsertCoins
 cInsertCoins mach = Command gen exec
   [ Update $ \m (InsertCoins coins) _ -> m & modelCoins +~ coins
 
-  , Ensure $ \oldM newM (InsertCoins coins) currentCoins -> do
-      oldM ^. modelCoins + coins === currentCoins
-      newM ^. modelCoins - coins === oldM ^. modelCoins
-      newM ^. modelCoins === currentCoins
+  , Ensure $ \_ newM _ currentCoins -> newM ^. modelCoins === currentCoins
   ]
   where
     gen :: Model Symbolic -> Maybe (g (InsertCoins Symbolic))
