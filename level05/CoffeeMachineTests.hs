@@ -7,7 +7,7 @@ module CoffeeMachineTests (stateMachineTests) where
 import qualified CoffeeMachine          as C
 import           Control.Lens           (makeLenses, view, _Just)
 import           Control.Lens.Extras    (is)
-import           Control.Lens.Operators ((+~), (-~), (.~), (?~), (^.), (^?))
+import           Control.Lens.Operators
 import           Control.Monad          (void)
 import           Control.Monad.IO.Class (MonadIO)
 import           Data.Function          ((&))
@@ -37,13 +37,15 @@ drinkAdditive _ s Sugar = s
 data MugStatus
   = Empty
   | Full
-  deriving (Show, Eq)
+  deriving (Eq, Show)
 
+-- You'll want to add this to the 'Model', probably as a 'Maybe
+-- Credit', so that 'Nothing' means "it's unknown whether we have
+-- enough credit".
 data Credit
   = TooLittle
   | Enough
-  | TooMuch
-  deriving (Eq,Show)
+  deriving (Eq, Show)
 
 data Model (v :: Type -> Type) = Model
   { _modelDrinkType        :: DrinkType
@@ -51,8 +53,7 @@ data Model (v :: Type -> Type) = Model
   , _modelMilk             :: Int
   , _modelSugar            :: Int
   , _modelCoins            :: Int
-  , _modelDrinkCost        :: Int
-  , _modelSufficientCredit :: Credit
+  , _modelDrinkCost        :: Maybe Int
   , _modelHasDispensed     :: Bool
   }
 $(makeLenses ''Model)
@@ -101,7 +102,6 @@ cSetDrinkType mach = Command gen exec
     & modelDrinkType .~ d
     & modelMilk .~ 0
     & modelSugar .~ 0
-    & modelSufficientCredit .~ TooLittle
 
   , Ensure $ \_ m _ drink -> case (m ^. modelDrinkType, drink) of
       (Coffee, C.Coffee{})           -> success
@@ -163,7 +163,6 @@ cAddMilkSugarHappy ref = Command (genAddMilkSugarCommand (/= HotChocolate)) (mil
 
   , Update $ \m (AddMilkSugar additive) _ -> m
       & drinkAdditive modelMilk modelSugar additive +~ 1
-      & modelSufficientCredit .~ TooLittle
 
   , Ensure $ \oldM newM (AddMilkSugar additive) mug' ->
       let (mL, sl) = drinkAdditive (modelMilk, C.milk) (modelSugar, C.sugar) additive
@@ -262,7 +261,6 @@ cRefundCoins
 cRefundCoins mach = Command gen exec
   [ Update $ \m _ _ -> m
     & modelCoins .~ 0
-    & modelSufficientCredit .~ TooLittle
 
   , Ensure $ \oldM newM _ refundCoins -> do
       oldM ^. modelCoins - refundCoins === 0
@@ -275,28 +273,16 @@ cRefundCoins mach = Command gen exec
     exec :: RefundCoins Concrete -> m Int
     exec _ = evalIO (C.refund mach)
 
+-- TODO
+--
+-- In this command you'll want to set the drink cost and the
+-- credit-checked value, with appopriate callbacks so this command can
+-- only happen once in a generated sequence.
 cCheckCredit
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
   -> Command g m Model
-cCheckCredit _ = Command gen (\_ -> pure ())
-  [ Update $ \m _ _ ->
-      let
-        cost = C.drinkCost $ case m ^. modelDrinkType of
-          HotChocolate -> C.HotChocolate
-          Coffee       -> C.Coffee (C.MilkSugar (m ^. modelMilk) (m ^. modelSugar))
-          Tea          -> C.Tea (C.MilkSugar (m ^. modelMilk) (m ^. modelSugar))
-
-      in m
-         & modelDrinkCost .~ cost
-         & modelSufficientCredit .~ case (m ^. modelCoins) `compare` cost of
-                                      GT -> TooMuch
-                                      EQ -> Enough
-                                      LT -> TooLittle
-  ]
-  where
-    gen :: Model Symbolic -> Maybe (g (CheckCredit Symbolic))
-    gen _ = Just $ pure CheckCredit
+cCheckCredit _ = undefined
 
 cDispenseHappy
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
@@ -306,19 +292,18 @@ cDispenseHappy mach = Command gen exec
   [ Require $ \m _ -> okayToDispense m
 
   , Update $ \m _ _ -> m
-    & modelCoins -~ (m ^. modelDrinkCost)
-    & modelSufficientCredit .~ TooLittle
+    & modelCoins -~ (m ^?! modelDrinkCost . _Just)
     & modelMug . _Just .~ Full
     & modelHasDispensed .~ True
 
-  , Ensure $ \oldM newM _ _ ->
-      newM ^. modelCoins === (oldM ^. modelCoins) - (newM ^. modelDrinkCost)
+  , Ensure $ \oldM newM _ _ -> newM ^. modelCoins
+      === (oldM ^. modelCoins) - (newM ^?! modelDrinkCost . _Just)
   ]
   where
     okayToDispense :: Model Symbolic -> Bool
     okayToDispense m = hasMug m
-      && m ^. modelSufficientCredit `elem` [Enough, TooMuch]
       && not (m ^. modelHasDispensed)
+      && isJust (m ^. modelDrinkCost)
 
     gen :: Model Symbolic -> Maybe (g (DispenseDrink Symbolic))
     gen m = if okayToDispense m then Just $ pure DispenseDrink else Nothing
@@ -330,7 +315,7 @@ stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
   mach <- evalIO C.newMachine
 
-  let initialModel = Model HotChocolate Nothing 0 0 0 0 TooLittle False
+  let initialModel = Model HotChocolate Nothing 0 0 0 Nothing False
       commands = ($ mach) <$>
         [ cSetDrinkType
         , cAddMugHappy
