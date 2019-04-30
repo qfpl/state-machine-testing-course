@@ -259,12 +259,8 @@ cRefundCoins
   => C.Machine
   -> Command g m Model
 cRefundCoins mach = Command gen exec
-  [ Update $ \m _ _ -> m
-    & modelCoins .~ 0
-
-  , Ensure $ \oldM newM _ refundCoins -> do
-      oldM ^. modelCoins - refundCoins === 0
-      newM ^. modelCoins + refundCoins === oldM ^. modelCoins
+  [ Update $ \m _ _ -> m & modelCoins .~ 0
+  , Ensure $ \oldM _ _ refundCoins -> oldM ^. modelCoins === refundCoins
   ]
   where
     gen :: Model Symbolic -> Maybe (g (RefundCoins Symbolic))
@@ -276,13 +272,13 @@ cRefundCoins mach = Command gen exec
 -- TODO
 --
 -- In this command you'll want to set the drink cost and the
--- credit-checked value, with appopriate callbacks so this command can
+-- credit-checked value, with appropriate callbacks so this command can
 -- only happen once in a generated sequence.
 cCheckCredit
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
   -> Command g m Model
-cCheckCredit _ = undefined
+cCheckCredit = undefined
 
 cDispenseHappy
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
@@ -296,20 +292,40 @@ cDispenseHappy mach = Command gen exec
     & modelMug . _Just .~ Full
     & modelHasDispensed .~ True
 
-  , Ensure $ \oldM newM _ _ -> newM ^. modelCoins
-      === (oldM ^. modelCoins) - (newM ^?! modelDrinkCost . _Just)
+  , Ensure $ \_ newM _ (credit, contents) -> do
+      -- Check that we have calculated the right amount of money in the machine
+      newM ^. modelCoins === credit
+
+      -- Check that the drink we got was the drink we configured
+      let
+        checkAdditives (C.MilkSugar milk sugar)
+          = (newM ^. modelMilk === milk)
+          *> (newM ^. modelSugar === sugar)
+      case contents of
+        C.HotChocolate -> newM ^. modelDrinkType === HotChocolate
+        C.Coffee additives ->
+          (newM ^. modelDrinkType === Coffee) *> checkAdditives additives
+        C.Tea additives ->
+          (newM ^. modelDrinkType === Tea) *> checkAdditives additives
   ]
   where
     okayToDispense :: Model Symbolic -> Bool
     okayToDispense m = hasMug m
       && not (m ^. modelHasDispensed)
       && isJust (m ^. modelDrinkCost)
+   -- && and there is enough credit
 
     gen :: Model Symbolic -> Maybe (g (DispenseDrink Symbolic))
     gen m = if okayToDispense m then Just $ pure DispenseDrink else Nothing
 
-    exec :: DispenseDrink Concrete -> m ()
-    exec _ = evalIO (C.dispense mach) >>= evalEither
+    exec :: DispenseDrink Concrete -> m (Int, C.Drink)
+    exec _ = do
+      evalIO (C.dispense mach) >>= evalEither
+      state <- evalIO (C.peek mach)
+      let
+        credit = state ^. C.coins
+        Just (C.Mug (Just contents)) = state ^. C.mug
+      pure (credit, contents)
 
 stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
