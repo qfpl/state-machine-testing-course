@@ -9,7 +9,7 @@ import           Control.Lens (makeLenses, to, view, (.~), (^.))
 import           Control.Monad.IO.Class (MonadIO)
 import           Data.Function ((&))
 import           Data.Kind (Type)
-import           Data.Maybe (isJust)
+import           Data.Maybe (isJust, isNothing)
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
@@ -84,14 +84,17 @@ cTakeMug
 cTakeMug mach = Command gen exec
   [ Require $ \m _ -> m ^. modelHasMug
   , Update $ \m _ _ -> m & modelHasMug .~ False
+  , Ensure $ \_ _ _ -> assert . isNothing
   ]
   where
     gen :: MonadGen g => Model Symbolic -> Maybe (g (TakeMug Symbolic))
     gen m | _modelHasMug m = (pure . pure) TakeMug
           | otherwise = Nothing
 
-    exec :: TakeMug Concrete -> m C.Mug
-    exec _ = evalIO (C.takeMug mach) >>= evalEither
+    exec :: TakeMug Concrete -> m (Maybe C.Mug)
+    exec _ = do
+      _ <- evalIO (C.takeMug mach) >>= evalEither
+      evalIO $ view C.mug <$> C.peek mach
 
 cAddMug
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
