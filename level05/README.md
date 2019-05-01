@@ -8,9 +8,9 @@ so we're able to write useful tests, without creating a crummy
 duplicate of the thing we're testing? This is where state machine
 testing becomes an art.
 
-The goal: construct a minimal the model that can still support
-sensible `Command`s. The exact details of this often depend on the
-thing that you're testing.
+The goal: construct a minimal model that can still support sensible
+`Command`s. The exact details of this often depend on the thing that
+you're testing.
 
 One technique is to define `Command`s that do no work of their own,
 but instead inspect the current model and update specific values used
