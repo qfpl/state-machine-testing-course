@@ -5,7 +5,7 @@
 module CoffeeMachineTests (stateMachineTests) where
 
 import qualified CoffeeMachine          as C
-import           Control.Lens           (makeLenses, view, _Just)
+import           Control.Lens           (failing, makeLenses, view, _Just)
 import           Control.Lens.Extras    (is)
 import           Control.Lens.Operators
 import           Control.Monad          (void)
@@ -164,17 +164,13 @@ cAddMilkSugarHappy ref = Command (genAddMilkSugarCommand (/= HotChocolate)) (mil
   , Update $ \m (AddMilkSugar additive) _ -> m
       & drinkAdditive modelMilk modelSugar additive +~ 1
 
-  , Ensure $ \oldM newM (AddMilkSugar additive) mug' ->
-      let (mL, sl) = drinkAdditive (modelMilk, C.milk) (modelSugar, C.sugar) additive
-
-          drinkAdditiveQty = case newM ^. modelDrinkType of
-            Coffee -> mug' ^? C._Coffee . sl
-            Tea    -> mug' ^? C._Tea . sl
-            _      -> Nothing
-
+  , Ensure $ \_ newM _ setting ->
+      let
+        setMilk = setting ^?! (C._Coffee `failing` C._Tea) . C.milk
+        setSugar = setting ^?! (C._Coffee `failing` C._Tea) . C.sugar
       in do
-        (newM ^. mL) - (oldM ^. mL) === 1
-        Just (newM ^. mL) === drinkAdditiveQty
+        newM ^. modelMilk === setMilk
+        newM ^. modelSugar === setSugar
   ]
 
 genAddMug :: MonadGen g => Model Symbolic -> Maybe (g (AddMug Symbolic))
