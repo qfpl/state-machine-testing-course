@@ -144,7 +144,7 @@ stateMachineTests = testProperty "State Machine Tests" . property $ do
 
   let initialModel = Model HotChocolate False
       commands = ($ mach) <$>
-        [cSetDrinkCoffee
+        [ cSetDrinkCoffee
         , cSetDrinkHotChocolate
         , cSetDrinkTea
         -- You will need to replace the above commands, or your
