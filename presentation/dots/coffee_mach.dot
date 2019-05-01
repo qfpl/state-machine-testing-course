@@ -1,0 +1,96 @@
+digraph G {
+  compound=true;
+  node [shape=point,label=""] ENTRY;
+  node [shape=ellipse];
+
+  nomug[label="no mug"];
+  hasmug[label="has mug"];
+
+  dtTea    [label="tea"];
+  dtCoffee [label="coffee"];
+  dtHChoc  [label="hot chocolate"];
+
+  ENTRY -> nomug,dtTea;
+
+  subgraph cluster0 {
+    node [shape=circle];
+    dtTea -> dtCoffee;
+    dtTea -> dtHChoc;
+    dtTea -> dtTea
+    
+    dtCoffee -> dtTea;
+    dtCoffee -> dtHChoc;
+    dtCoffee -> dtCoffee;
+    
+    dtHChoc -> dtTea;
+    dtHChoc -> dtCoffee;
+    dtHChoc -> dtHChoc;
+    label="Drink Type";
+  }
+
+  nomug -> hasmug[label="add"];
+  hasmug -> nomug[label="take"];
+
+  subgraph cluster2 {
+    label="Additives";
+    milk[label="Milk: n"];
+    milk -> milk [constraint=false,label="Add Milk [Drink Type: {Coffee,Tea}] /milk := milk + 1"];
+
+    sugar[label="Sugar: m"];
+    sugar -> sugar [constraint=false,label="Add Sugar [Drink Type: {Coffee,Tea}] /sugar := sugar + 1"];
+ 
+    milk -> sugar [style=invis];
+  }
+
+  dtHChoc -> milk [label="selected /milk := 0"];
+  dtHChoc -> sugar [label="selected /sugar := 0"];
+
+  coins [label="Coins: n"];
+
+  ENTRY -> coins;
+  coins -> coins [label="insert /coins := coins + 1", pos="3.0,4.0!"];
+  coins -> coins [label="refund /coins := 0"]
+
+  drinkcost [label="Cost of drink type"];
+
+  sum [label="+", shape=diamond];
+
+  milk -> sum;
+  sugar -> sum;
+  drinkcost -> sum;
+
+  cost [label="Cost"];
+
+  sum -> cost;
+
+  dtHChoc -> drinkcost [ltail=cluster0 label="selected"];
+
+  coincomp [label=">=",shape=diamond];
+
+  coins -> coincomp;
+  cost -> coincomp;
+
+  canafford [label="Can Afford"];
+
+  coincomp -> canafford;
+
+  candisp [label="Can dispense"];
+  hasdisp [label="Has dispensed"];
+
+  mugfull [label="full mug"];
+  mugempty [label="empty mug"];
+
+  hasmug -> mugempty;
+  mugempty -> candisp;
+  canafford -> candisp;
+
+  hasdisp -> mugfull;
+  mugfull -> nomug [label="take"];
+
+  candisp -> hasdisp [label="dispense"];
+
+  pay [label="-",shape=diamond];
+
+  cost -> pay -> coins;
+  hasdisp -> pay [label="pay"];
+}

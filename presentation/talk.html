@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Property Base Your State Machine</title>
+<meta name="author" content="(Sean Chalmers, Jack Kelly)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/moon.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1>Property Base Your State Machine</h1><h2>Sean Chalmers, Jack Kelly</h2><h4>Queensland&nbsp;Functional&nbsp;Programming&nbsp;Lab</h4><h3><a href="mailto:"></a></h3>
+</section>
+
+<section>
+<section id="slide-org387c84c">
+<h2 id="org387c84c">Programs are weird</h2>
+<p>
+Complex, Dependent, Interactive
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org23afd72">
+<h2 id="org23afd72">Testing weird programs is hard</h2>
+<ul>
+<li>Multi-step testing can be arduous and brittle
+<ul>
+<li>input and process are static</li>
+<li>branching?</li>
+<li>feedback on failure</li>
+
+</ul></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org8fbceaf">
+<h2 id="org8fbceaf">Property-based testing</h2>
+<ul>
+<li>Define properties over explicit unit tests</li>
+<li>Hand off the mundane aspects to the computer</li>
+<li>Frustratingly thorough ;)</li>
+<li>Staggeringly awesome design tool</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org439718c">
+<h2 id="org439718c">Property-based state machine testing</h2>
+<p>
+All the benefits of property based testing, lifted to the level of application behaviour.
+</p>
+<ul>
+<li>Yes, really.</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org37e9d27">
+<h2 id="org37e9d27">Wait &#x2026;what?</h2>
+<ul>
+<li>Randomly generate:
+<ul>
+<li>sequences of instructions</li>
+<li>inputs to those instructions</li>
+
+</ul></li>
+<li>Shrinking (OMG!)</li>
+<li>Failure reports provide reproducibility</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org6c7dd5e">
+<h2 id="org6c7dd5e">How?! Tell meeeee!</h2>
+<div class="outline-text-2" id="text-org6c7dd5e">
+</div>
+</section>
+<section id="slide-org4b214ac">
+<h3 id="org4b214ac">The basics</h3>
+<ul>
+<li>Drawn from Hedgehog package</li>
+<li>Concepts are similar across different packages/languages</li>
+
+</ul>
+
+</section>
+<section id="slide-orgd21b043">
+<h3 id="orgd21b043">Command</h3>
+<p>
+An instruction, the workhorse.
+</p>
+<ul>
+<li>Pre/Post conditions</li>
+<li>Input generation</li>
+<li>Action execution</li>
+
+</ul>
+
+</section>
+<section id="slide-orge8b7b59">
+<h3 id="orge8b7b59">Model</h3>
+<p>
+Your expectations regarding the 'state' of the world.
+</p>
+
+</section>
+<section id="slide-orgabf76ab">
+<h3 id="orgabf76ab">The general process</h3>
+<ul>
+<li>Pre-conditions are checked</li>
+<li>Input is generated</li>
+<li>Action is executed</li>
+<li>Model is updated</li>
+<li>Post-conditions are checked</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org921240b">
+<h2 id="org921240b">Simple</h2>
+
+<div class="figure">
+<p><img src="./images/mach.png" alt="mach.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgf28ff8f">
+<h2 id="orgf28ff8f">Model</h2>
+
+<div class="figure">
+<p><img src="./images/mach_states.png" alt="mach_states.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org8455b85">
+<h2 id="org8455b85">Commands</h2>
+
+<div class="figure">
+<p><img src="./images/mach_transitions.png" alt="mach_transitions.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org3e7bc1d">
+<h2 id="org3e7bc1d">Danger, Wil Robinson</h2>
+<p>
+In danger of writing a terrible duplicate of what you're testing.
+</p>
+<ul>
+<li>Your model should be a tiny collection of "has this transition occurred" and
+the minimum amount of information required to make informed conclusions
+about pre/post-conditions.</li>
+<li>comparison of:
+<ul>
+<li>state machine with <b><b>states</b></b> highlighted</li>
+<li>state machine with <b><b>transitions</b></b> highlighted</li>
+
+</ul></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgf34557d">
+<h2 id="orgf34557d">Ssssymbolism</h2>
+
+</section>
+</section>
+<section>
+<section id="slide-orga6d4ec8">
+<h2 id="orga6d4ec8">Machines that grow</h2>
+<ul>
+<li>New feature ~ new instruction(s)</li>
+<li>Leave it to the framework to weave in the new instruction</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orga39f1b8">
+<h2 id="orga39f1b8">Bonus awesome</h2>
+<ul>
+<li>Use classification to understand your test-case distribution
+<ul>
+<li>point to <a href="https://www.youtube.com/watch?v=NcJOiQlzlXQ">https://www.youtube.com/watch?v=NcJOiQlzlXQ</a></li>
+
+</ul></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org62fe437">
+<h2 id="org62fe437">Some cool examples of applications of state-machine testing</h2>
+<ul>
+<li>direct ((our)coffee machine/turnstile)</li>
+<li>external (wordpress, levelDB)</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgbf7f028">
+<h2 id="orgbf7f028">important notes:</h2>
+<ul>
+<li>Jack: "The thing that made the name click for me: <b><b>each command is a
+transition</b></b>. I carried around a model of 'you sketch out a state machine
+like you do in automata theory class' for far too long"</li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
+<script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c',
+rollingLinks: false,
+keyboard: true,
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>
