@@ -22,5 +22,8 @@ being tested, while others return `Left MachineError`. You will have
 to write appropriate `Update` and `Ensure` callbacks, depending on the
 behaviour of the command being tested.
 
-Can you think of any commands you've written so far, that should have
-negative versions?
+# Your Task
+
+Think over the commands you have written so far. For each command,
+decide whether you should write a negative command to contemplate it,
+and implement any necessary negative commands.

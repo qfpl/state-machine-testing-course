@@ -30,5 +30,15 @@ addMilk :: MonadIO m => Machine -> m ()
 addSugar :: MonadIO m => Machine -> m ()
 ```
 
-You may implement this as one or two commands. As these functions have
-a lot in common, try doing it as a single `Command`.
+# Your Tasks
+
+* Define `cInsertCoins` and `cRefundCoins` commands, that
+  insert/remove coins and update the model.
+
+* Define a `cAddMilkSugar` that adds either milk or sugar to the
+  drink. Hot chocolate drinks cannot have milk or sugar added, so you
+  will need to exclude this possibility when building the generator,
+  as well as in a `Require` callback.
+
+  If you struggle to implement the combined command, implement it as
+  two commands first, and then abstract over the common parts.
