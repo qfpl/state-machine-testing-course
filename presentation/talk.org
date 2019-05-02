@@ -3,60 +3,93 @@
 #+OPTIONS: num:nil
 #+OPTIONS: toc:nil
 
-#+TITLE: Property Base Your State Machine (WIP)
+#+TITLE: Property Base Your State Machine
 #+AUTHOR: Sean Chalmers, Jack Kelly
+#+EMAIL:
 
-* Programs are weird and complex
-  - "building applications"
-    - Expectation: An obedient puppy
-    - Reality: Several screeching eldrich horrors
-  - hard to test properly
-  - settle for some unit tests of expected usage, and /maybe/ some regression checks
-  - checking an entire process or workflow is difficult
+* Programs are weird
+  Complex, Dependent, Interactive
 
-* Briefly introduce broad property-based testing concepts
-  - hands off the mundane aspects to the computer
-  - define properties not brittle unit tests
-  - frustratingly thorough ;)
+* Testing weird is hard
+  - manual testing? [cries in Quality Assurance]
+  - which processes/use cases do you test?
+  - testing for failure?
 
-* What is state-machine testing
-  Testing behaviour with randomised interactions.
+* Do what we can
+  - unit test functions
+  - maybe test functions that use other functions
+  - test 'expected' use
+  - subcontract end users to suggest regression tests
 
-* Why is state-machine testing
-  All the benefits of property based testing, lifted to the level of application behaviour.
+* Cost : Benefit
+  - multi-step testing can be arduous and brittle
+    - input and process are static
+    - coverage
+    - new feature? have fun!
+ 
+* Property-based testing
+  - fob off the boring bits
+  - frustratingly thorough
+  - staggeringly useful
 
-* How is state-machine testing
+** Squeeeeeze
+  Use classification to understand your test-case distribution
+  - John Hughes: Building on developer intuitions
+    - https://www.youtube.com/watch?v=NcJOiQlzlXQ
 
-** Model = State
-** Command = Transition
+* Property-based state machine testing
+  Property-based testing, lifted to the level of *application behaviour*.
 
-** Phases - Execution Model
-*** Generate, ~Require~
-*** Execute, ~Update~ 
-*** Shrink, ~Ensure~ 
+** Generate useful workflows
+   list of actions is randomly generated, but guided by your requirements
+
+** Generated structured inputs
+   create useful randomised inputs for actions
+
+** Shrinking (OMG!)
+   you thought shrinking inputs was cool...
+
+** Useful feedback
+   - test failure provides list on actions and their respective inputs
+   - the random seed is provided so you can reproduce *that* failure
+
+* How?! Tell meeeee!
+
+** The basics
+   - drawn from Hedgehog package
+   - concepts are /similar/ across different packages/languages
+
+** Command
+   The workhorse
+   - pre/post conditions
+   - input generation
+   - action execution
+
+** Model
+   Your expectations regarding the 'state' of the world.
+
+* For example
+  [[./images/mach.png]]
+
+* There be dangers
+  Run the risk of writing a terrible duplicate of what you're testing.
+  - comparison of:
+    - state machine with **states** highlighted
+    - state machine with **transitions** highlighted
+
+* Ssssymbolism
 
 * Machines that grow
-  New feature ~ New `Command`
-  - Leave it to the framework to weave the new transition in.
-
-* Won't save you from awful tests
-  Not a silver bullet for the shitzu of bad testing!
-
-* Danger, Wil Robinson
-  In danger of writing a terrible duplicate of what you're testing.
-  - Your model should be a tiny collection of "has this transition occurred" and
-    the minimum amount of information required to make informed conclusions
-    about pre/post-conditions.
+  - New feature ~ new instruction(s)
+  - Leave it to the framework to weave in the new instruction
 
 * Bonus awesome
-  - Use classification to understand your test-case distribution
-    - point to https://www.youtube.com/watch?v=NcJOiQlzlXQ
 
 * Some cool examples of applications of state-machine testing
   - direct ((our)coffee machine/turnstile)
   - external (wordpress, levelDB)
 
 * important notes:
-  - jack: the thing that made the name click for me: **each command is a transition**.
-    - I carried around a model of "you sketch out a state machine like you do in
-      automata theory class" for far too long
+  - Jack: "The thing that made the name click for me: **each command is a
+    transition**. I carried around a model of 'you sketch out a state machine
+    like you do in automata theory class' for far too long"

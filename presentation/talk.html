@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <title>Property Base Your State Machine</title>
-<meta name="author" content="(Sean Chalmers, Jack Kelly)"/>
+<meta name="author" content="Sean Chalmers, Jack Kelly"/>
 <style type="text/css">
 .underline { text-decoration: underline; }
 </style>
@@ -26,12 +26,13 @@
 <body>
 <div class="reveal">
 <div class="slides">
-<section id="sec-title-slide"><h1>Property Base Your State Machine</h1><h2>Sean Chalmers, Jack Kelly</h2><h4>Queensland&nbsp;Functional&nbsp;Programming&nbsp;Lab</h4><h3><a href="mailto:"></a></h3>
+<section id="sec-title-slide">
+<h1 class="title">Property Base Your State Machine</h1><h2 class="author">Sean Chalmers, Jack Kelly</h2><p class="date">Created: 2019-05-02 Thu 14:35</p>
 </section>
 
 <section>
-<section id="slide-org387c84c">
-<h2 id="org387c84c">Programs are weird</h2>
+<section id="slide-org3d5b397">
+<h2 id="org3d5b397">Programs are weird</h2>
 <p>
 Complex, Dependent, Interactive
 </p>
@@ -39,14 +40,39 @@ Complex, Dependent, Interactive
 </section>
 </section>
 <section>
-<section id="slide-org23afd72">
-<h2 id="org23afd72">Testing weird programs is hard</h2>
+<section id="slide-org7d5e413">
+<h2 id="org7d5e413">Testing weird is hard</h2>
 <ul>
-<li>Multi-step testing can be arduous and brittle
+<li>manual testing? [cries in Quality Assurance]</li>
+<li>which processes/use cases do you test?</li>
+<li>testing for failure?</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org14e861a">
+<h2 id="org14e861a">Do what we can</h2>
+<ul>
+<li>unit test functions</li>
+<li>maybe test functions that use other functions</li>
+<li>test 'expected' use</li>
+<li>subcontract end users to suggest regression tests</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org1567346">
+<h2 id="org1567346">Cost : Benefit</h2>
+<ul>
+<li>multi-step testing can be arduous and brittle
 <ul>
 <li>input and process are static</li>
-<li>branching?</li>
-<li>feedback on failure</li>
+<li>coverage</li>
+<li>new feature? have fun!</li>
 
 </ul></li>
 
@@ -55,99 +81,110 @@ Complex, Dependent, Interactive
 </section>
 </section>
 <section>
-<section id="slide-org8fbceaf">
-<h2 id="org8fbceaf">Property-based testing</h2>
+<section id="slide-org0ea61bc">
+<h2 id="org0ea61bc">Property-based testing</h2>
 <ul>
-<li>Define properties over explicit unit tests</li>
-<li>Hand off the mundane aspects to the computer</li>
-<li>Frustratingly thorough ;)</li>
-<li>Staggeringly awesome design tool</li>
+<li>fob off the boring bits</li>
+<li>frustratingly thorough</li>
+<li>staggeringly useful</li>
 
 </ul>
 
 </section>
-</section>
-<section>
-<section id="slide-org439718c">
-<h2 id="org439718c">Property-based state machine testing</h2>
+<section id="slide-org2924c8a">
+<h3 id="org2924c8a">Squeeeeeze</h3>
 <p>
-All the benefits of property based testing, lifted to the level of application behaviour.
+Use classification to understand your test-case distribution
 </p>
 <ul>
-<li>Yes, really.</li>
-
-</ul>
-
-</section>
-</section>
-<section>
-<section id="slide-org37e9d27">
-<h2 id="org37e9d27">Wait &#x2026;what?</h2>
+<li>John Hughes: Building on developer intuitions
 <ul>
-<li>Randomly generate:
-<ul>
-<li>sequences of instructions</li>
-<li>inputs to those instructions</li>
+<li><a href="https://www.youtube.com/watch?v=NcJOiQlzlXQ">https://www.youtube.com/watch?v=NcJOiQlzlXQ</a></li>
 
 </ul></li>
-<li>Shrinking (OMG!)</li>
-<li>Failure reports provide reproducibility</li>
 
 </ul>
 
 </section>
 </section>
 <section>
-<section id="slide-org6c7dd5e">
-<h2 id="org6c7dd5e">How?! Tell meeeee!</h2>
-<div class="outline-text-2" id="text-org6c7dd5e">
+<section id="slide-orgc6d555f">
+<h2 id="orgc6d555f">Property-based state machine testing</h2>
+<p>
+Property-based testing, lifted to the level of <b>application behaviour</b>.
+</p>
+
+</section>
+<section id="slide-org8be9bbf">
+<h3 id="org8be9bbf">Generate useful workflows</h3>
+<p>
+list of actions is randomly generated, but guided by your requirements
+</p>
+
+</section>
+<section id="slide-org705424b">
+<h3 id="org705424b">Generated structured inputs</h3>
+<p>
+create useful randomised inputs for actions
+</p>
+
+</section>
+<section id="slide-org5805cff">
+<h3 id="org5805cff">Shrinking (OMG!)</h3>
+<p>
+you thought shrinking inputs was cool&#x2026;
+</p>
+
+</section>
+<section id="slide-org8f384bd">
+<h3 id="org8f384bd">Useful feedback</h3>
+<ul>
+<li>test failure provides list on actions and their respective inputs</li>
+<li>the random seed is provided so you can reproduce <b>that</b> failure</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgb91bc35">
+<h2 id="orgb91bc35">How?! Tell meeeee!</h2>
+<div class="outline-text-2" id="text-orgb91bc35">
 </div>
 </section>
-<section id="slide-org4b214ac">
-<h3 id="org4b214ac">The basics</h3>
+<section id="slide-orge49366e">
+<h3 id="orge49366e">The basics</h3>
 <ul>
-<li>Drawn from Hedgehog package</li>
-<li>Concepts are similar across different packages/languages</li>
+<li>drawn from Hedgehog package</li>
+<li>concepts are <i>similar</i> across different packages/languages</li>
 
 </ul>
 
 </section>
-<section id="slide-orgd21b043">
-<h3 id="orgd21b043">Command</h3>
+<section id="slide-org22826f5">
+<h3 id="org22826f5">Command</h3>
 <p>
-An instruction, the workhorse.
+The workhorse
 </p>
 <ul>
-<li>Pre/Post conditions</li>
-<li>Input generation</li>
-<li>Action execution</li>
+<li>pre/post conditions</li>
+<li>input generation</li>
+<li>action execution</li>
 
 </ul>
 
 </section>
-<section id="slide-orge8b7b59">
-<h3 id="orge8b7b59">Model</h3>
+<section id="slide-orgcaeb067">
+<h3 id="orgcaeb067">Model</h3>
 <p>
 Your expectations regarding the 'state' of the world.
 </p>
 
 </section>
-<section id="slide-orgabf76ab">
-<h3 id="orgabf76ab">The general process</h3>
-<ul>
-<li>Pre-conditions are checked</li>
-<li>Input is generated</li>
-<li>Action is executed</li>
-<li>Model is updated</li>
-<li>Post-conditions are checked</li>
-
-</ul>
-
-</section>
 </section>
 <section>
-<section id="slide-org921240b">
-<h2 id="org921240b">Simple</h2>
+<section id="slide-org4364af1">
+<h2 id="org4364af1">For example</h2>
 
 <div class="figure">
 <p><img src="./images/mach.png" alt="mach.png" />
@@ -157,37 +194,12 @@ Your expectations regarding the 'state' of the world.
 </section>
 </section>
 <section>
-<section id="slide-orgf28ff8f">
-<h2 id="orgf28ff8f">Model</h2>
-
-<div class="figure">
-<p><img src="./images/mach_states.png" alt="mach_states.png" />
-</p>
-</div>
-
-</section>
-</section>
-<section>
-<section id="slide-org8455b85">
-<h2 id="org8455b85">Commands</h2>
-
-<div class="figure">
-<p><img src="./images/mach_transitions.png" alt="mach_transitions.png" />
-</p>
-</div>
-
-</section>
-</section>
-<section>
-<section id="slide-org3e7bc1d">
-<h2 id="org3e7bc1d">Danger, Wil Robinson</h2>
+<section id="slide-orga00e3e0">
+<h2 id="orga00e3e0">There be dangers</h2>
 <p>
-In danger of writing a terrible duplicate of what you're testing.
+Run the risk of writing a terrible duplicate of what you're testing.
 </p>
 <ul>
-<li>Your model should be a tiny collection of "has this transition occurred" and
-the minimum amount of information required to make informed conclusions
-about pre/post-conditions.</li>
 <li>comparison of:
 <ul>
 <li>state machine with <b><b>states</b></b> highlighted</li>
@@ -200,14 +212,14 @@ about pre/post-conditions.</li>
 </section>
 </section>
 <section>
-<section id="slide-orgf34557d">
-<h2 id="orgf34557d">Ssssymbolism</h2>
+<section id="slide-org656c09d">
+<h2 id="org656c09d">Ssssymbolism</h2>
 
 </section>
 </section>
 <section>
-<section id="slide-orga6d4ec8">
-<h2 id="orga6d4ec8">Machines that grow</h2>
+<section id="slide-org1d97419">
+<h2 id="org1d97419">Machines that grow</h2>
 <ul>
 <li>New feature ~ new instruction(s)</li>
 <li>Leave it to the framework to weave in the new instruction</li>
@@ -217,22 +229,14 @@ about pre/post-conditions.</li>
 </section>
 </section>
 <section>
-<section id="slide-orga39f1b8">
-<h2 id="orga39f1b8">Bonus awesome</h2>
-<ul>
-<li>Use classification to understand your test-case distribution
-<ul>
-<li>point to <a href="https://www.youtube.com/watch?v=NcJOiQlzlXQ">https://www.youtube.com/watch?v=NcJOiQlzlXQ</a></li>
-
-</ul></li>
-
-</ul>
+<section id="slide-org0f9dc7f">
+<h2 id="org0f9dc7f">Bonus awesome</h2>
 
 </section>
 </section>
 <section>
-<section id="slide-org62fe437">
-<h2 id="org62fe437">Some cool examples of applications of state-machine testing</h2>
+<section id="slide-orgd947545">
+<h2 id="orgd947545">Some cool examples of applications of state-machine testing</h2>
 <ul>
 <li>direct ((our)coffee machine/turnstile)</li>
 <li>external (wordpress, levelDB)</li>
@@ -242,8 +246,8 @@ about pre/post-conditions.</li>
 </section>
 </section>
 <section>
-<section id="slide-orgbf7f028">
-<h2 id="orgbf7f028">important notes:</h2>
+<section id="slide-org9ba05bf">
+<h2 id="org9ba05bf">important notes:</h2>
 <ul>
 <li>Jack: "The thing that made the name click for me: <b><b>each command is a
 transition</b></b>. I carried around a model of 'you sketch out a state machine
@@ -256,7 +260,6 @@ like you do in automata theory class' for far too long"</li>
 </div>
 <script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
 <script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
-
 <script>
 // Full list of configuration options available here:
 // https://github.com/hakimel/reveal.js#configuration
@@ -269,16 +272,15 @@ center: true,
 slideNumber: 'c',
 rollingLinks: false,
 keyboard: true,
+mouseWheel: false,
+fragmentInURL: false,
+pdfSeparateFragments: true,
+
 overview: true,
 
 theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
-transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+transition: Reveal.getQueryHash().transition || 'convex', // see README of reveal.js for options
 transitionSpeed: 'default',
-multiplex: {
-    secret: '', // null if client
-    id: '', // id, obtained from socket.io server
-    url: '' // Location of socket.io server
-},
 
 // Optional libraries used to extend on reveal.js
 dependencies: [
@@ -287,6 +289,7 @@ dependencies: [
  { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
  { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
  { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+
 });
 </script>
 </body>
