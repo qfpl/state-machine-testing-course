@@ -82,7 +82,7 @@ cSetDrinkType mach = Command gen exec
     gen _ = Just $ SetDrinkType <$> Gen.enumBounded
 
     exec :: SetDrinkType Concrete -> m C.Drink
-    exec (SetDrinkType d) = evalIO $ do
+    exec (SetDrinkType d) = do
       mach & case d of
         Coffee       -> C.coffee
         HotChocolate -> C.hotChocolate
@@ -97,7 +97,7 @@ milkOrSugarExec
   -> AddMilkSugar Concrete
   -> m C.Drink
 milkOrSugarExec mach (AddMilkSugar additive) = do
-  evalIO $ drinkAdditive C.addMilk C.addSugar additive mach
+  drinkAdditive C.addMilk C.addSugar additive mach
   view C.drinkSetting <$> C.peek mach
 
 genAddMilkSugarCommand
@@ -157,7 +157,7 @@ cTakeMugSad mach = Command genTakeMug exec
   ]
   where
     exec :: TakeMug Concrete -> m (Either C.MachineError C.Mug)
-    exec _ = evalIO $ C.takeMug mach
+    exec _ = C.takeMug mach
 
 cTakeMugHappy
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
@@ -169,7 +169,7 @@ cTakeMugHappy mach = Command genTakeMug exec
   ]
   where
     exec :: TakeMug Concrete -> m C.Mug
-    exec _ = evalIO (C.takeMug mach) >>= evalEither
+    exec _ = C.takeMug mach >>= evalEither
 
 cAddMugHappy
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
@@ -183,8 +183,8 @@ cAddMugHappy mach = Command genAddMug exec
   where
     exec :: AddMug Concrete -> m (Maybe C.Mug)
     exec _ = do
-      evalIO (C.addMug mach) >>= evalEither
-      evalIO $ view C.mug <$> C.peek mach
+      C.addMug mach >>= evalEither
+      view C.mug <$> C.peek mach
 
 cAddMugSad
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
@@ -196,7 +196,7 @@ cAddMugSad mach = Command genAddMug exec
   ]
   where
     exec :: AddMug Concrete -> m (Either C.MachineError ())
-    exec _ = evalIO $ C.addMug mach
+    exec _ = C.addMug mach
 
 cInsertCoins
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
@@ -212,7 +212,7 @@ cInsertCoins mach = Command gen exec
     gen _ = Just $ InsertCoins <$> Gen.int (Range.linear 0 100)
 
     exec :: InsertCoins Concrete -> m Int
-    exec (InsertCoins coins) = evalIO $ do
+    exec (InsertCoins coins) = do
       C.insertCoins coins mach
       view C.coins <$> C.peek mach
 
@@ -230,11 +230,11 @@ cRefundCoins mach = Command gen exec
     gen _ = Just $ pure RefundCoins
 
     exec :: RefundCoins Concrete -> m Int
-    exec _ = evalIO (C.refund mach)
+    exec _ = C.refund mach
 
 stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
-  mach <- evalIO C.newMachine
+  mach <- C.newMachine
 
   let initialModel = Model HotChocolate False 0 0 0
       commands = ($ mach) <$>
@@ -250,5 +250,5 @@ stateMachineTests = testProperty "State Machine Tests" . property $ do
         ]
 
   actions <- forAll $ Gen.sequential (Range.linear 1 100) initialModel commands
-  evalIO $ C.reset mach
+  C.reset mach
   executeSequential initialModel actions

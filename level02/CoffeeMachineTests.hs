@@ -63,7 +63,7 @@ cSetDrinkCoffee mach = Command gen exec
     gen _ = Just $ pure SetDrinkCoffee
 
     exec :: SetDrinkCoffee Concrete -> m C.Drink
-    exec _ = evalIO $ do
+    exec _ = do
       C.coffee mach
       view C.drinkSetting <$> C.peek mach
 
@@ -82,7 +82,7 @@ cSetDrinkHotChocolate mach = Command gen exec
     gen _ = Just $ pure SetDrinkHotChocolate
 
     exec :: SetDrinkHotChocolate Concrete -> m C.Drink
-    exec _ = evalIO $ do
+    exec _ = do
       C.hotChocolate mach
       view C.drinkSetting <$> C.peek mach
 
@@ -101,7 +101,7 @@ cSetDrinkTea mach = Command gen exec
     gen _ = Just $ pure SetDrinkTea
 
     exec :: SetDrinkTea Concrete -> m C.Drink
-    exec _ = evalIO $ do
+    exec _ = do
       C.tea mach
       view C.drinkSetting <$> C.peek mach
 
@@ -154,5 +154,5 @@ stateMachineTests = testProperty "State Machine Tests" . property $ do
         ]
 
   actions <- forAll $ Gen.sequential (Range.linear 1 100) initialModel commands
-  evalIO $ C.reset mach
+  C.reset mach
   executeSequential initialModel actions
