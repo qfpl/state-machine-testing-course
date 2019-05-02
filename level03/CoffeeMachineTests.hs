@@ -5,7 +5,8 @@
 module CoffeeMachineTests (stateMachineTests) where
 
 import qualified CoffeeMachine as C
-import           Control.Lens (makeLenses, to, view, (.~), (^.))
+import           Control.Lens (failing, makeLenses, to, view)
+import           Control.Lens.Operators
 import           Control.Monad.IO.Class (MonadIO)
 import           Data.Function ((&))
 import           Data.Kind (Type)
@@ -18,7 +19,6 @@ import           Test.Tasty.Hedgehog (testProperty)
 
 data DrinkType = Coffee | HotChocolate | Tea deriving (Bounded, Enum, Show, Eq)
 
--- This type and its associated fold might be useful.
 data DrinkAdditive = Milk | Sugar deriving (Bounded, Enum, Show)
 
 drinkAdditive :: a -> a -> DrinkAdditive -> a
@@ -39,6 +39,12 @@ newtype SetDrinkType (v :: Type -> Type) = SetDrinkType DrinkType deriving Show
 data AddMug (v :: Type -> Type) = AddMug deriving Show
 data TakeMug (v :: Type -> Type) = TakeMug deriving Show
 
+newtype InsertCoins (v :: Type -> Type) = InsertCoins Int deriving Show
+data RefundCoins (v :: Type -> Type) = RefundCoins deriving Show
+
+newtype AddMilkSugar (v :: Type -> Type) = AddMilkSugar DrinkAdditive
+  deriving Show
+
 instance HTraversable AddMug where
   htraverse _ _ = pure AddMug
 
@@ -47,6 +53,15 @@ instance HTraversable TakeMug where
 
 instance HTraversable SetDrinkType where
   htraverse _ (SetDrinkType d) = pure $ SetDrinkType d
+
+instance HTraversable InsertCoins where
+  htraverse _ (InsertCoins i) = pure $ InsertCoins i
+
+instance HTraversable RefundCoins where
+  htraverse _ _ = pure RefundCoins
+
+instance HTraversable AddMilkSugar where
+  htraverse _ (AddMilkSugar additive) = pure $ AddMilkSugar additive
 
 cSetDrinkType
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
@@ -115,6 +130,65 @@ cAddMug mach = Command gen exec
       C.addMug mach >>= evalEither
       view C.mug <$> C.peek mach
 
+cAddMilkSugar
+  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  => C.Machine
+  -> Command g m Model
+cAddMilkSugar mach = Command gen exec
+  [ Require $ \m _ -> m ^. modelDrinkType /= HotChocolate
+  , Update $ \m (AddMilkSugar additive) _ ->
+      m & drinkAdditive modelMilk modelSugar additive +~ 1
+  , Ensure $ \_ newM _ setting ->
+      let
+        setMilk = setting ^?! (C._Coffee `failing` C._Tea) . C.milk
+        setSugar = setting ^?! (C._Coffee `failing` C._Tea) . C.sugar
+      in do
+        newM ^. modelMilk === setMilk
+        newM ^. modelSugar === setSugar
+  ]
+  where
+    gen :: MonadGen g => Model Symbolic -> Maybe (g (AddMilkSugar Symbolic))
+    gen m = case m ^. modelDrinkType of
+      HotChocolate -> Nothing
+      _ -> Just $ AddMilkSugar <$> Gen.enumBounded
+
+    exec :: AddMilkSugar Concrete -> m C.Drink
+    exec (AddMilkSugar additive) = do
+      drinkAdditive C.addMilk C.addSugar additive mach
+      view C.drinkSetting <$> C.peek mach
+
+cInsertCoins
+  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  => C.Machine
+  -> Command g m Model
+cInsertCoins mach = Command gen exec
+  [ Update $ \m (InsertCoins coins) _ -> m & modelCoins +~ coins
+  , Ensure $ \_ newM _ currentCoins -> newM ^. modelCoins === currentCoins
+  ]
+  where
+    gen :: MonadGen g => Model Symbolic -> Maybe (g (InsertCoins Symbolic))
+    gen _ = Just $ InsertCoins <$> Gen.int (Range.linear 0 100)
+
+    exec :: InsertCoins Concrete -> m Int
+    exec (InsertCoins coins) = do
+      C.insertCoins coins mach
+      view C.coins <$> C.peek mach
+
+cRefundCoins
+  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  => C.Machine
+  -> Command g m Model
+cRefundCoins mach = Command gen exec
+  [ Update $ \m _ _ -> m & modelCoins .~ 0
+
+  , Ensure $ \oldM _ _ refundCoins -> oldM ^. modelCoins === refundCoins
+  ]
+  where
+    gen :: MonadGen g => Model Symbolic -> Maybe (g (RefundCoins Symbolic))
+    gen _ = Just $ pure RefundCoins
+
+    exec :: RefundCoins Concrete -> m Int
+    exec _ = C.refund mach
 
 stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
@@ -125,9 +199,9 @@ stateMachineTests = testProperty "State Machine Tests" . property $ do
         [ cSetDrinkType
         , cAddMug
         , cTakeMug
-        -- , cAddMilkSugar
-        -- , cInsertCoins
-        -- , cRefundCoins
+        , cAddMilkSugar
+        , cInsertCoins
+        , cRefundCoins
         ]
 
   actions <- forAll $ Gen.sequential (Range.linear 1 100) initialModel commands
