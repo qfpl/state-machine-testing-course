@@ -69,7 +69,7 @@ cSetDrinkType mach = Command gen exec
     gen _ = pure $ SetDrinkType <$> Gen.enumBounded
 
     exec :: SetDrinkType Concrete -> m C.Drink
-    exec (SetDrinkType d) = evalIO $ do
+    exec (SetDrinkType d) = do
       mach & case d of
         Coffee       -> C.coffee
         HotChocolate -> C.hotChocolate
@@ -93,8 +93,8 @@ cTakeMug mach = Command gen exec
 
     exec :: TakeMug Concrete -> m (Maybe C.Mug)
     exec _ = do
-      _ <- evalIO (C.takeMug mach) >>= evalEither
-      evalIO $ view C.mug <$> C.peek mach
+      _ <- C.takeMug mach >>= evalEither
+      view C.mug <$> C.peek mach
 
 cAddMug
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
@@ -112,8 +112,8 @@ cAddMug mach = Command gen exec
 
     exec :: AddMug Concrete -> m (Maybe C.Mug)
     exec _ = do
-      evalIO (C.addMug mach) >>= evalEither
-      evalIO $ view C.mug <$> C.peek mach
+      C.addMug mach >>= evalEither
+      view C.mug <$> C.peek mach
 
 
 stateMachineTests :: TestTree
@@ -131,5 +131,5 @@ stateMachineTests = testProperty "State Machine Tests" . property $ do
         ]
 
   actions <- forAll $ Gen.sequential (Range.linear 1 100) initialModel commands
-  evalIO $ C.reset mach
+  C.reset mach
   executeSequential initialModel actions
