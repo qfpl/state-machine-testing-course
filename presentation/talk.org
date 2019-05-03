@@ -7,16 +7,19 @@
 #+AUTHOR: Sean Chalmers, Jack Kelly
 #+EMAIL:
 
+* Come to the workshop!
+  Discover interesting and fascinating state machines, and test them.
+
 * Programs are weird
-  Complex, Dependent, Interactive
+  Complex, Dependent, Interactive, Insidious
 
 * Testing weird is hard
   - manual testing? [cries in Quality Assurance]
   - which processes/use cases do you test?
-  - testing for failure?
+  - test for failure?
 
 * Do what we can
-  - unit test functions
+  - unit tests 
   - maybe test functions that use other functions
   - test 'expected' use
   - subcontract end users to suggest regression tests
@@ -26,70 +29,68 @@
     - input and process are static
     - coverage
     - new feature? have fun!
- 
+
 * Property-based testing
   - fob off the boring bits
   - frustratingly thorough
   - staggeringly useful
 
-** Squeeeeeze
-  Use classification to understand your test-case distribution
-  - John Hughes: Building on developer intuitions
-    - https://www.youtube.com/watch?v=NcJOiQlzlXQ
-
 * Property-based state machine testing
   Property-based testing, lifted to the level of *application behaviour*.
 
-** Generate useful workflows
-   list of actions is randomly generated, but guided by your requirements
+** Generate workflows
+   define individual steps, let the package shuffle them into randomised workflows.
 
-** Generated structured inputs
+** Generate structured inputs
    create useful randomised inputs for actions
 
 ** Shrinking (OMG!)
    you thought shrinking inputs was cool...
 
 ** Useful feedback
-   - test failure provides list on actions and their respective inputs
-   - the random seed is provided so you can reproduce *that* failure
+   - test failure provides the list of actions and their respective inputs
+   - the random seed is provided for reproducibility
+
+* OMG
+  Right?
 
 * How?! Tell meeeee!
 
-** The basics
-   - drawn from Hedgehog package
-   - concepts are /similar/ across different packages/languages
+** Model
+   expectations/awareness regarding the 'state' of the world
 
 ** Command
-   The workhorse
-   - pre/post conditions
-   - input generation
-   - action execution
-
-** Model
-   Your expectations regarding the 'state' of the world.
-
-* For example
-  [[./images/mach.png]]
+   Represents the /transitions/ not the states.
+   - pre & post conditions
+   - input generator
+   - action executor
+   - model update function
 
 * There be dangers
-  Run the risk of writing a terrible duplicate of what you're testing.
-  - comparison of:
-    - state machine with **states** highlighted
-    - state machine with **transitions** highlighted
+  there is the risk of writing a terrible duplicate of what you're testing
 
-* Ssssymbolism
+** Given
+   [[./images/mach.png]]
 
+** Test this
+   [[./images/mach_transitions.png]]
+
+** Not this
+   [[./images/mach_states.png]]
+
+** must maintain minimal model
+ 
 * Machines that grow
-  - New feature ~ new instruction(s)
-  - Leave it to the framework to weave in the new instruction
-
-* Bonus awesome
+  new feature ~ new Command(s)
 
 * Some cool examples of applications of state-machine testing
   - direct ((our)coffee machine/turnstile)
   - external (wordpress, levelDB)
 
-* important notes:
-  - Jack: "The thing that made the name click for me: **each command is a
-    transition**. I carried around a model of 'you sketch out a state machine
-    like you do in automata theory class' for far too long"
+* Come to the workshop!
+  Discover interesting and fascinating state machines, and test them.
+
+* Bonus Round
+ Use classification to understand your test-case distribution
+ - John Hughes: Building on developer intuitions
+   - https://www.youtube.com/watch?v=NcJOiQlzlXQ
