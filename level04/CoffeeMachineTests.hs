@@ -139,23 +139,20 @@ cAddMilkSugarHappy ref = Command (genAddMilkSugarCommand (/= HotChocolate)) (mil
         newM ^. modelSugar === setSugar
   ]
 
-genAddMug :: MonadGen g => Model Symbolic -> Maybe (g (AddMug Symbolic))
-genAddMug m | m ^. modelHasMug . to not = Just $ pure AddMug
-            | otherwise                 = Nothing
-
-genTakeMug :: MonadGen g => Model Symbolic -> Maybe (g (TakeMug Symbolic))
-genTakeMug m | m ^. modelHasMug = Just $ pure TakeMug
-             | otherwise        = Nothing
-
 cTakeMugSad
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
   -> Command g m Model
-cTakeMugSad mach = Command genTakeMug exec
+cTakeMugSad mach = Command gen exec
   [ Require $ \m _ -> m ^. modelHasMug . to not
   , Ensure $ \_ _ _ e -> either (=== C.NoMug) (const failure) e
   ]
   where
+    gen :: Model Symbolic -> Maybe (g (TakeMug Symbolic))
+    gen m
+      | m ^. modelHasMug = Nothing
+      | otherwise = Just $ pure TakeMug
+
     exec :: TakeMug Concrete -> m (Either C.MachineError C.Mug)
     exec _ = C.takeMug mach
 
@@ -163,11 +160,16 @@ cTakeMugHappy
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
   -> Command g m Model
-cTakeMugHappy mach = Command genTakeMug exec
+cTakeMugHappy mach = Command gen exec
   [ Require $ \m _ -> m ^. modelHasMug
   , Update $ \m _ _ -> m & modelHasMug .~ False
   ]
   where
+    gen :: Model Symbolic -> Maybe (g (TakeMug Symbolic))
+    gen m
+      | m ^. modelHasMug = Just $ pure TakeMug
+      | otherwise = Nothing
+    
     exec :: TakeMug Concrete -> m C.Mug
     exec _ = C.takeMug mach >>= evalEither
 
@@ -175,12 +177,17 @@ cAddMugHappy
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
   -> Command g m Model
-cAddMugHappy mach = Command genAddMug exec
+cAddMugHappy mach = Command gen exec
   [ Require $ \m _ -> m ^. modelHasMug . to not
   , Update $ \m _ _ -> m & modelHasMug .~ True
   , Ensure $ \_ _ _ -> assert . isJust
   ]
   where
+    gen :: Model Symbolic -> Maybe (g (AddMug Symbolic))
+    gen m
+      | m ^. modelHasMug = Nothing
+      | otherwise = Just $ pure AddMug
+
     exec :: AddMug Concrete -> m (Maybe C.Mug)
     exec _ = do
       C.addMug mach >>= evalEither
@@ -190,11 +197,16 @@ cAddMugSad
   :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
   => C.Machine
   -> Command g m Model
-cAddMugSad mach = Command genAddMug exec
+cAddMugSad mach = Command gen exec
   [ Require $ \m _ -> m ^. modelHasMug
   , Ensure $ \ _ _ _ res -> either (=== C.MugInTheWay) (const failure) res
   ]
   where
+    gen :: Model Symbolic -> Maybe (g (AddMug Symbolic))
+    gen m
+      | m ^. modelHasMug = Just $ pure AddMug
+      | otherwise = Nothing
+
     exec :: AddMug Concrete -> m (Either C.MachineError ())
     exec _ = C.addMug mach
 
