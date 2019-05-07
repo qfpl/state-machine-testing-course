@@ -27,21 +27,12 @@
 <div class="reveal">
 <div class="slides">
 <section id="sec-title-slide">
-<h1 class="title">Property Base Your State Machine</h1><h2 class="author">Sean Chalmers, Jack Kelly</h2><p class="date">Created: 2019-05-03 Fri 14:34</p>
+<h1>Property Base Your State Machine</h1><h2>Sean Chalmers, Jack Kelly</h2><h4>Queensland&nbsp;Functional&nbsp;Programming&nbsp;Lab</h4><h3><a href="mailto:"></a></h3>
 </section>
 
 <section>
-<section id="slide-org161344d">
-<h2 id="org161344d">Come to the workshop!</h2>
-<p>
-Discover interesting and fascinating state machines, and test them.
-</p>
-
-</section>
-</section>
-<section>
-<section id="slide-org37c4d68">
-<h2 id="org37c4d68">Programs are weird</h2>
+<section id="slide-org2178a24">
+<h2 id="org2178a24">Programs are weird</h2>
 <p>
 Complex, Dependent, Interactive, Insidious
 </p>
@@ -49,11 +40,11 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org267e378">
-<h2 id="org267e378">Testing weird is hard</h2>
+<section id="slide-org9f28b75">
+<h2 id="org9f28b75">Testing weird is hard</h2>
 <ul>
 <li>manual testing? [cries in Quality Assurance]</li>
-<li>which processes/use cases do you test?</li>
+<li>which processes do you test?</li>
 <li>test for failure?</li>
 
 </ul>
@@ -61,21 +52,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org008c1a6">
-<h2 id="org008c1a6">Do what we can</h2>
-<ul>
-<li>unit tests</li>
-<li>maybe test functions that use other functions</li>
-<li>test 'expected' use</li>
-<li>subcontract end users to suggest regression tests</li>
-
-</ul>
-
-</section>
-</section>
-<section>
-<section id="slide-org782beac">
-<h2 id="org782beac">Cost : Benefit</h2>
+<section id="slide-org02c2c58">
+<h2 id="org02c2c58">Cost : Benefit</h2>
 <ul>
 <li>multi-step testing can be arduous and brittle
 <ul>
@@ -90,59 +68,83 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-orge956c44">
-<h2 id="orge956c44">Property-based testing</h2>
+<section id="slide-org0d7fa01">
+<h2 id="org0d7fa01">Do what we can</h2>
 <ul>
-<li>fob off the boring bits</li>
-<li>frustratingly thorough</li>
-<li>staggeringly useful</li>
+<li>write unit tests</li>
+
+</ul>
+<div class="org-src-container">
+
+<pre  class="src src-haskell"><span style="color: #A6E22E;">funcB</span> <span style="color: #E6DB74;">"fred"</span>  <span style="color: #FD971F;">==</span> <span style="color: #66D9EF;">TunaSalad</span>
+<span style="color: #A6E22E;">funcB</span> <span style="color: #E6DB74;">"sally"</span> <span style="color: #FD971F;">==</span> <span style="color: #66D9EF;">HalfChicken</span> <span style="color: #66D9EF;">ExtraHot</span>
+</pre>
+</div>
+<ul>
+<li>subcontract end users to suggest regression tests</li>
 
 </ul>
 
 </section>
 </section>
 <section>
-<section id="slide-orgfcdd8bc">
-<h2 id="orgfcdd8bc">Property-based state machine testing</h2>
+<section id="slide-orge41b30a">
+<h2 id="orge41b30a">Property-based testing</h2>
+<ul>
+<li>randomised input generation: <code>generateText</code></li>
+<li>shrinking</li>
+<li>awesome design tool: <code>generateUsername</code></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org2d42862">
+<h2 id="org2d42862">Property-based state machine testing</h2>
 <p>
 Property-based testing, lifted to the level of <b>application behaviour</b>.
 </p>
 
 </section>
-<section id="slide-orgbb61492">
-<h3 id="orgbb61492">Generate workflows</h3>
+<section id="slide-orgd7714b3">
+<h3 id="orgd7714b3">Generate structured inputs</h3>
 <p>
-define individual steps, let the package shuffle them into randomised workflows.
+randomised inputs for actions
 </p>
 
 </section>
-<section id="slide-org09a7871">
-<h3 id="org09a7871">Generate structured inputs</h3>
+<section id="slide-orgfa049ee">
+<h3 id="orgfa049ee">Generate workflows</h3>
 <p>
-create useful randomised inputs for actions
+define individual steps, let the package generate workflows.
 </p>
 
 </section>
-<section id="slide-org1269f76">
-<h3 id="org1269f76">Shrinking (OMG!)</h3>
+<section id="slide-orgeb36861">
+<h3 id="orgeb36861">Shrinking (OMG!)</h3>
 <p>
-you thought shrinking inputs was cool&#x2026;
+you thought shrinking was cool before&#x2026;
 </p>
 
 </section>
-<section id="slide-org7a8b57e">
-<h3 id="org7a8b57e">Useful feedback</h3>
+<section id="slide-orge62d02d">
+<h3 id="orge62d02d">Useful feedback</h3>
+<p>
+a failure will produce:
+</p>
 <ul>
-<li>test failure provides the list of actions and their respective inputs</li>
-<li>the random seed is provided for reproducibility</li>
+<li>list of actions</li>
+<li>their respective inputs</li>
+<li>random seed</li>
 
 </ul>
 
 </section>
 </section>
 <section>
-<section id="slide-org8638a01">
-<h2 id="org8638a01">OMG</h2>
+<section id="slide-org714b841">
+<h2 id="org714b841">OMG</h2>
 <p>
 Right?
 </p>
@@ -150,23 +152,20 @@ Right?
 </section>
 </section>
 <section>
-<section id="slide-org68e707c">
-<h2 id="org68e707c">How?! Tell meeeee!</h2>
-<div class="outline-text-2" id="text-org68e707c">
+<section id="slide-orgf98d6e1">
+<h2 id="orgf98d6e1">Moving parts</h2>
+<div class="outline-text-2" id="text-orgf98d6e1">
 </div>
 </section>
-<section id="slide-orge41c2b9">
-<h3 id="orge41c2b9">Model</h3>
+<section id="slide-org416c3c3">
+<h3 id="org416c3c3">Model</h3>
 <p>
-expectations/awareness regarding the 'state' of the world
+track expectations/awareness regarding the 'state' of the world
 </p>
 
 </section>
-<section id="slide-org0f521f4">
-<h3 id="org0f521f4">Command</h3>
-<p>
-Represents the <i>transitions</i> not the states.
-</p>
+<section id="slide-org2857091">
+<h3 id="org2857091">Command</h3>
 <ul>
 <li>pre &amp; post conditions</li>
 <li>input generator</li>
@@ -174,19 +173,13 @@ Represents the <i>transitions</i> not the states.
 <li>model update function</li>
 
 </ul>
-
-</section>
-</section>
-<section>
-<section id="slide-org52f0005">
-<h2 id="org52f0005">There be dangers</h2>
 <p>
-there is the risk of writing a terrible duplicate of what you're testing
+Represents the <i>transitions</i> not the states.
 </p>
 
 </section>
-<section id="slide-org2cb684b">
-<h3 id="org2cb684b">Given</h3>
+<section id="slide-orgd2d8c71">
+<h3 id="orgd2d8c71">Given</h3>
 
 <div class="figure">
 <p><img src="./images/mach.png" alt="mach.png" />
@@ -194,8 +187,8 @@ there is the risk of writing a terrible duplicate of what you're testing
 </div>
 
 </section>
-<section id="slide-orgd9ededd">
-<h3 id="orgd9ededd">Test this</h3>
+<section id="slide-org58531bf">
+<h3 id="org58531bf">Test this</h3>
 
 <div class="figure">
 <p><img src="./images/mach_transitions.png" alt="mach_transitions.png" />
@@ -203,8 +196,8 @@ there is the risk of writing a terrible duplicate of what you're testing
 </div>
 
 </section>
-<section id="slide-orgc513ab7">
-<h3 id="orgc513ab7">Not this</h3>
+<section id="slide-orga64ad04">
+<h3 id="orga64ad04">Not this</h3>
 
 <div class="figure">
 <p><img src="./images/mach_states.png" alt="mach_states.png" />
@@ -212,14 +205,10 @@ there is the risk of writing a terrible duplicate of what you're testing
 </div>
 
 </section>
-<section id="slide-org025d7e5">
-<h3 id="org025d7e5">must maintain minimal model</h3>
-
-</section>
 </section>
 <section>
-<section id="slide-orgf09c9d3">
-<h2 id="orgf09c9d3">Machines that grow</h2>
+<section id="slide-org2b43696">
+<h2 id="org2b43696">Machines that grow</h2>
 <p>
 new feature ~ new Command(s)
 </p>
@@ -227,28 +216,28 @@ new feature ~ new Command(s)
 </section>
 </section>
 <section>
-<section id="slide-org0fcdf50">
-<h2 id="org0fcdf50">Some cool examples of applications of state-machine testing</h2>
+<section id="slide-org6f303e3">
+<h2 id="org6f303e3">Some cool examples</h2>
 <ul>
-<li>direct ((our)coffee machine/turnstile)</li>
-<li>external (wordpress, levelDB)</li>
+<li>wordpress API (tiny bit of it)</li>
+<li>levelDB</li>
 
 </ul>
 
 </section>
 </section>
 <section>
-<section id="slide-org7130563">
-<h2 id="org7130563">Come to the workshop!</h2>
+<section id="slide-orga858c5a">
+<h2 id="orga858c5a">Come to the workshop!</h2>
 <p>
-Discover interesting and fascinating state machines, and test them.
+Learn the weirding way!
 </p>
 
 </section>
 </section>
 <section>
-<section id="slide-org8409da7">
-<h2 id="org8409da7">Bonus Round</h2>
+<section id="slide-org5849b10">
+<h2 id="org5849b10">Bonus Round</h2>
 <p>
 Use classification to understand your test-case distribution
 </p>
@@ -256,6 +245,35 @@ Use classification to understand your test-case distribution
 <li>John Hughes: Building on developer intuitions
 <ul>
 <li><a href="https://www.youtube.com/watch?v=NcJOiQlzlXQ">https://www.youtube.com/watch?v=NcJOiQlzlXQ</a></li>
+
+</ul></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org065251e">
+<h2 id="org065251e">References</h2>
+<ul>
+<li>LevelDB example
+<ul>
+<li><a href="https://github.com/strangeloop/lambdajam2013/blob/master/slides/Norton-QuickCheck.html">https://github.com/strangeloop/lambdajam2013/blob/master/slides/Norton-QuickCheck.html</a></li>
+
+</ul></li>
+<li>Wordpress example
+<ul>
+<li><a href="http://qfpl.io/posts/intro-to-state-machine-testing-1/">http://qfpl.io/posts/intro-to-state-machine-testing-1/</a></li>
+
+</ul></li>
+<li>Turnstile
+<ul>
+<li><a href="https://teh.id.au/posts/2017/07/15/state-machine-testing/index.html">https://teh.id.au/posts/2017/07/15/state-machine-testing/index.html</a></li>
+
+</ul></li>
+<li>Water Jug Puzzle
+<ul>
+<li><a href="http://nchammas.com/writing/how-not-to-die-hard-with-hypothesis">http://nchammas.com/writing/how-not-to-die-hard-with-hypothesis</a></li>
 
 </ul></li>
 

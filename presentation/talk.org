@@ -1,5 +1,6 @@
 #+REVEAL_ROOT: https://cdn.jsdelivr.net/reveal.js/3.0.0/
-#+OPTIONS: reveal_title_slide:"<h1>%t</h1><h2>%a</h2><h4>Queensland&nbsp;Functional&nbsp;Programming&nbsp;Lab</h4><h3>%e</h3>"
+#+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%a</h2><h4>Queensland&nbsp;Functional&nbsp;Programming&nbsp;Lab</h4><h3>%e</h3>
+
 #+OPTIONS: num:nil
 #+OPTIONS: toc:nil
 
@@ -7,22 +8,13 @@
 #+AUTHOR: Sean Chalmers, Jack Kelly
 #+EMAIL:
 
-* Come to the workshop!
-  Discover interesting and fascinating state machines, and test them.
-
 * Programs are weird
   Complex, Dependent, Interactive, Insidious
 
 * Testing weird is hard
   - manual testing? [cries in Quality Assurance]
-  - which processes/use cases do you test?
+  - which processes do you test?
   - test for failure?
-
-* Do what we can
-  - unit tests 
-  - maybe test functions that use other functions
-  - test 'expected' use
-  - subcontract end users to suggest regression tests
 
 * Cost : Benefit
   - multi-step testing can be arduous and brittle
@@ -30,44 +22,51 @@
     - coverage
     - new feature? have fun!
 
+* Do what we can
+  - write unit tests
+  #+BEGIN_SRC haskell
+    funcB "fred"  == TunaSalad
+    funcB "sally" == HalfChicken ExtraHot
+  #+END_SRC
+  - subcontract end users to suggest regression tests
+
 * Property-based testing
-  - fob off the boring bits
-  - frustratingly thorough
-  - staggeringly useful
+  - randomised input generation: ~generateText~
+  - shrinking
+  - awesome design tool: ~generateUsername~
 
 * Property-based state machine testing
   Property-based testing, lifted to the level of *application behaviour*.
+  
+** Generate structured inputs
+   randomised inputs for actions
 
 ** Generate workflows
-   define individual steps, let the package shuffle them into randomised workflows.
-
-** Generate structured inputs
-   create useful randomised inputs for actions
+   define individual steps, let the package generate workflows.
 
 ** Shrinking (OMG!)
-   you thought shrinking inputs was cool...
+   you thought shrinking was cool before...
 
 ** Useful feedback
-   - test failure provides the list of actions and their respective inputs
-   - the random seed is provided for reproducibility
+   a failure will produce:
+   - list of actions
+   - their respective inputs
+   - random seed
 
 * OMG
   Right?
 
-* How?! Tell meeeee!
+* Moving parts
 
 ** Model
-   expectations/awareness regarding the 'state' of the world
+   track expectations/awareness regarding the 'state' of the world
 
 ** Command
-   Represents the /transitions/ not the states.
    - pre & post conditions
    - input generator
    - action executor
    - model update function
-
-* There be dangers
-  there is the risk of writing a terrible duplicate of what you're testing
+   Represents the /transitions/ not the states.
 
 ** Given
    [[./images/mach.png]]
@@ -78,19 +77,27 @@
 ** Not this
    [[./images/mach_states.png]]
 
-** must maintain minimal model
- 
 * Machines that grow
   new feature ~ new Command(s)
 
-* Some cool examples of applications of state-machine testing
-  - direct ((our)coffee machine/turnstile)
-  - external (wordpress, levelDB)
+* Some cool examples
+  - wordpress API (tiny bit of it)
+  - levelDB
 
 * Come to the workshop!
-  Discover interesting and fascinating state machines, and test them.
+  Learn the weirding way!
 
 * Bonus Round
  Use classification to understand your test-case distribution
  - John Hughes: Building on developer intuitions
    - https://www.youtube.com/watch?v=NcJOiQlzlXQ
+  
+* References
+  - LevelDB example
+    - https://github.com/strangeloop/lambdajam2013/blob/master/slides/Norton-QuickCheck.html
+  - Wordpress example
+    - http://qfpl.io/posts/intro-to-state-machine-testing-1/
+  - Turnstile
+    - https://teh.id.au/posts/2017/07/15/state-machine-testing/index.html
+  - Water Jug Puzzle
+    - http://nchammas.com/writing/how-not-to-die-hard-with-hypothesis
