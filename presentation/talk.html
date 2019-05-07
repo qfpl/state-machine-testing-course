@@ -31,8 +31,8 @@
 </section>
 
 <section>
-<section id="slide-org2178a24">
-<h2 id="org2178a24">Programs are weird</h2>
+<section id="slide-org62d0cc7">
+<h2 id="org62d0cc7">Programs are weird</h2>
 <p>
 Complex, Dependent, Interactive, Insidious
 </p>
@@ -40,8 +40,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org9f28b75">
-<h2 id="org9f28b75">Testing weird is hard</h2>
+<section id="slide-orge910153">
+<h2 id="orge910153">Testing weird is hard</h2>
 <ul>
 <li>manual testing? [cries in Quality Assurance]</li>
 <li>which processes do you test?</li>
@@ -52,8 +52,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org02c2c58">
-<h2 id="org02c2c58">Cost : Benefit</h2>
+<section id="slide-orgca11836">
+<h2 id="orgca11836">Cost : Benefit</h2>
 <ul>
 <li>multi-step testing can be arduous and brittle
 <ul>
@@ -68,8 +68,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org0d7fa01">
-<h2 id="org0d7fa01">Do what we can</h2>
+<section id="slide-orgda88303">
+<h2 id="orgda88303">Do what we can</h2>
 <ul>
 <li>write unit tests</li>
 
@@ -88,8 +88,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-orge41b30a">
-<h2 id="orge41b30a">Property-based testing</h2>
+<section id="slide-org7e7dcd7">
+<h2 id="org7e7dcd7">Property-based testing</h2>
 <ul>
 <li>randomised input generation: <code>generateText</code></li>
 <li>shrinking</li>
@@ -100,51 +100,51 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org2d42862">
-<h2 id="org2d42862">Property-based state machine testing</h2>
+<section id="slide-org10a6c4e">
+<h2 id="org10a6c4e">Property-based state machine testing</h2>
 <p>
 Property-based testing, lifted to the level of <b>application behaviour</b>.
 </p>
 
 </section>
-<section id="slide-orgd7714b3">
-<h3 id="orgd7714b3">Generate structured inputs</h3>
+<section id="slide-org6e1e060">
+<h3 id="org6e1e060">Generate structured inputs</h3>
 <p>
 randomised inputs for actions
 </p>
 
 </section>
-<section id="slide-orgfa049ee">
-<h3 id="orgfa049ee">Generate workflows</h3>
+<section id="slide-orgfede106">
+<h3 id="orgfede106">Generate workflows</h3>
 <p>
-define individual steps, let the package generate workflows.
+define actions independently, let the package generate workflows
 </p>
 
 </section>
-<section id="slide-orgeb36861">
-<h3 id="orgeb36861">Shrinking (OMG!)</h3>
+<section id="slide-org6ec786a">
+<h3 id="org6ec786a">Shrinking (OMG!)</h3>
 <p>
 you thought shrinking was cool before&#x2026;
 </p>
 
 </section>
-<section id="slide-orge62d02d">
-<h3 id="orge62d02d">Useful feedback</h3>
+<section id="slide-org63fda7e">
+<h3 id="org63fda7e">Useful feedback</h3>
 <p>
 a failure will produce:
 </p>
 <ul>
 <li>list of actions</li>
 <li>their respective inputs</li>
-<li>random seed</li>
+<li>the random seed responsible</li>
 
 </ul>
 
 </section>
 </section>
 <section>
-<section id="slide-org714b841">
-<h2 id="org714b841">OMG</h2>
+<section id="slide-orgc36ec5a">
+<h2 id="orgc36ec5a">OMG</h2>
 <p>
 Right?
 </p>
@@ -152,20 +152,20 @@ Right?
 </section>
 </section>
 <section>
-<section id="slide-orgf98d6e1">
-<h2 id="orgf98d6e1">Moving parts</h2>
-<div class="outline-text-2" id="text-orgf98d6e1">
+<section id="slide-org826940a">
+<h2 id="org826940a">Moving parts</h2>
+<div class="outline-text-2" id="text-org826940a">
 </div>
 </section>
-<section id="slide-org416c3c3">
-<h3 id="org416c3c3">Model</h3>
+<section id="slide-orgeaabd09">
+<h3 id="orgeaabd09">Model</h3>
 <p>
 track expectations/awareness regarding the 'state' of the world
 </p>
 
 </section>
-<section id="slide-org2857091">
-<h3 id="org2857091">Command</h3>
+<section id="slide-orgad63791">
+<h3 id="orgad63791">Command</h3>
 <ul>
 <li>pre &amp; post conditions</li>
 <li>input generator</li>
@@ -178,8 +178,8 @@ Represents the <i>transitions</i> not the states.
 </p>
 
 </section>
-<section id="slide-orgd2d8c71">
-<h3 id="orgd2d8c71">Given</h3>
+<section id="slide-orgbfa1021">
+<h3 id="orgbfa1021">Given</h3>
 
 <div class="figure">
 <p><img src="./images/mach.png" alt="mach.png" />
@@ -187,8 +187,8 @@ Represents the <i>transitions</i> not the states.
 </div>
 
 </section>
-<section id="slide-org58531bf">
-<h3 id="org58531bf">Test this</h3>
+<section id="slide-orge0bd991">
+<h3 id="orge0bd991">Test this</h3>
 
 <div class="figure">
 <p><img src="./images/mach_transitions.png" alt="mach_transitions.png" />
@@ -196,8 +196,8 @@ Represents the <i>transitions</i> not the states.
 </div>
 
 </section>
-<section id="slide-orga64ad04">
-<h3 id="orga64ad04">Not this</h3>
+<section id="slide-orgacf0837">
+<h3 id="orgacf0837">Not this</h3>
 
 <div class="figure">
 <p><img src="./images/mach_states.png" alt="mach_states.png" />
@@ -207,8 +207,8 @@ Represents the <i>transitions</i> not the states.
 </section>
 </section>
 <section>
-<section id="slide-org2b43696">
-<h2 id="org2b43696">Machines that grow</h2>
+<section id="slide-orgf779c45">
+<h2 id="orgf779c45">Machines that grow</h2>
 <p>
 new feature ~ new Command(s)
 </p>
@@ -216,8 +216,8 @@ new feature ~ new Command(s)
 </section>
 </section>
 <section>
-<section id="slide-org6f303e3">
-<h2 id="org6f303e3">Some cool examples</h2>
+<section id="slide-org59fd2fa">
+<h2 id="org59fd2fa">Some cool examples</h2>
 <ul>
 <li>wordpress API (tiny bit of it)</li>
 <li>levelDB</li>
@@ -227,8 +227,8 @@ new feature ~ new Command(s)
 </section>
 </section>
 <section>
-<section id="slide-orga858c5a">
-<h2 id="orga858c5a">Come to the workshop!</h2>
+<section id="slide-org5300504">
+<h2 id="org5300504">Come to the workshop!</h2>
 <p>
 Learn the weirding way!
 </p>
@@ -236,8 +236,8 @@ Learn the weirding way!
 </section>
 </section>
 <section>
-<section id="slide-org5849b10">
-<h2 id="org5849b10">Bonus Round</h2>
+<section id="slide-orgc49c579">
+<h2 id="orgc49c579">Bonus Round</h2>
 <p>
 Use classification to understand your test-case distribution
 </p>
@@ -253,8 +253,8 @@ Use classification to understand your test-case distribution
 </section>
 </section>
 <section>
-<section id="slide-org065251e">
-<h2 id="org065251e">References</h2>
+<section id="slide-org3d7ab13">
+<h2 id="org3d7ab13">References</h2>
 <ul>
 <li>LevelDB example
 <ul>

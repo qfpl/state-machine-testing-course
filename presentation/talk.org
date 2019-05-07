@@ -42,7 +42,7 @@
    randomised inputs for actions
 
 ** Generate workflows
-   define individual steps, let the package generate workflows.
+   define actions independently, let the package generate workflows
 
 ** Shrinking (OMG!)
    you thought shrinking was cool before...
@@ -51,7 +51,7 @@
    a failure will produce:
    - list of actions
    - their respective inputs
-   - random seed
+   - the random seed responsible
 
 * OMG
   Right?
