@@ -31,8 +31,8 @@
 </section>
 
 <section>
-<section id="slide-org62d0cc7">
-<h2 id="org62d0cc7">Programs are weird</h2>
+<section id="slide-org6477f8e">
+<h2 id="org6477f8e">Programs are weird</h2>
 <p>
 Complex, Dependent, Interactive, Insidious
 </p>
@@ -40,8 +40,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-orge910153">
-<h2 id="orge910153">Testing weird is hard</h2>
+<section id="slide-org2825d78">
+<h2 id="org2825d78">Testing weird is hard</h2>
 <ul>
 <li>manual testing? [cries in Quality Assurance]</li>
 <li>which processes do you test?</li>
@@ -52,8 +52,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-orgca11836">
-<h2 id="orgca11836">Cost : Benefit</h2>
+<section id="slide-orgb6fdaf4">
+<h2 id="orgb6fdaf4">Cost : Benefit</h2>
 <ul>
 <li>multi-step testing can be arduous and brittle
 <ul>
@@ -68,16 +68,16 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-orgda88303">
-<h2 id="orgda88303">Do what we can</h2>
+<section id="slide-org280c91f">
+<h2 id="org280c91f">Do what we can</h2>
 <ul>
 <li>write unit tests</li>
 
 </ul>
 <div class="org-src-container">
 
-<pre  class="src src-haskell"><span style="color: #A6E22E;">funcB</span> <span style="color: #E6DB74;">"fred"</span>  <span style="color: #FD971F;">==</span> <span style="color: #66D9EF;">TunaSalad</span>
-<span style="color: #A6E22E;">funcB</span> <span style="color: #E6DB74;">"sally"</span> <span style="color: #FD971F;">==</span> <span style="color: #66D9EF;">HalfChicken</span> <span style="color: #66D9EF;">ExtraHot</span>
+<pre  class="src src-haskell"><span style="color: #A6E22E;">getLunchFor</span> <span style="color: #E6DB74;">"fred"</span>  <span style="color: #FD971F;">==</span> <span style="color: #66D9EF;">TunaSalad</span>
+<span style="color: #A6E22E;">getLunchFor</span> <span style="color: #E6DB74;">"sally"</span> <span style="color: #FD971F;">==</span> <span style="color: #66D9EF;">HalfChicken</span> <span style="color: #66D9EF;">ExtraHot</span>
 </pre>
 </div>
 <ul>
@@ -88,48 +88,52 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org7e7dcd7">
-<h2 id="org7e7dcd7">Property-based testing</h2>
+<section id="slide-orgab8388d">
+<h2 id="orgab8388d">Property-based testing</h2>
 <ul>
-<li>randomised input generation: <code>generateText</code></li>
+<li>randomised input generation</li>
 <li>shrinking</li>
-<li>awesome design tool: <code>generateUsername</code></li>
+<li>awesome design tool
+<ul>
+<li><code>generateText</code> becomes <code>generateUsername</code></li>
+
+</ul></li>
 
 </ul>
 
 </section>
 </section>
 <section>
-<section id="slide-org10a6c4e">
-<h2 id="org10a6c4e">Property-based state machine testing</h2>
+<section id="slide-org710a665">
+<h2 id="org710a665">Property-based state machine testing</h2>
 <p>
 Property-based testing, lifted to the level of <b>application behaviour</b>.
 </p>
 
 </section>
-<section id="slide-org6e1e060">
-<h3 id="org6e1e060">Generate structured inputs</h3>
+<section id="slide-org0259f5a">
+<h3 id="org0259f5a">Generate structured inputs</h3>
 <p>
 randomised inputs for actions
 </p>
 
 </section>
-<section id="slide-orgfede106">
-<h3 id="orgfede106">Generate workflows</h3>
+<section id="slide-orgd841808">
+<h3 id="orgd841808">Generate workflows</h3>
 <p>
 define actions independently, let the package generate workflows
 </p>
 
 </section>
-<section id="slide-org6ec786a">
-<h3 id="org6ec786a">Shrinking (OMG!)</h3>
+<section id="slide-orgbda2ee9">
+<h3 id="orgbda2ee9">Shrinking (OMG!)</h3>
 <p>
 you thought shrinking was cool before&#x2026;
 </p>
 
 </section>
-<section id="slide-org63fda7e">
-<h3 id="org63fda7e">Useful feedback</h3>
+<section id="slide-org3295342">
+<h3 id="org3295342">Useful feedback</h3>
 <p>
 a failure will produce:
 </p>
@@ -143,8 +147,8 @@ a failure will produce:
 </section>
 </section>
 <section>
-<section id="slide-orgc36ec5a">
-<h2 id="orgc36ec5a">OMG</h2>
+<section id="slide-org50aa70b">
+<h2 id="org50aa70b">OMG</h2>
 <p>
 Right?
 </p>
@@ -152,20 +156,20 @@ Right?
 </section>
 </section>
 <section>
-<section id="slide-org826940a">
-<h2 id="org826940a">Moving parts</h2>
-<div class="outline-text-2" id="text-org826940a">
+<section id="slide-org62f7a49">
+<h2 id="org62f7a49">Moving parts</h2>
+<div class="outline-text-2" id="text-org62f7a49">
 </div>
 </section>
-<section id="slide-orgeaabd09">
-<h3 id="orgeaabd09">Model</h3>
+<section id="slide-orga2f7a98">
+<h3 id="orga2f7a98">Model</h3>
 <p>
 track expectations/awareness regarding the 'state' of the world
 </p>
 
 </section>
-<section id="slide-orgad63791">
-<h3 id="orgad63791">Command</h3>
+<section id="slide-orgfcfa82a">
+<h3 id="orgfcfa82a">Command</h3>
 <ul>
 <li>pre &amp; post conditions</li>
 <li>input generator</li>
@@ -178,8 +182,8 @@ Represents the <i>transitions</i> not the states.
 </p>
 
 </section>
-<section id="slide-orgbfa1021">
-<h3 id="orgbfa1021">Given</h3>
+<section id="slide-orgf995d1f">
+<h3 id="orgf995d1f">Given</h3>
 
 <div class="figure">
 <p><img src="./images/mach.png" alt="mach.png" />
@@ -187,8 +191,8 @@ Represents the <i>transitions</i> not the states.
 </div>
 
 </section>
-<section id="slide-orge0bd991">
-<h3 id="orge0bd991">Test this</h3>
+<section id="slide-orgf957e47">
+<h3 id="orgf957e47">Test this</h3>
 
 <div class="figure">
 <p><img src="./images/mach_transitions.png" alt="mach_transitions.png" />
@@ -196,8 +200,8 @@ Represents the <i>transitions</i> not the states.
 </div>
 
 </section>
-<section id="slide-orgacf0837">
-<h3 id="orgacf0837">Not this</h3>
+<section id="slide-org3ba28b1">
+<h3 id="org3ba28b1">Not this</h3>
 
 <div class="figure">
 <p><img src="./images/mach_states.png" alt="mach_states.png" />
@@ -207,8 +211,8 @@ Represents the <i>transitions</i> not the states.
 </section>
 </section>
 <section>
-<section id="slide-orgf779c45">
-<h2 id="orgf779c45">Machines that grow</h2>
+<section id="slide-org076f068">
+<h2 id="org076f068">Machines that grow</h2>
 <p>
 new feature ~ new Command(s)
 </p>
@@ -216,19 +220,19 @@ new feature ~ new Command(s)
 </section>
 </section>
 <section>
-<section id="slide-org59fd2fa">
-<h2 id="org59fd2fa">Some cool examples</h2>
+<section id="slide-org434cbe2">
+<h2 id="org434cbe2">Examples?</h2>
 <ul>
-<li>wordpress API (tiny bit of it)</li>
-<li>levelDB</li>
+<li>Wordpress API (a tiny bit of it)</li>
+<li>LevelDB</li>
 
 </ul>
 
 </section>
 </section>
 <section>
-<section id="slide-org5300504">
-<h2 id="org5300504">Come to the workshop!</h2>
+<section id="slide-org37b30e0">
+<h2 id="org37b30e0">Come to the workshop!</h2>
 <p>
 Learn the weirding way!
 </p>
@@ -236,8 +240,8 @@ Learn the weirding way!
 </section>
 </section>
 <section>
-<section id="slide-orgc49c579">
-<h2 id="orgc49c579">Bonus Round</h2>
+<section id="slide-orge66a1ee">
+<h2 id="orge66a1ee">Bonus Round</h2>
 <p>
 Use classification to understand your test-case distribution
 </p>
@@ -253,8 +257,8 @@ Use classification to understand your test-case distribution
 </section>
 </section>
 <section>
-<section id="slide-org3d7ab13">
-<h2 id="org3d7ab13">References</h2>
+<section id="slide-org27204ae">
+<h2 id="org27204ae">References</h2>
 <ul>
 <li>LevelDB example
 <ul>

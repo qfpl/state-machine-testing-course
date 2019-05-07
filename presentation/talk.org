@@ -25,15 +25,16 @@
 * Do what we can
   - write unit tests
   #+BEGIN_SRC haskell
-    funcB "fred"  == TunaSalad
-    funcB "sally" == HalfChicken ExtraHot
+    getLunchFor "fred"  == TunaSalad
+    getLunchFor "sally" == HalfChicken ExtraHot
   #+END_SRC
   - subcontract end users to suggest regression tests
 
 * Property-based testing
-  - randomised input generation: ~generateText~
+  - randomised input generation
   - shrinking
-  - awesome design tool: ~generateUsername~
+  - awesome design tool
+    - ~generateText~ becomes ~generateUsername~
 
 * Property-based state machine testing
   Property-based testing, lifted to the level of *application behaviour*.
@@ -80,9 +81,9 @@
 * Machines that grow
   new feature ~ new Command(s)
 
-* Some cool examples
-  - wordpress API (tiny bit of it)
-  - levelDB
+* Examples?
+  - Wordpress API (a tiny bit of it)
+  - LevelDB
 
 * Come to the workshop!
   Learn the weirding way!
