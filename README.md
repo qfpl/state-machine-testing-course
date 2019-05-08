@@ -60,4 +60,4 @@ a course about testing, each level is a separate `test-suite` in the
 2. `Require` & Pre-conditions
 3. More Commands
 4. Positive & Negative Testing
-5. Phases and growing models
+5. Lensy Models
