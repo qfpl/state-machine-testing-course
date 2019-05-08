@@ -23,18 +23,19 @@
     - new feature? have fun!
 
 * Do what we can
-  - write unit tests
+  - eat the cost for some big things
+  - write unit tests for some small things
   #+BEGIN_SRC haskell
-    getLunchFor "fred"  == TunaSalad
-    getLunchFor "sally" == HalfChicken ExtraHot
+    getLunch "fishy" == TunaSalad
+    getLunch "spicy" == HalfChicken ExtraHot
   #+END_SRC
   - subcontract end users to suggest regression tests
 
-* Property-based testing
-  - randomised input generation
+* Property-based awesome
+  - unleash the power of: $\forall$
   - shrinking
-  - awesome design tool
-    - ~generateText~ becomes ~generateUsername~
+  - powerful design tool
+    - =forAll text= becomes =forAll lunchType=
 
 * Property-based state machine testing
   Property-based testing, lifted to the level of *application behaviour*.
@@ -50,7 +51,7 @@
 
 ** Useful feedback
    a failure will produce:
-   - list of actions
+   - the sequence of actions
    - their respective inputs
    - the random seed responsible
 
@@ -64,10 +65,10 @@
 
 ** Command
    - pre & post conditions
-   - input generator
-   - action executor
+   - generator
+   - executor
    - model update function
-   Represents the /transitions/ not the states.
+   Represents the /transitions/, not the states.
 
 ** Given
    [[./images/mach.png]]
@@ -87,6 +88,7 @@
 
 * Come to the workshop!
   Learn the weirding way!
+  - https://github.com/qfpl/state-machine-testing-course/
 
 * Bonus Round
  Use classification to understand your test-case distribution
