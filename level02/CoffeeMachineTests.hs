@@ -7,7 +7,6 @@ import qualified CoffeeMachine as C
 import           Control.Lens (view)
 import           Control.Monad.IO.Class (MonadIO)
 import           Data.Kind (Type)
-import           Data.Maybe (isJust)
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
