@@ -12,7 +12,7 @@
   Complex, Dependent, Interactive, Insidious
 
 * Testing weird is hard
-  - manual testing? [cries in Quality Assurance]
+  - manual testing? =[cries in Quality Assurance]=
   - which processes do you test?
   - test for failure?
 
