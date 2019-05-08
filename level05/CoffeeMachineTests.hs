@@ -4,14 +4,13 @@
 
 module CoffeeMachineTests (stateMachineTests) where
 
+import           Data.Kind              (Type)
 import qualified CoffeeMachine          as C
-import           Control.Lens           (failing, makeLenses, view, _Just)
+import           Control.Lens           (Lens', failing, makeLenses, to, view)
 import           Control.Lens.Extras    (is)
 import           Control.Lens.Operators
-import           Control.Monad          (void)
 import           Control.Monad.IO.Class (MonadIO)
 import           Data.Function          ((&))
-import           Data.Kind              (Type)
 import           Data.Maybe             (isJust)
 import           Hedgehog
 import qualified Hedgehog.Gen           as Gen
@@ -19,73 +18,58 @@ import qualified Hedgehog.Range         as Range
 import           Test.Tasty             (TestTree)
 import           Test.Tasty.Hedgehog    (testProperty)
 
-data DrinkType
-  = Coffee
-  | HotChocolate
-  | Tea
-  deriving (Bounded, Enum, Show, Eq)
-
-data DrinkAdditive
-  = Milk
-  | Sugar
-  deriving (Bounded, Enum, Show)
+data DrinkType = Coffee | HotChocolate | Tea deriving (Bounded, Enum, Show, Eq)
+data DrinkAdditive = Milk | Sugar deriving (Bounded, Enum, Show)
 
 drinkAdditive :: a -> a -> DrinkAdditive -> a
 drinkAdditive m _ Milk  = m
 drinkAdditive _ s Sugar = s
 
-data MugStatus
-  = Empty
-  | Full
-  deriving (Eq, Show)
-
--- You'll want to add this to the 'Model', probably as a 'Maybe
--- Credit', so that 'Nothing' means "it's unknown whether we have
--- enough credit".
-data Credit
-  = TooLittle
-  | Enough
-  deriving (Eq, Show)
-
 data Model (v :: Type -> Type) = Model
-  { _modelDrinkType        :: DrinkType
-  , _modelMug              :: Maybe MugStatus
-  , _modelMilk             :: Int
-  , _modelSugar            :: Int
-  , _modelCoins            :: Int
-  , _modelDrinkCost        :: Maybe Int
-  , _modelHasDispensed     :: Bool
+  { _modelDrinkType :: DrinkType
+  , _modelHasMug    :: Bool
+  , _modelMilk      :: Int
+  , _modelSugar     :: Int
+  , _modelCoins     :: Int
   }
-$(makeLenses ''Model)
+--  $(makeLenses ''Model)
 
-hasMug :: Model v -> Bool
-hasMug = isJust . _modelMug
+class HasCoins (s :: (Type -> Type) -> Type) where
+  coins :: Lens' (s v) Int
 
-doesntHaveMug :: Model v -> Bool
-doesntHaveMug = not . hasMug
+instance HasCoins Model where
+  coins f m = f (_modelCoins m) <&> \x -> m { _modelCoins = x }
 
-data DispenseDrink (v :: Type -> Type) = DispenseDrink deriving Show
-instance HTraversable DispenseDrink where htraverse _ _ = pure DispenseDrink
+class HasDrinkConfig (s :: (Type -> Type) -> Type) where
+  drinkType :: Lens' (s v) DrinkType
+  milk :: Lens' (s v) Int
+  sugar :: Lens' (s v) Int
 
-data CheckCredit (v :: Type -> Type) = CheckCredit deriving Show
-instance HTraversable CheckCredit where htraverse _ _ = pure CheckCredit
+class HasMug (s :: (Type -> Type) -> Type) where
+  mug :: Lens' (s v) Bool
 
-data RefundCoins (v :: Type -> Type) = RefundCoins deriving Show
-instance HTraversable RefundCoins where htraverse _ _ = pure RefundCoins
+instance HasMug Model where
+  mug f m = f (_modelHasMug m) <&> \x -> m { _modelHasMug = x }
 
-newtype InsertCoins (v :: Type -> Type) = InsertCoins Int deriving Show
+instance HasDrinkConfig Model where
+  drinkType f m = f (_modelDrinkType m) <&> \x -> m { _modelDrinkType = x }
+  milk f m = f (_modelMilk m) <&> \x -> m { _modelMilk = x }
+  sugar f m = f (_modelSugar m) <&> \x -> m { _modelSugar = x }
 
-instance HTraversable InsertCoins where
-  htraverse _ (InsertCoins n) = pure (InsertCoins n)
+newtype SetDrinkType (v :: Type -> Type) = SetDrinkType DrinkType deriving Show
 
-data AddMug (v :: Type -> Type) = AddMug deriving Show
-instance HTraversable AddMug where htraverse _ _ = pure AddMug
-
+data AddMug (v :: Type -> Type)  = AddMug deriving Show
 data TakeMug (v :: Type -> Type) = TakeMug deriving Show
-instance HTraversable TakeMug where htraverse _ _ = pure TakeMug
 
 newtype AddMilkSugar (v :: Type -> Type) = AddMilkSugar DrinkAdditive deriving Show
-newtype SetDrinkType (v :: Type -> Type) = SetDrinkType DrinkType deriving Show
+newtype InsertCoins (v :: Type -> Type)  = InsertCoins Int deriving Show
+data RefundCoins (v :: Type -> Type)     = RefundCoins deriving Show
+
+instance HTraversable AddMug where
+  htraverse _ _ = pure AddMug
+
+instance HTraversable TakeMug where
+  htraverse _ _ = pure TakeMug
 
 instance HTraversable AddMilkSugar where
   htraverse _ (AddMilkSugar d) = pure $ AddMilkSugar d
@@ -93,24 +77,30 @@ instance HTraversable AddMilkSugar where
 instance HTraversable SetDrinkType where
   htraverse _ (SetDrinkType d) = pure $ SetDrinkType d
 
+instance HTraversable RefundCoins where
+  htraverse _ _ = pure RefundCoins
+
+instance HTraversable InsertCoins where
+  htraverse _ (InsertCoins n) = pure (InsertCoins n)
+
 cSetDrinkType
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasDrinkConfig s)
   => C.Machine
-  -> Command g m Model
+  -> Command g m s
 cSetDrinkType mach = Command gen exec
   [ Update $ \m (SetDrinkType d) _ -> m
-    & modelDrinkType .~ d
-    & modelMilk .~ 0
-    & modelSugar .~ 0
+    & drinkType .~ d
+    & milk .~ 0
+    & sugar .~ 0
 
-  , Ensure $ \_ m _ drink -> case (m ^. modelDrinkType, drink) of
+  , Ensure $ \_ m _ drink -> case (m ^. drinkType, drink) of
       (Coffee, C.Coffee{})           -> success
       (HotChocolate, C.HotChocolate) -> success
       (Tea, C.Tea{})                 -> success
       _                              -> failure
   ]
   where
-    gen :: Model Symbolic -> Maybe (g (SetDrinkType Symbolic))
+    gen :: s Symbolic -> Maybe (g (SetDrinkType Symbolic))
     gen _ = Just $ SetDrinkType <$> Gen.enumBounded
 
     exec :: SetDrinkType Concrete -> m C.Drink
@@ -133,198 +123,154 @@ milkOrSugarExec mach (AddMilkSugar additive) = do
   view C.drinkSetting <$> C.peek mach
 
 genAddMilkSugarCommand
-  :: MonadGen g
+  :: (MonadGen g, HasDrinkConfig s)
   => (DrinkType -> Bool)
-  -> Model Symbolic
+  -> s Symbolic
   -> Maybe (g (AddMilkSugar Symbolic))
 genAddMilkSugarCommand isDrinkType m
-  | isDrinkType (m ^. modelDrinkType) = pure $ AddMilkSugar <$> Gen.enumBounded
-  | otherwise                         = Nothing
+  | isDrinkType (m ^. drinkType) = Just (AddMilkSugar <$> Gen.enumBounded)
+  | otherwise                    = Nothing
 
 cAddMilkSugarSad
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasDrinkConfig s)
   => C.Machine
-  -> Command g m Model
+  -> Command g m s
 cAddMilkSugarSad mach = Command (genAddMilkSugarCommand (== HotChocolate)) (milkOrSugarExec mach)
-  [ Require $ \m _ ->
-      m ^. modelDrinkType == HotChocolate
+  [ Require $ \m _ -> m ^. drinkType == HotChocolate
 
   , Ensure $ \_ _ _ drink ->
       assert $ is C._HotChocolate drink
   ]
 
 cAddMilkSugarHappy
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasDrinkConfig s)
   => C.Machine
-  -> Command g m Model
+  -> Command g m s
 cAddMilkSugarHappy ref = Command (genAddMilkSugarCommand (/= HotChocolate)) (milkOrSugarExec ref)
-  [ Require $ \m _ ->
-      m ^. modelDrinkType /= HotChocolate
+  [ Require $ \m _ -> m ^. drinkType /= HotChocolate
 
-  , Update $ \m (AddMilkSugar additive) _ -> m
-      & drinkAdditive modelMilk modelSugar additive +~ 1
+  , Update $ \m (AddMilkSugar additive) _ ->
+      m & drinkAdditive milk sugar additive +~ 1
 
   , Ensure $ \_ newM _ setting ->
       let
         setMilk = setting ^?! (C._Coffee `failing` C._Tea) . C.milk
         setSugar = setting ^?! (C._Coffee `failing` C._Tea) . C.sugar
       in do
-        newM ^. modelMilk === setMilk
-        newM ^. modelSugar === setSugar
+        newM ^. milk === setMilk
+        newM ^. sugar === setSugar
   ]
 
-genAddMug :: MonadGen g => Model Symbolic -> Maybe (g (AddMug Symbolic))
-genAddMug m | doesntHaveMug m = pure $ pure AddMug
-            | otherwise       = Nothing
-
-genTakeMug :: MonadGen g => Model Symbolic -> Maybe (g (TakeMug Symbolic))
-genTakeMug m | hasMug m  = pure $ pure TakeMug
-             | otherwise = Nothing
-
 cTakeMugSad
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasMug s)
   => C.Machine
-  -> Command g m Model
-cTakeMugSad mach = Command genTakeMug exec
-  [ Require $ \m _ -> doesntHaveMug m
+  -> Command g m s
+cTakeMugSad mach = Command gen exec
+  [ Require $ \m _ -> m ^. mug . to not
   , Ensure $ \_ _ _ e -> either (=== C.NoMug) (const failure) e
   ]
   where
+    gen :: s Symbolic -> Maybe (g (TakeMug Symbolic))
+    gen m
+      | m ^. mug = Nothing
+      | otherwise = Just $ pure TakeMug
+
     exec :: TakeMug Concrete -> m (Either C.MachineError C.Mug)
     exec _ = C.takeMug mach
 
 cTakeMugHappy
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasMug s)
   => C.Machine
-  -> Command g m Model
-cTakeMugHappy mach = Command genTakeMug exec
-  [ Require $ \m _ -> hasMug m
-  , Update $ \m _ _ -> m & modelMug .~ Nothing
+  -> Command g m s
+cTakeMugHappy mach = Command gen exec
+  [ Require $ \m _ -> m ^. mug
+  , Update $ \m _ _ -> m & mug .~ False
   ]
   where
-    exec :: TakeMug Concrete -> m ()
-    exec _ = void $ C.takeMug mach >>= evalEither
+    gen :: s Symbolic -> Maybe (g (TakeMug Symbolic))
+    gen m
+      | m ^. mug = Just $ pure TakeMug
+      | otherwise = Nothing
+
+    exec :: TakeMug Concrete -> m C.Mug
+    exec _ = C.takeMug mach >>= evalEither
 
 cAddMugHappy
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasMug s)
   => C.Machine
-  -> Command g m Model
-cAddMugHappy mach = Command genAddMug exec
-  [ Require $ \m _ -> doesntHaveMug m
-  , Update $ \m _ _ -> m & modelMug ?~ Empty
+  -> Command g m s
+cAddMugHappy mach = Command gen exec
+  [ Require $ \m _ -> m ^. mug . to not
+  , Update $ \m _ _ -> m & mug .~ True
+  , Ensure $ \_ _ _ -> assert . isJust
   ]
   where
-    exec :: AddMug Concrete -> m ()
-    exec _ = C.addMug mach >>= evalEither
+    gen :: s Symbolic -> Maybe (g (AddMug Symbolic))
+    gen m
+      | m ^. mug = Nothing
+      | otherwise = Just $ pure AddMug
+
+    exec :: AddMug Concrete -> m (Maybe C.Mug)
+    exec _ = do
+      C.addMug mach >>= evalEither
+      view C.mug <$> C.peek mach
 
 cAddMugSad
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasMug s)
   => C.Machine
-  -> Command g m Model
-cAddMugSad mach = Command genAddMug exec
-  [ Require $ \m _ -> hasMug m
+  -> Command g m s
+cAddMugSad mach = Command gen exec
+  [ Require $ \m _ -> m ^. mug
   , Ensure $ \ _ _ _ res -> either (=== C.MugInTheWay) (const failure) res
   ]
   where
+    gen :: s Symbolic -> Maybe (g (AddMug Symbolic))
+    gen m
+      | m ^. mug = Just $ pure AddMug
+      | otherwise = Nothing
+
     exec :: AddMug Concrete -> m (Either C.MachineError ())
     exec _ = C.addMug mach
 
 cInsertCoins
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasCoins s)
   => C.Machine
-  -> Command g m Model
+  -> Command g m s
 cInsertCoins mach = Command gen exec
-  [ Update $ \m (InsertCoins coins) _ -> m & modelCoins +~ coins
+  [ Update $ \m (InsertCoins c) _ -> m & coins +~ c
 
-  , Ensure $ \_ newM _ currentCoins -> newM ^. modelCoins === currentCoins
+  , Ensure $ \_ newM _ currentCoins -> newM ^. coins === currentCoins
   ]
   where
-    gen :: Model Symbolic -> Maybe (g (InsertCoins Symbolic))
+    gen :: s Symbolic -> Maybe (g (InsertCoins Symbolic))
     gen _ = Just $ InsertCoins <$> Gen.int (Range.linear 0 100)
 
     exec :: InsertCoins Concrete -> m Int
-    exec (InsertCoins coins) = do
-      C.insertCoins coins mach
+    exec (InsertCoins c) = do
+      C.insertCoins c mach
       view C.coins <$> C.peek mach
 
 cRefundCoins
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasCoins s)
   => C.Machine
-  -> Command g m Model
+  -> Command g m s
 cRefundCoins mach = Command gen exec
-  [ Update $ \m _ _ -> m & modelCoins .~ 0
-  , Ensure $ \oldM _ _ refundCoins -> oldM ^. modelCoins === refundCoins
+  [ Update $ \m _ _ -> m & coins .~ 0
+
+  , Ensure $ \oldM _ _ refundCoins -> oldM ^. coins === refundCoins
   ]
   where
-    gen :: Model Symbolic -> Maybe (g (RefundCoins Symbolic))
+    gen :: s Symbolic -> Maybe (g (RefundCoins Symbolic))
     gen _ = Just $ pure RefundCoins
 
     exec :: RefundCoins Concrete -> m Int
     exec _ = C.refund mach
 
--- TODO
---
--- In this command you'll want to set the drink cost and the
--- credit-checked value, with appropriate callbacks so this command can
--- only happen once in a generated sequence.
-cCheckCredit
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => C.Machine
-  -> Command g m Model
-cCheckCredit = undefined
-
-cDispenseHappy
-  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
-  => C.Machine
-  -> Command g m Model
-cDispenseHappy mach = Command gen exec
-  [ Require $ \m _ -> okayToDispense m
-
-  , Update $ \m _ _ -> m
-    & modelCoins -~ (m ^?! modelDrinkCost . _Just)
-    & modelMug . _Just .~ Full
-    & modelHasDispensed .~ True
-
-  , Ensure $ \_ newM _ (credit, contents) -> do
-      -- Check that we have calculated the right amount of money in the machine
-      newM ^. modelCoins === credit
-
-      -- Check that the drink we got was the drink we configured
-      let
-        checkAdditives (C.MilkSugar milk sugar)
-          = (newM ^. modelMilk === milk)
-          *> (newM ^. modelSugar === sugar)
-      case contents of
-        C.HotChocolate -> newM ^. modelDrinkType === HotChocolate
-        C.Coffee additives ->
-          (newM ^. modelDrinkType === Coffee) *> checkAdditives additives
-        C.Tea additives ->
-          (newM ^. modelDrinkType === Tea) *> checkAdditives additives
-  ]
-  where
-    okayToDispense :: Model Symbolic -> Bool
-    okayToDispense m = hasMug m
-      && not (m ^. modelHasDispensed)
-      && isJust (m ^. modelDrinkCost)
-   -- && and there is enough credit
-
-    gen :: Model Symbolic -> Maybe (g (DispenseDrink Symbolic))
-    gen m = if okayToDispense m then Just $ pure DispenseDrink else Nothing
-
-    exec :: DispenseDrink Concrete -> m (Int, C.Drink)
-    exec _ = do
-      C.dispense mach >>= evalEither
-      state <- C.peek mach
-      let
-        credit = state ^. C.coins
-        Just (C.Mug (Just contents)) = state ^. C.mug
-      pure (credit, contents)
-
 stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
   mach <- C.newMachine
 
-  let initialModel = Model HotChocolate Nothing 0 0 0 Nothing False
+  let initialModel = Model HotChocolate False 0 0 0
       commands = ($ mach) <$>
         [ cSetDrinkType
         , cAddMugHappy
@@ -335,8 +281,6 @@ stateMachineTests = testProperty "State Machine Tests" . property $ do
         , cAddMilkSugarSad
         , cInsertCoins
         , cRefundCoins
-        , cCheckCredit
-        , cDispenseHappy
         ]
 
   actions <- forAll $ Gen.sequential (Range.linear 1 100) initialModel commands
