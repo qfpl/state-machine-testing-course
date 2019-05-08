@@ -45,6 +45,10 @@ class HasDrinkConfig (s :: (Type -> Type) -> Type) where
   milk :: Lens' (s v) Int
   sugar :: Lens' (s v) Int
 
+-- You will need to define the other Has... class, and instances for
+-- both. Then refactor through until your commands do not depend on a
+-- specific model type.
+
 newtype SetDrinkType (v :: Type -> Type) = SetDrinkType DrinkType deriving Show
 
 data AddMug (v :: Type -> Type)  = AddMug deriving Show
