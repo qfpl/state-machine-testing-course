@@ -1,55 +1,43 @@
-# Level 05 - Phases and Transitions
+# Level 05 - Lensy Models
 
 You may have noticed that in the process of building the model and
-various commands, we're building another state machine! This is a
-problem: our goal is to prove that the thing we're testing operates
-correctly, not duplicate it. How do we create _just enough_ of a model
-so we're able to write useful tests, without creating a crummy
-duplicate of the thing we're testing? This is where state machine
-testing becomes an art.
+various commands, we're capturing more and more information in our
+model. This can become unwieldy - each command passes a bunch of
+information around that it just doesn't care about. Records alleviate
+this somewhat, but larger test suites can have state machine tests
+across multiple model types. We want to write each command once, only
+caring about the fields that we manipulate.
 
-The goal: construct a minimal model that can still support sensible
-`Command`s. The exact details of this often depend on the thing that
-you're testing.
-
-One technique is to define `Command`s that do no work of their own,
-but instead inspect the current model and update specific values used
-by `Require` or `Ensure` callbacks in subsequent `Command`s.
-
-This style of `Command` acts as a 'transition' within the state
-machine that we're building. 'Transition `Command`s' serve to
-restrict the generated tests to valid subsets of `Command`s, by
-collecting the logic for transitions into a single location and
-setting values on the model that other `Command`s can check more
-easily.
-
-Some functions that will be useful for this level's task:
-
-### Current Credit
-
-The function for checking the cost of the current drink configuration is:
+Enter classy lenses. The basic idea is that we create a typeclass
+whose name begins with `Has`, that provides one or more useful lenses:
 
 ```haskell
-currentDrinkCost :: MonadIO m => Machine -> m Int
+class HasCoins (s :: (Type -> Type) -> Type) where
+  coins :: Lens' (s v) Int
 ```
 
-### Dispensing a drink
-
-The function for dispensing a drink is:
+We then define an instance for our `Model`:
 
 ```haskell
-dispense :: MonadIO m => Machine -> m (Either MachineError ())
+instance HasCoins Model where
+  coins f m = f (_modelCoins m) <&> \x -> m { _modelCoins = x }
 ```
 
-# Your Task
+(Aside: `lens` has a Template Haskell function called `makeClassy`
+that won't do what we want: we need a kind for `s` that is compatible
+with `Model`. `makeClassy` will also create one typeclass for the
+entire record, and a lens for each field. We want a few classes for
+different subsets of fields. It is very useful in other contexts,
+though!)
 
-Write a transition `Command` that checks whether the model has enough
-credit to dispense a drink and stores that fact in the model. Once
-that's working, update the other commands to use this extra
-information instead of repeating those checks inline.
+Once you have the classes and instances, you can refactor the commands
+to not depend on a specific `Model` type.
 
-**NB:** We deliberately provide limited written guidance on how to
-complete this exercise. Not because we're mean, but because we
-consider this a vital skill for effectively applying state machine
-testing to complex systems. Ask us if you get stuck and have struggled
-for a few minutes.
+## Your Task
+
+Define the `HasMug` typeclass. Define instances `HasDrinkConfig Model`
+and `HasMug Model`. Refactor all the commands to not depend directly
+on the `Model`, but instead access and update via classy lenses.
+
+If you have completed the task, you should be able to remove the
+`$(makeLenses ''Model)` call.
