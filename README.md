@@ -47,6 +47,8 @@ The course itself is broken apart into several levels. Because this is
 a course about testing, each level is a separate `test-suite` in the
 `.cabal` file, and its own directory.
 
+Solutions are on the `solutions` branch, one commit per level.
+
 ## Course Structure
 
 0. Setting Up
