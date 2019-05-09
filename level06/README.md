@@ -51,7 +51,15 @@ functionality in `src/CoffeeMachine.hs`:
 * `cRestorePreferences`: Given a `PreferenceToken`, restore the saved
   drink settings.
 
+Also define a `cReset` `Command`, that resets the machine. See if this
+gives you any surprising results.
+
 Set up the types so that it is impossible to fabricate a
 `PreferenceToken` that didn't come from a machine. This makes it less
 important to write positive and negative variants of the "restore
 preferences" command.
+
+If you do want to write positive and negative variants of the "restore
+preferences" command, you'll want to write a testing function that
+makes the machine generate a `PreferenceToken` that corresponds to no
+saved preference.
