@@ -3,19 +3,23 @@
 
 module CoffeeMachineTests (stateMachineTests) where
 
-import           Data.Kind              (Type)
-import qualified CoffeeMachine          as C
-import           Control.Lens           (Lens', failing, to, view)
-import           Control.Lens.Extras    (is)
+import qualified CoffeeMachine as C
+import           Control.Lens (Lens', at, failing, folded, ix, to, view)
+import           Control.Lens.Extras (is)
 import           Control.Lens.Operators
 import           Control.Monad.IO.Class (MonadIO)
-import           Data.Function          ((&))
-import           Data.Maybe             (isJust)
+import           Data.Function ((&))
+import           Data.Kind (Type)
+import           Data.Map (Map)
+import qualified Data.Map as Map
+import           Data.Maybe (isJust)
+import           Data.Set (Set)
+import qualified Data.Set as Set
 import           Hedgehog
-import qualified Hedgehog.Gen           as Gen
-import qualified Hedgehog.Range         as Range
-import           Test.Tasty             (TestTree)
-import           Test.Tasty.Hedgehog    (testProperty)
+import qualified Hedgehog.Gen as Gen
+import qualified Hedgehog.Range as Range
+import           Test.Tasty (TestTree)
+import           Test.Tasty.Hedgehog (testProperty)
 
 data DrinkType = Coffee | HotChocolate | Tea deriving (Bounded, Enum, Show, Eq)
 data DrinkAdditive = Milk | Sugar deriving (Bounded, Enum, Show)
@@ -25,12 +29,17 @@ drinkAdditive m _ Milk  = m
 drinkAdditive _ s Sugar = s
 
 data Model (v :: Type -> Type) = Model
-  { _modelDrinkType :: DrinkType
-  , _modelHasMug    :: Bool
-  , _modelMilk      :: Int
-  , _modelSugar     :: Int
-  , _modelCoins     :: Int
+  { _modelDrinkType           :: DrinkType
+  , _modelHasMug              :: Bool
+  , _modelMilk                :: Int
+  , _modelSugar               :: Int
+  , _modelSavedPreferences    :: Map (Var C.PreferenceToken v) C.Drink
+  , _modelBadPreferenceTokens :: Set (Var C.PreferenceToken v)
+  , _modelCoins               :: Int
   }
+
+initialModel :: Model v
+initialModel = Model HotChocolate False 0 0 Map.empty Set.empty 0
 
 class HasCoins (s :: (Type -> Type) -> Type) where
   coins :: Lens' (s v) Int
@@ -48,6 +57,17 @@ instance HasDrinkConfig Model where
   milk f m = f (_modelMilk m) <&> \x -> m { _modelMilk = x }
   sugar f m = f (_modelSugar m) <&> \x -> m { _modelSugar = x }
 
+class HasPreferences (s :: (Type -> Type) -> Type) where
+  savedPreferences
+    :: Lens' (s v) (Map (Var C.PreferenceToken v) C.Drink)
+  badPreferenceTokens :: Lens' (s v) (Set (Var C.PreferenceToken v))
+
+instance HasPreferences Model where
+  savedPreferences f m =
+    f (_modelSavedPreferences m) <&> \x -> m { _modelSavedPreferences = x }
+  badPreferenceTokens f m =
+    f (_modelBadPreferenceTokens m) <&> \x -> m { _modelBadPreferenceTokens = x }
+
 class HasMug (s :: (Type -> Type) -> Type) where
   mug :: Lens' (s v) Bool
 
@@ -62,6 +82,13 @@ data TakeMug (v :: Type -> Type) = TakeMug deriving Show
 newtype AddMilkSugar (v :: Type -> Type) = AddMilkSugar DrinkAdditive deriving Show
 newtype InsertCoins (v :: Type -> Type)  = InsertCoins Int deriving Show
 data RefundCoins (v :: Type -> Type)     = RefundCoins deriving Show
+
+data SavePreferences (v :: Type -> Type) = SavePreferences deriving Show
+newtype LoadPreferences (v :: Type -> Type)
+  = LoadPreferences (Var C.PreferenceToken v) deriving Show
+data BadPreferenceToken (v :: Type -> Type) = BadPreferenceToken deriving Show
+
+data Reset (v :: Type -> Type) = Reset deriving Show
 
 instance HTraversable AddMug where
   htraverse _ _ = pure AddMug
@@ -80,6 +107,18 @@ instance HTraversable RefundCoins where
 
 instance HTraversable InsertCoins where
   htraverse _ (InsertCoins n) = pure (InsertCoins n)
+
+instance HTraversable SavePreferences where
+  htraverse _ _ = pure SavePreferences
+
+instance HTraversable LoadPreferences where
+  htraverse f (LoadPreferences token) = LoadPreferences <$> htraverse f token
+
+instance HTraversable BadPreferenceToken where
+  htraverse _ _ = pure BadPreferenceToken
+
+instance HTraversable Reset where
+  htraverse _ _ = pure Reset
 
 cSetDrinkType
   :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasDrinkConfig s)
@@ -263,12 +302,127 @@ cRefundCoins mach = Command gen exec
     exec :: RefundCoins Concrete -> m Int
     exec _ = C.refund mach
 
+currentDrink :: HasDrinkConfig s => s v -> C.Drink
+currentDrink model = case model ^. drinkType of
+  Coffee -> C.Coffee $ C.MilkSugar (model ^. milk) (model ^. sugar)
+  Tea -> C.Tea $ C.MilkSugar (model ^. milk) (model ^. sugar)
+  HotChocolate -> C.HotChocolate
+
+setDrink :: HasDrinkConfig s => C.Drink -> s v -> s v
+setDrink (C.Coffee (C.MilkSugar m s))
+  = (drinkType .~ Coffee)
+  . (milk .~ m)
+  . (sugar .~ s)
+setDrink C.HotChocolate
+  = (drinkType .~ HotChocolate)
+  . (milk .~ 0)
+  . (sugar .~ 0)
+setDrink (C.Tea (C.MilkSugar m s))
+  = (drinkType .~ Tea)
+  . (milk .~ m)
+  . (sugar .~ s)
+
+cSavePreferences
+  :: forall g m s.
+     ( MonadGen g
+     , MonadTest m, MonadIO m
+     , HasDrinkConfig s, HasPreferences s
+     )
+  => C.Machine
+  -> Command g m s
+cSavePreferences mach = Command gen exec
+  [ Update $ \model _ token ->
+      model & savedPreferences . at token ?~ currentDrink model
+  ]
+  where
+    gen :: s Symbolic -> Maybe (g (SavePreferences Symbolic))
+    gen _ = Just $ pure SavePreferences
+
+    exec :: SavePreferences Concrete -> m C.PreferenceToken
+    exec _ = C.savePreferences mach
+
+cBadPreferenceToken
+  :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasPreferences s)
+  => C.Machine
+  -> Command g m s
+cBadPreferenceToken mach = Command gen exec
+  [ Update $ \model _ token ->
+      model & badPreferenceTokens %~ Set.insert token
+  ]
+  where
+    gen :: s Symbolic -> Maybe (g (BadPreferenceToken Symbolic))
+    gen _ = Just $ pure BadPreferenceToken
+
+    exec :: BadPreferenceToken Concrete -> m C.PreferenceToken
+    exec _ = C.badPreferenceToken mach
+
+cLoadPreferencesHappy
+  :: forall g m s.
+     ( MonadGen g
+     , MonadTest m, MonadIO m
+     , HasDrinkConfig s, HasPreferences s
+     )
+  => C.Machine
+  -> Command g m s
+cLoadPreferencesHappy mach = Command gen exec
+  [ Require $ \model (LoadPreferences token) ->
+      Map.member token $ model ^. savedPreferences
+  , Update $ \model (LoadPreferences token) _ ->
+      setDrink (model ^?! savedPreferences . ix token) model
+  , Ensure $ \_ newM (LoadPreferences token) drink ->
+      let
+        modelDrink = newM ^?! savedPreferences . ix token
+      in
+        modelDrink === drink
+  ]
+  where
+    gen :: s Symbolic -> Maybe (g (LoadPreferences Symbolic))
+    gen model = case model ^. savedPreferences . to Map.keys of
+      [] -> Nothing
+      tokens -> Just $ LoadPreferences <$> Gen.element tokens
+
+    exec :: LoadPreferences Concrete -> m C.Drink
+    exec (LoadPreferences token) = do
+      C.loadPreferences mach (concrete token) >>= evalEither
+      view C.drinkSetting <$> C.peek mach
+
+cLoadPreferencesSad
+  :: forall g m s. (MonadGen g, MonadTest m, MonadIO m, HasPreferences s)
+  => C.Machine
+  -> Command g m s
+cLoadPreferencesSad mach = Command gen exec
+  [ Require $ \model (LoadPreferences token) ->
+      Set.member token $ model ^. badPreferenceTokens
+  , Ensure $ \_ _ _ -> either (=== C.InvalidPreferenceToken) (const failure) 
+  ]
+  where
+    gen :: s Symbolic -> Maybe (g (LoadPreferences Symbolic))
+    gen model = case model ^.. badPreferenceTokens . folded of
+      [] -> Nothing
+      tokens -> Just $ LoadPreferences <$> Gen.element tokens
+
+    exec :: LoadPreferences Concrete -> m (Either C.MachineError ())
+    exec (LoadPreferences token) = C.loadPreferences mach $ concrete token
+
+cReset
+  :: forall g m. (MonadGen g, MonadTest m, MonadIO m)
+  => C.Machine
+  -> Command g m Model
+cReset mach = Command gen exec
+  [ Update $ \_ _ _ -> initialModel
+  ]
+  where
+    gen :: Model Symbolic -> Maybe (g (Reset Symbolic))
+    gen _ = Just $ pure Reset
+
+    exec :: Reset Concrete -> m ()
+    exec _ = C.reset mach
+
 stateMachineTests :: TestTree
 stateMachineTests = testProperty "State Machine Tests" . property $ do
   mach <- C.newMachine
 
-  let initialModel = Model HotChocolate False 0 0 0
-      commands = ($ mach) <$>
+  let commands = ($ mach) <$>
         [ cSetDrinkType
         , cAddMugHappy
         , cAddMugSad
@@ -278,6 +432,11 @@ stateMachineTests = testProperty "State Machine Tests" . property $ do
         , cAddMilkSugarSad
         , cInsertCoins
         , cRefundCoins
+        , cSavePreferences
+        , cLoadPreferencesHappy
+        , cLoadPreferencesSad
+        , cBadPreferenceToken
+        , cReset
         ]
 
   actions <- forAll $ Gen.sequential (Range.linear 1 100) initialModel commands

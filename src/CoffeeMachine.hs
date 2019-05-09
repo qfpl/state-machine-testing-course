@@ -10,6 +10,8 @@ module CoffeeMachine
   , drinkSetting
   , drinkCost
   , mug
+  , preferences
+  , nextToken
 
   , Drink(..)
   , _HotChocolate
@@ -22,6 +24,8 @@ module CoffeeMachine
 
   , MachineError(..)
   , Mug(..)
+
+  , PreferenceToken
 
   , newMachine
   , reset
@@ -41,18 +45,24 @@ module CoffeeMachine
   , addMilk
   , addSugar
 
+  , savePreferences
+  , loadPreferences
+  , badPreferenceToken
+
   , dispense
   ) where
 
-import Control.Lens (failing, use)
-import Control.Lens.Operators
-import Control.Lens.TH (makeLenses, makePrisms)
-import Control.Monad (when)
-import Control.Monad.Except (runExceptT, throwError)
-import Control.Monad.IO.Class (MonadIO(..))
-import Control.Monad.State (runState)
-import Data.IORef (IORef, atomicModifyIORef', newIORef, readIORef)
-import Data.Tuple (swap)
+import           Control.Lens (at, failing, use)
+import           Control.Lens.Operators
+import           Control.Lens.TH (makeLenses, makePrisms)
+import           Control.Monad (when)
+import           Control.Monad.Except (runExceptT, throwError)
+import           Control.Monad.IO.Class (MonadIO(..))
+import           Control.Monad.State (runState)
+import           Data.IORef (IORef, atomicModifyIORef', newIORef, readIORef)
+import           Data.Map (Map)
+import qualified Data.Map as Map
+import           Data.Tuple (swap)
 
 data MilkSugar = MilkSugar
   { _milk :: Int
@@ -70,6 +80,11 @@ data Drink
 
 $(makePrisms ''Drink)
 
+newtype PreferenceToken = PreferenceToken Int deriving (Eq, Ord, Show)
+
+next :: PreferenceToken -> PreferenceToken
+next (PreferenceToken p) = PreferenceToken $ p + 1
+
 drinkCost :: Drink -> Int
 drinkCost HotChocolate = 3
 drinkCost (Coffee (MilkSugar m s)) = 4 + m + s
@@ -81,6 +96,8 @@ data MachineState = MachineState
   { _coins :: Int
   , _drinkSetting :: Drink
   , _mug :: Maybe Mug
+  , _preferences :: Map PreferenceToken Drink
+  , _nextToken :: PreferenceToken
   } deriving Show
 
 $(makeLenses ''MachineState)
@@ -101,6 +118,8 @@ initialState = MachineState
   { _coins = 0
   , _drinkSetting = HotChocolate
   , _mug = Nothing
+  , _preferences = Map.empty
+  , _nextToken = PreferenceToken 0
   }
 
 data MachineError
@@ -108,6 +127,7 @@ data MachineError
   | NoMug
   | MugFull
   | MugInTheWay
+  | InvalidPreferenceToken
   deriving (Eq, Show)
 
 insertCoins :: MonadIO m => Int -> Machine -> m ()
@@ -147,6 +167,30 @@ addMilk = update $ drinkSetting . (_Coffee `failing` _Tea) . milk +~ 1
 
 addSugar :: MonadIO m => Machine -> m ()
 addSugar = update $ drinkSetting . (_Coffee `failing` _Tea) . sugar +~ 1
+
+savePreferences :: MonadIO m => Machine -> m PreferenceToken
+savePreferences (Machine ref) = liftIO . atomicModifyIORef' ref $ \state ->
+  let
+    (token, state') = state & nextToken <<%~ next
+    state'' = state' & preferences . at token ?~ (state' ^. drinkSetting)
+  in
+    (state'', token)
+
+loadPreferences
+  :: MonadIO m
+  => Machine
+  -> PreferenceToken
+  -> m (Either MachineError ())
+loadPreferences (Machine ref) token
+  = liftIO . atomicModifyIORef' ref $ \state ->
+  case state ^. preferences . at token of
+    Nothing -> (state, Left InvalidPreferenceToken)
+    Just pref -> (state & drinkSetting .~ pref, Right ())
+
+-- | Return a token that will error when used. Useful for testing.
+badPreferenceToken :: MonadIO m => Machine -> m PreferenceToken
+badPreferenceToken (Machine ref) = liftIO . atomicModifyIORef' ref $ \state ->
+  swap $ state & nextToken <<%~ next
 
 update :: MonadIO m => (MachineState -> MachineState) -> Machine -> m ()
 update f (Machine ref) = liftIO $ atomicModifyIORef' ref ((,()) . f)

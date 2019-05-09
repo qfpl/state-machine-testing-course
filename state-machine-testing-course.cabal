@@ -23,17 +23,19 @@ common level-setup
   other-modules:       CoffeeMachineTests
   ghc-options:         -Wall -threaded
   build-depends:       base >= 4.11 && < 4.13
-                     , state-machine-testing-course
+                     , containers >= 0.5.11 && < 0.6
                      , hedgehog >= 0.6 && < 0.7
                      , lens > 4.15 && < 4.18
+                     , state-machine-testing-course
                      , tasty >= 1.1 && < 1.3
                      , tasty-hedgehog >= 0.2 && < 0.3
 
 library
   exposed-modules:     CoffeeMachine
   build-depends:       base >= 4.11 && < 4.13
-                     , mtl >= 2.2.2 && < 2.3
+                     , containers >= 0.5.11 && < 0.6
                      , lens > 4.15 && < 4.18
+                     , mtl >= 2.2.2 && < 2.3
   hs-source-dirs:      src
   ghc-options:         -Wall
   default-language:    Haskell2010
