@@ -33,12 +33,22 @@ This means that our `Model v` can store a `Map (Var PreferenceToken v)
 Drink`, and track which drinks come from which setting. But how do we
 get a `Var PreferenceToken v` to insert as the key?
 
-The answer is in the type of the `Update` callback: `Update :: forall
-v. Ord1 v => state v -> input v -> Var output v -> state v -> Callback
-input output state`. The type variable `output` is fixed by the return
-value of the `Command`'s `commandExecute` field, and Hedgehog will
-give our `Update` callback a symbol representing that result when it
-constructs the test sequence.
+The answer is in the type of the `Update` callback:
+
+```haskell
+Update
+  :: forall v. Ord1 v
+  => state v
+  -> input v
+  -> Var output v
+  -> state v
+  -> Callback input output state
+```
+
+The type variable `output` is fixed by the return value of the
+`Command`'s `commandExecute` field, and Hedgehog will give our
+`Update` callback a symbol representing that result when it constructs
+the test sequence.
 
 ## Your Task
 
@@ -59,7 +69,7 @@ Set up the types so that it is impossible to fabricate a
 important to write positive and negative variants of the "restore
 preferences" command.
 
-If you do want to write positive and negative variants of the "restore
-preferences" command, you'll want to write a testing function that
-makes the machine generate a `PreferenceToken` that corresponds to no
-saved preference.
+If you still want to write positive and negative variants of the
+"restore preferences" command, you'll want to write a testing function
+that makes the machine generate a `PreferenceToken` that corresponds
+to no saved preference.
