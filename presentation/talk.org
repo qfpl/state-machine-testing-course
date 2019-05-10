@@ -27,18 +27,18 @@
   - write unit tests for some small things
   #+BEGIN_SRC haskell
     getLunch "fishy" == TunaSalad
-    getLunch "spicy" == HalfChicken ExtraHot
+    getLunch "hungry spicy" == HalfChicken ExtraHot
   #+END_SRC
   - subcontract end users to suggest regression tests
 
 * Property-based awesome
-  - unleash the power of: $\forall$
+  - unleash the power of   $\forall$
   - shrinking
   - powerful design tool
-    - =forAll text= becomes =forAll lunchType=
+    - '=forAll text=' becomes '=forAll lunchType='
 
 * Property-based state machine testing
-  Property-based testing, lifted to the level of *application behaviour*.
+  property-based testing, lifted to the level of *application behaviour*.
   
 ** Generate structured inputs
    randomised inputs for actions
@@ -53,22 +53,28 @@
    a failure will produce:
    - the sequence of actions
    - their respective inputs
-   - the random seed responsible
 
 * OMG
   Right?
 
 * Moving parts
+  - Model
+  - Command
 
 ** Model
-   track expectations/awareness regarding the 'state' of the world
+   - abstract model of the thing under test
+   - *not the thing itself*
 
 ** Command
-   - pre & post conditions
+   - represents /transitions/
+   - *not states*
+ 
+** Bits of a Command
+   - pre conditions
    - generator
    - executor
    - model update function
-   Represents the /transitions/, not the states.
+   - post conditions
 
 ** Given
    [[./images/mach.png]]

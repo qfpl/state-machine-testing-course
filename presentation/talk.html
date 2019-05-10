@@ -32,8 +32,8 @@
 </section>
 
 <section>
-<section id="slide-orgcaecec3">
-<h2 id="orgcaecec3">Programs are weird</h2>
+<section id="slide-orgafb9009">
+<h2 id="orgafb9009">Programs are weird</h2>
 <p>
 Complex, Dependent, Interactive, Insidious
 </p>
@@ -41,8 +41,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org1682edc">
-<h2 id="org1682edc">Testing weird is hard</h2>
+<section id="slide-org5455b35">
+<h2 id="org5455b35">Testing weird is hard</h2>
 <ul>
 <li>manual testing? <code>[cries in Quality Assurance]</code></li>
 <li>which processes do you test?</li>
@@ -53,8 +53,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org73ce87e">
-<h2 id="org73ce87e">Cost : Benefit</h2>
+<section id="slide-org975a9be">
+<h2 id="org975a9be">Cost : Benefit</h2>
 <ul>
 <li>multi-step testing can be arduous and brittle
 <ul>
@@ -69,8 +69,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org1e7e9fa">
-<h2 id="org1e7e9fa">Do what we can</h2>
+<section id="slide-org537f2b7">
+<h2 id="org537f2b7">Do what we can</h2>
 <ul>
 <li>eat the cost for some big things</li>
 <li>write unit tests for some small things</li>
@@ -79,7 +79,7 @@ Complex, Dependent, Interactive, Insidious
 <div class="org-src-container">
 
 <pre  class="src src-haskell"><span style="color: #A6E22E;">getLunch</span> <span style="color: #E6DB74;">"fishy"</span> <span style="color: #FD971F;">==</span> <span style="color: #66D9EF;">TunaSalad</span>
-<span style="color: #A6E22E;">getLunch</span> <span style="color: #E6DB74;">"spicy"</span> <span style="color: #FD971F;">==</span> <span style="color: #66D9EF;">HalfChicken</span> <span style="color: #66D9EF;">ExtraHot</span>
+<span style="color: #A6E22E;">getLunch</span> <span style="color: #E6DB74;">"hungry spicy"</span> <span style="color: #FD971F;">==</span> <span style="color: #66D9EF;">HalfChicken</span> <span style="color: #66D9EF;">ExtraHot</span>
 </pre>
 </div>
 <ul>
@@ -90,14 +90,14 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org7442ac5">
-<h2 id="org7442ac5">Property-based awesome</h2>
+<section id="slide-org2a9cf44">
+<h2 id="org2a9cf44">Property-based awesome</h2>
 <ul>
-<li>unleash the power of: \(\forall\)</li>
+<li>unleash the power of   \(\forall\)</li>
 <li>shrinking</li>
 <li>powerful design tool
 <ul>
-<li><code>forAll text</code> becomes <code>forAll lunchType</code></li>
+<li>'<code>forAll text</code>' becomes '<code>forAll lunchType</code>'</li>
 
 </ul></li>
 
@@ -106,51 +106,50 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org1277047">
-<h2 id="org1277047">Property-based state machine testing</h2>
+<section id="slide-org1828402">
+<h2 id="org1828402">Property-based state machine testing</h2>
 <p>
-Property-based testing, lifted to the level of <b>application behaviour</b>.
+property-based testing, lifted to the level of <b>application behaviour</b>.
 </p>
 
 </section>
-<section id="slide-org797a58d">
-<h3 id="org797a58d">Generate structured inputs</h3>
+<section id="slide-orgeec8067">
+<h3 id="orgeec8067">Generate structured inputs</h3>
 <p>
 randomised inputs for actions
 </p>
 
 </section>
-<section id="slide-org8355f7c">
-<h3 id="org8355f7c">Generate workflows</h3>
+<section id="slide-orgdf65097">
+<h3 id="orgdf65097">Generate workflows</h3>
 <p>
 define actions independently, let the package generate workflows
 </p>
 
 </section>
-<section id="slide-orgad6cce3">
-<h3 id="orgad6cce3">Shrinking (OMG!)</h3>
+<section id="slide-org2f7f3fb">
+<h3 id="org2f7f3fb">Shrinking (OMG!)</h3>
 <p>
 you thought shrinking was cool before&#x2026;
 </p>
 
 </section>
-<section id="slide-org710d121">
-<h3 id="org710d121">Useful feedback</h3>
+<section id="slide-orgff5a621">
+<h3 id="orgff5a621">Useful feedback</h3>
 <p>
 a failure will produce:
 </p>
 <ul>
 <li>the sequence of actions</li>
 <li>their respective inputs</li>
-<li>the random seed responsible</li>
 
 </ul>
 
 </section>
 </section>
 <section>
-<section id="slide-orga5fcfb3">
-<h2 id="orga5fcfb3">OMG</h2>
+<section id="slide-orgcbb0e8b">
+<h2 id="orgcbb0e8b">OMG</h2>
 <p>
 Right?
 </p>
@@ -158,34 +157,47 @@ Right?
 </section>
 </section>
 <section>
-<section id="slide-orgc2fb04d">
-<h2 id="orgc2fb04d">Moving parts</h2>
-<div class="outline-text-2" id="text-orgc2fb04d">
-</div>
-</section>
-<section id="slide-orgc2aa15c">
-<h3 id="orgc2aa15c">Model</h3>
-<p>
-track expectations/awareness regarding the 'state' of the world
-</p>
+<section id="slide-org49c46fb">
+<h2 id="org49c46fb">Moving parts</h2>
+<ul>
+<li>Model</li>
+<li>Command</li>
+
+</ul>
 
 </section>
-<section id="slide-org5aabc16">
-<h3 id="org5aabc16">Command</h3>
+<section id="slide-org26c9d0d">
+<h3 id="org26c9d0d">Model</h3>
 <ul>
-<li>pre &amp; post conditions</li>
+<li>abstract model of the thing under test</li>
+<li><b>not the thing itself</b></li>
+
+</ul>
+
+</section>
+<section id="slide-org07d66ca">
+<h3 id="org07d66ca">Command</h3>
+<ul>
+<li>represents <i>transitions</i></li>
+<li><b>not states</b></li>
+
+</ul>
+
+</section>
+<section id="slide-orgf4ae203">
+<h3 id="orgf4ae203">Bits of a Command</h3>
+<ul>
+<li>pre conditions</li>
 <li>generator</li>
 <li>executor</li>
 <li>model update function</li>
+<li>post conditions</li>
 
 </ul>
-<p>
-Represents the <i>transitions</i>, not the states.
-</p>
 
 </section>
-<section id="slide-org5578c54">
-<h3 id="org5578c54">Given</h3>
+<section id="slide-org707aebc">
+<h3 id="org707aebc">Given</h3>
 
 <div class="figure">
 <p><img src="./images/mach.png" alt="mach.png" />
@@ -193,8 +205,8 @@ Represents the <i>transitions</i>, not the states.
 </div>
 
 </section>
-<section id="slide-org62e9311">
-<h3 id="org62e9311">Test this</h3>
+<section id="slide-org5181b89">
+<h3 id="org5181b89">Test this</h3>
 
 <div class="figure">
 <p><img src="./images/mach_transitions.png" alt="mach_transitions.png" />
@@ -202,8 +214,8 @@ Represents the <i>transitions</i>, not the states.
 </div>
 
 </section>
-<section id="slide-org35897e2">
-<h3 id="org35897e2">Not this</h3>
+<section id="slide-orga8ec88c">
+<h3 id="orga8ec88c">Not this</h3>
 
 <div class="figure">
 <p><img src="./images/mach_states.png" alt="mach_states.png" />
@@ -213,8 +225,8 @@ Represents the <i>transitions</i>, not the states.
 </section>
 </section>
 <section>
-<section id="slide-orgb9c892e">
-<h2 id="orgb9c892e">Machines that grow</h2>
+<section id="slide-org2741612">
+<h2 id="org2741612">Machines that grow</h2>
 <p>
 new feature ~ new Command(s)
 </p>
@@ -222,8 +234,8 @@ new feature ~ new Command(s)
 </section>
 </section>
 <section>
-<section id="slide-org9ee4f21">
-<h2 id="org9ee4f21">Examples?</h2>
+<section id="slide-orgf3c31d4">
+<h2 id="orgf3c31d4">Examples?</h2>
 <ul>
 <li>Wordpress API (a tiny bit of it)</li>
 <li>LevelDB</li>
@@ -233,8 +245,8 @@ new feature ~ new Command(s)
 </section>
 </section>
 <section>
-<section id="slide-orgc48af76">
-<h2 id="orgc48af76">Come to the workshop!</h2>
+<section id="slide-org29de102">
+<h2 id="org29de102">Come to the workshop!</h2>
 <p>
 Learn the weirding way!
 </p>
@@ -246,8 +258,8 @@ Learn the weirding way!
 </section>
 </section>
 <section>
-<section id="slide-orgfa8593b">
-<h2 id="orgfa8593b">Bonus Round</h2>
+<section id="slide-orgd790d88">
+<h2 id="orgd790d88">Bonus Round</h2>
 <p>
 Use classification to understand your test-case distribution
 </p>
@@ -263,8 +275,8 @@ Use classification to understand your test-case distribution
 </section>
 </section>
 <section>
-<section id="slide-orge9e31e7">
-<h2 id="orge9e31e7">References</h2>
+<section id="slide-org5d32418">
+<h2 id="org5d32418">References</h2>
 <ul>
 <li>LevelDB example
 <ul>
