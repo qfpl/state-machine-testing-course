@@ -25,5 +25,5 @@ behaviour of the command being tested.
 # Your Task
 
 Think over the commands you have written so far. For each command,
-decide whether you should write a negative command to contemplate it,
+decide whether you should write a negative command to complement it,
 and implement any necessary negative commands.

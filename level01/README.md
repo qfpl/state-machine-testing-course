@@ -45,19 +45,26 @@ check out the asides below:
   Hedgehog generates complete command sequences before it runs any
   commands, and not every command can be run at any time. Example: if
   your web service has commands that need administrator powers, you
-  need to register an admin before you try running those commands.
+  need to register an admin before you try running those commands, and
+  you won't know what user ID will come back when you register an
+  admin.
 
-  This means that generators need to see the current model state. At
-  the same time, you can't know what the exact values in the state
-  are, because the test hasn't run yet!
+  This means that some generators need to know the results of previous
+  actions. At the same time, you can't know what the exact values from
+  previous actions, because the tests haven't run yet!
 
-  Hedgehog works around this with two types:
+  Hedgehog solves this with a container type
+  [`Var`](https://hackage.haskell.org/package/hedgehog/docs/Hedgehog.html#t:Var),
+  which either holds the value that come from executing a previous
+  command, or a symbolic placeholder. It does so using the types
   [`Symbolic`](https://hackage.haskell.org/package/hedgehog/docs/Hedgehog.html#t:Symbolic)
   and
   [`Concrete`](https://hackage.haskell.org/package/hedgehog/docs/Hedgehog.html#t:Concrete)
   . In the generation phase of the test, your model is a `Model
   Symbolic`, but once it starts executing it becomes a `Model
   Concrete` and you can pull out real values from the model.
+
+  We explore this in detail as part of Level 06.
 </details>
 
 *****
