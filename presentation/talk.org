@@ -32,7 +32,7 @@
   - subcontract end users to suggest regression tests
 
 * Property-based awesome
-  - unleash the power of   $\forall$
+  - unleash the power of $\forall$
   - shrinking
   - powerful design tool
     - '=forAll text=' becomes '=forAll lunchType='
@@ -72,11 +72,11 @@
 ** Given
    [[./images/mach.png]]
 
-** Test this
-   [[./images/mach_transitions.png]]
-
 ** Not this
    [[./images/mach_states.png]]
+
+** Test this
+   [[./images/mach_transitions.png]]
 
 * Parts & Flow
   - generation (maybe)
@@ -97,9 +97,9 @@
   - https://github.com/qfpl/state-machine-testing-course/
 
 * Bonus Round
- Use classification to understand your test-case distribution
- - John Hughes: Building on developer intuitions
-   - https://www.youtube.com/watch?v=NcJOiQlzlXQ
+  Use classification to understand your test-case distribution
+  - John Hughes: Building on developer intuitions
+    - https://www.youtube.com/watch?v=NcJOiQlzlXQ
   
 * References
   - Wordpress example

@@ -32,8 +32,8 @@
 </section>
 
 <section>
-<section id="slide-org54441dd">
-<h2 id="org54441dd">Programs are weird</h2>
+<section id="slide-org8bda3d3">
+<h2 id="org8bda3d3">Programs are weird</h2>
 <p>
 Complex, Dependent, Interactive, Insidious
 </p>
@@ -41,8 +41,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-orgbcbc7f4">
-<h2 id="orgbcbc7f4">Testing weird is hard</h2>
+<section id="slide-orgf828cc6">
+<h2 id="orgf828cc6">Testing weird is hard</h2>
 <ul>
 <li>manual testing? <code>[cries in Quality Assurance]</code></li>
 <li>which processes do you test?</li>
@@ -53,8 +53,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org69c03d1">
-<h2 id="org69c03d1">Cost : Benefit</h2>
+<section id="slide-orgcf90bb4">
+<h2 id="orgcf90bb4">Cost : Benefit</h2>
 <ul>
 <li>multi-step testing can be arduous and brittle
 <ul>
@@ -69,8 +69,8 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-orgfec385a">
-<h2 id="orgfec385a">Do what we can</h2>
+<section id="slide-org4753472">
+<h2 id="org4753472">Do what we can</h2>
 <ul>
 <li>eat the cost for some big things</li>
 <li>write unit tests for some small things</li>
@@ -90,10 +90,10 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-org3a9d038">
-<h2 id="org3a9d038">Property-based awesome</h2>
+<section id="slide-org12f76b7">
+<h2 id="org12f76b7">Property-based awesome</h2>
 <ul>
-<li>unleash the power of   \(\forall\)</li>
+<li>unleash the power of \(\forall\)</li>
 <li>shrinking</li>
 <li>powerful design tool
 <ul>
@@ -106,36 +106,36 @@ Complex, Dependent, Interactive, Insidious
 </section>
 </section>
 <section>
-<section id="slide-orgb0a7f09">
-<h2 id="orgb0a7f09">Property-based state machine testing</h2>
+<section id="slide-org22a7fca">
+<h2 id="org22a7fca">Property-based state machine testing</h2>
 <p>
 property-based testing, lifted to the level of <b>application behaviour</b>.
 </p>
 
 </section>
-<section id="slide-org56e3487">
-<h3 id="org56e3487">Generate structured inputs</h3>
+<section id="slide-org350e882">
+<h3 id="org350e882">Generate structured inputs</h3>
 <p>
 randomised inputs for actions
 </p>
 
 </section>
-<section id="slide-orgffccca4">
-<h3 id="orgffccca4">Generate list of actions</h3>
+<section id="slide-org3ff503b">
+<h3 id="org3ff503b">Generate list of actions</h3>
 <p>
 actions defined independently, package generates a list
 </p>
 
 </section>
-<section id="slide-orge0bbff8">
-<h3 id="orge0bbff8">Shrinking (OMG!)</h3>
+<section id="slide-orga4f0f73">
+<h3 id="orga4f0f73">Shrinking (OMG!)</h3>
 <p>
 you thought shrinking was cool before&#x2026;
 </p>
 
 </section>
-<section id="slide-org34788d6">
-<h3 id="org34788d6">Useful feedback</h3>
+<section id="slide-org90875ab">
+<h3 id="org90875ab">Useful feedback</h3>
 <p>
 a failure will produce:
 </p>
@@ -148,8 +148,8 @@ a failure will produce:
 </section>
 </section>
 <section>
-<section id="slide-org15831c8">
-<h2 id="org15831c8">OMG</h2>
+<section id="slide-orgd9e19d2">
+<h2 id="orgd9e19d2">OMG</h2>
 <p>
 Right?
 </p>
@@ -157,8 +157,8 @@ Right?
 </section>
 </section>
 <section>
-<section id="slide-org4035b6c">
-<h2 id="org4035b6c">Moving parts</h2>
+<section id="slide-org08cf5d7">
+<h2 id="org08cf5d7">Moving parts</h2>
 <ul>
 <li>Model</li>
 <li>Command</li>
@@ -166,8 +166,8 @@ Right?
 </ul>
 
 </section>
-<section id="slide-orgb7bb817">
-<h3 id="orgb7bb817">Model</h3>
+<section id="slide-org7e17f86">
+<h3 id="org7e17f86">Model</h3>
 <ul>
 <li><i>abstract model</i> of the thing under test</li>
 <li><b>not the thing itself</b></li>
@@ -175,8 +175,8 @@ Right?
 </ul>
 
 </section>
-<section id="slide-org21c42b3">
-<h3 id="org21c42b3">Command</h3>
+<section id="slide-org401a4d4">
+<h3 id="org401a4d4">Command</h3>
 <ul>
 <li>represents <i>transitions</i></li>
 <li><b>not states</b></li>
@@ -184,8 +184,8 @@ Right?
 </ul>
 
 </section>
-<section id="slide-org0695d10">
-<h3 id="org0695d10">Given</h3>
+<section id="slide-orgfa741f6">
+<h3 id="orgfa741f6">Given</h3>
 
 <div class="figure">
 <p><img src="./images/mach.png" alt="mach.png" />
@@ -193,17 +193,8 @@ Right?
 </div>
 
 </section>
-<section id="slide-org5e9536f">
-<h3 id="org5e9536f">Test this</h3>
-
-<div class="figure">
-<p><img src="./images/mach_transitions.png" alt="mach_transitions.png" />
-</p>
-</div>
-
-</section>
-<section id="slide-org401f7fa">
-<h3 id="org401f7fa">Not this</h3>
+<section id="slide-org1375215">
+<h3 id="org1375215">Not this</h3>
 
 <div class="figure">
 <p><img src="./images/mach_states.png" alt="mach_states.png" />
@@ -211,10 +202,19 @@ Right?
 </div>
 
 </section>
+<section id="slide-orgeb5c07c">
+<h3 id="orgeb5c07c">Test this</h3>
+
+<div class="figure">
+<p><img src="./images/mach_transitions.png" alt="mach_transitions.png" />
+</p>
+</div>
+
+</section>
 </section>
 <section>
-<section id="slide-orgd509afc">
-<h2 id="orgd509afc">Parts &amp; Flow</h2>
+<section id="slide-orgae1e240">
+<h2 id="orgae1e240">Parts &amp; Flow</h2>
 <ul>
 <li>generation (maybe)</li>
 <li>pre-condition(s)</li>
@@ -227,8 +227,8 @@ Right?
 </section>
 </section>
 <section>
-<section id="slide-org5132447">
-<h2 id="org5132447">Machines that grow</h2>
+<section id="slide-org0b63def">
+<h2 id="org0b63def">Machines that grow</h2>
 <p>
 new feature ~ new Command(s)
 </p>
@@ -236,8 +236,8 @@ new feature ~ new Command(s)
 </section>
 </section>
 <section>
-<section id="slide-org30a887c">
-<h2 id="org30a887c">Examples</h2>
+<section id="slide-orgd615022">
+<h2 id="orgd615022">Examples</h2>
 <ul>
 <li>Wordpress API (a tiny bit of it)</li>
 <li>LevelDB</li>
@@ -247,8 +247,8 @@ new feature ~ new Command(s)
 </section>
 </section>
 <section>
-<section id="slide-org9c8e9e0">
-<h2 id="org9c8e9e0">Come to the workshop!</h2>
+<section id="slide-orge5b568e">
+<h2 id="orge5b568e">Come to the workshop!</h2>
 <p>
 Learn the weirding way!
 </p>
@@ -260,8 +260,8 @@ Learn the weirding way!
 </section>
 </section>
 <section>
-<section id="slide-orgaf0e308">
-<h2 id="orgaf0e308">Bonus Round</h2>
+<section id="slide-orgcf03db9">
+<h2 id="orgcf03db9">Bonus Round</h2>
 <p>
 Use classification to understand your test-case distribution
 </p>
@@ -277,8 +277,8 @@ Use classification to understand your test-case distribution
 </section>
 </section>
 <section>
-<section id="slide-orgaa4adca">
-<h2 id="orgaa4adca">References</h2>
+<section id="slide-org51ec077">
+<h2 id="org51ec077">References</h2>
 <ul>
 <li>Wordpress example
 <ul>

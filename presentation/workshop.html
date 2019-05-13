@@ -27,12 +27,12 @@
 <div class="reveal">
 <div class="slides">
 <section id="sec-title-slide">
-
+<h1 class="title">Property-based state machine testing</h1><h2 class="author">Sean Chalmers, Jack Kelly</h2><p class="date">Created: 2019-05-13 Mon 10:18</p>
 </section>
 
 <section>
-<section id="slide-orgae0365e">
-<h2 id="orgae0365e">Workshop repo</h2>
+<section id="slide-org4713856">
+<h2 id="org4713856">Workshop</h2>
 <p>
 <a href="https://github.com/qfpl/state-machine-testing-course">https://github.com/qfpl/state-machine-testing-course</a>
 </p>
@@ -40,17 +40,17 @@
 </section>
 </section>
 <section>
-<section id="slide-org9b9d45d">
-<h2 id="org9b9d45d">Command</h2>
+<section id="slide-org575908b">
+<h2 id="org575908b">Command</h2>
 <div class="org-src-container">
 
-<pre  class="src src-haskell"><span style="color: #F92672;">data</span> <span style="color: #66D9EF;">Command</span> n m <span style="color: #AE81FF;">(</span>state <span style="color: #FD971F;">::</span> <span style="color: #66D9EF;">(</span><span style="color: #FD971F;">*</span> <span style="color: #FD971F;">-&gt;</span> <span style="color: #FD971F;">*</span><span style="color: #66D9EF;">)</span> <span style="color: #FD971F;">-&gt;</span> <span style="color: #FD971F;">*</span><span style="color: #AE81FF;">)</span> <span style="color: #FD971F;">=</span> forall input output<span style="color: #FD971F;">.</span>
+<pre  class="src src-haskell"><span style="color: #F92672;">data</span> <span style="color: #66D9EF;">Command</span> g m <span style="color: #AE81FF;">(</span>state <span style="color: #FD971F;">::</span> <span style="color: #66D9EF;">(</span><span style="color: #FD971F;">*</span> <span style="color: #FD971F;">-&gt;</span> <span style="color: #FD971F;">*</span><span style="color: #66D9EF;">)</span> <span style="color: #FD971F;">-&gt;</span> <span style="color: #FD971F;">*</span><span style="color: #AE81FF;">)</span> <span style="color: #FD971F;">=</span> forall input output<span style="color: #FD971F;">.</span>
 
 <span style="color: #AE81FF;">(</span><span style="color: #66D9EF;">HTraversable</span> input, <span style="color: #66D9EF;">Show</span> <span style="color: #66D9EF;">(</span>input <span style="color: #66D9EF;">Symbolic</span><span style="color: #66D9EF;">)</span>, <span style="color: #66D9EF;">Typeable</span> output<span style="color: #AE81FF;">)</span> <span style="color: #FD971F;">=&gt;</span>
 
 <span style="color: #66D9EF;">Command</span> <span style="color: #AE81FF;">{</span>
 
-    commandGen <span style="color: #FD971F;">::</span> state <span style="color: #66D9EF;">Symbolic</span> <span style="color: #FD971F;">-&gt;</span> <span style="color: #66D9EF;">Maybe</span> <span style="color: #66D9EF;">(</span>n <span style="color: #A6E22E;">(</span>input <span style="color: #66D9EF;">Symbolic</span><span style="color: #A6E22E;">)</span><span style="color: #66D9EF;">)</span>
+    commandGen <span style="color: #FD971F;">::</span> state <span style="color: #66D9EF;">Symbolic</span> <span style="color: #FD971F;">-&gt;</span> <span style="color: #66D9EF;">Maybe</span> <span style="color: #66D9EF;">(</span>g <span style="color: #A6E22E;">(</span>input <span style="color: #66D9EF;">Symbolic</span><span style="color: #A6E22E;">)</span><span style="color: #66D9EF;">)</span>
 
   , commandExecute <span style="color: #FD971F;">::</span> input <span style="color: #66D9EF;">Concrete</span> <span style="color: #FD971F;">-&gt;</span> m output
 
@@ -63,8 +63,8 @@
 </section>
 </section>
 <section>
-<section id="slide-org0e95bdf">
-<h2 id="org0e95bdf">Callbacks</h2>
+<section id="slide-org895c7ce">
+<h2 id="org895c7ce">Callbacks</h2>
 <div class="org-src-container">
 
 <pre  class="src src-haskell"><span style="color: #66D9EF;">Require</span> <span style="color: #FD971F;">::</span> <span style="color: #AE81FF;">(</span>state <span style="color: #66D9EF;">Symbolic</span> <span style="color: #FD971F;">-&gt;</span> input <span style="color: #66D9EF;">Symbolic</span> <span style="color: #FD971F;">-&gt;</span> <span style="color: #66D9EF;">Bool</span><span style="color: #AE81FF;">)</span>
@@ -78,8 +78,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgceecd4e">
-<h2 id="orgceecd4e">HTraversable</h2>
+<section id="slide-org8bb6f6b">
+<h2 id="org8bb6f6b">HTraversable</h2>
 <div class="org-src-container">
 
 <pre  class="src src-haskell"><span style="color: #F92672;">class</span> <span style="color: #66D9EF;">HTraversable</span> t <span style="color: #F92672;">where</span>

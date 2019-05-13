@@ -13,13 +13,13 @@
   
 * Command
   #+BEGIN_SRC haskell
-    data Command n m (state :: (* -> *) -> *) = forall input output.
+    data Command g m (state :: (* -> *) -> *) = forall input output.
 
     (HTraversable input, Show (input Symbolic), Typeable output) =>
 
     Command {
 
-        commandGen :: state Symbolic -> Maybe (n (input Symbolic))
+        commandGen :: state Symbolic -> Maybe (g (input Symbolic))
 
       , commandExecute :: input Concrete -> m output
 
@@ -27,6 +27,7 @@
  
       }
   #+END_SRC
+  =g= is often MonadGen, =m= often MonadTest, MonadIO
 
 * Callbacks
   #+BEGIN_SRC haskell
