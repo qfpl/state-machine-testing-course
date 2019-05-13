@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Property-based state machine testing</title>
+<meta name="author" content="Sean Chalmers, Jack Kelly"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/moon.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide">
+
+</section>
+
+<section>
+<section id="slide-orgae0365e">
+<h2 id="orgae0365e">Workshop repo</h2>
+<p>
+<a href="https://github.com/qfpl/state-machine-testing-course">https://github.com/qfpl/state-machine-testing-course</a>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org9b9d45d">
+<h2 id="org9b9d45d">Command</h2>
+<div class="org-src-container">
+
+<pre  class="src src-haskell"><span style="color: #F92672;">data</span> <span style="color: #66D9EF;">Command</span> n m <span style="color: #AE81FF;">(</span>state <span style="color: #FD971F;">::</span> <span style="color: #66D9EF;">(</span><span style="color: #FD971F;">*</span> <span style="color: #FD971F;">-&gt;</span> <span style="color: #FD971F;">*</span><span style="color: #66D9EF;">)</span> <span style="color: #FD971F;">-&gt;</span> <span style="color: #FD971F;">*</span><span style="color: #AE81FF;">)</span> <span style="color: #FD971F;">=</span> forall input output<span style="color: #FD971F;">.</span>
+
+<span style="color: #AE81FF;">(</span><span style="color: #66D9EF;">HTraversable</span> input, <span style="color: #66D9EF;">Show</span> <span style="color: #66D9EF;">(</span>input <span style="color: #66D9EF;">Symbolic</span><span style="color: #66D9EF;">)</span>, <span style="color: #66D9EF;">Typeable</span> output<span style="color: #AE81FF;">)</span> <span style="color: #FD971F;">=&gt;</span>
+
+<span style="color: #66D9EF;">Command</span> <span style="color: #AE81FF;">{</span>
+
+    commandGen <span style="color: #FD971F;">::</span> state <span style="color: #66D9EF;">Symbolic</span> <span style="color: #FD971F;">-&gt;</span> <span style="color: #66D9EF;">Maybe</span> <span style="color: #66D9EF;">(</span>n <span style="color: #A6E22E;">(</span>input <span style="color: #66D9EF;">Symbolic</span><span style="color: #A6E22E;">)</span><span style="color: #66D9EF;">)</span>
+
+  , commandExecute <span style="color: #FD971F;">::</span> input <span style="color: #66D9EF;">Concrete</span> <span style="color: #FD971F;">-&gt;</span> m output
+
+  , commandCallbacks <span style="color: #FD971F;">::</span> <span style="color: #66D9EF;">[</span><span style="color: #66D9EF;">Callback</span> input output state<span style="color: #66D9EF;">]</span>
+
+  <span style="color: #AE81FF;">}</span>
+</pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org0e95bdf">
+<h2 id="org0e95bdf">Callbacks</h2>
+<div class="org-src-container">
+
+<pre  class="src src-haskell"><span style="color: #66D9EF;">Require</span> <span style="color: #FD971F;">::</span> <span style="color: #AE81FF;">(</span>state <span style="color: #66D9EF;">Symbolic</span> <span style="color: #FD971F;">-&gt;</span> input <span style="color: #66D9EF;">Symbolic</span> <span style="color: #FD971F;">-&gt;</span> <span style="color: #66D9EF;">Bool</span><span style="color: #AE81FF;">)</span>
+
+<span style="color: #66D9EF;">Update</span> <span style="color: #FD971F;">::</span> <span style="color: #AE81FF;">(</span><span style="color: #F92672;">forall</span> v<span style="color: #FD971F;">.</span> <span style="color: #66D9EF;">Ord1</span> v <span style="color: #FD971F;">=&gt;</span> state v <span style="color: #FD971F;">-&gt;</span> input v <span style="color: #FD971F;">-&gt;</span> <span style="color: #66D9EF;">Var</span> output v <span style="color: #FD971F;">-&gt;</span> state v<span style="color: #AE81FF;">)</span>
+
+<span style="color: #66D9EF;">Ensure</span> <span style="color: #FD971F;">::</span> <span style="color: #AE81FF;">(</span>state <span style="color: #66D9EF;">Concrete</span> <span style="color: #FD971F;">-&gt;</span> state <span style="color: #66D9EF;">Concrete</span> <span style="color: #FD971F;">-&gt;</span> input <span style="color: #66D9EF;">Concrete</span> <span style="color: #FD971F;">-&gt;</span> output <span style="color: #FD971F;">-&gt;</span> <span style="color: #66D9EF;">Test</span> <span style="color: #66D9EF;">()</span><span style="color: #AE81FF;">)</span>
+</pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgceecd4e">
+<h2 id="orgceecd4e">HTraversable</h2>
+<div class="org-src-container">
+
+<pre  class="src src-haskell"><span style="color: #F92672;">class</span> <span style="color: #66D9EF;">HTraversable</span> t <span style="color: #F92672;">where</span>
+  htraverse <span style="color: #FD971F;">::</span> <span style="color: #66D9EF;">Applicative</span> f <span style="color: #FD971F;">=&gt;</span> <span style="color: #AE81FF;">(</span><span style="color: #F92672;">forall</span> a<span style="color: #FD971F;">.</span> g a <span style="color: #FD971F;">-&gt;</span> f <span style="color: #66D9EF;">(</span>h a<span style="color: #66D9EF;">)</span><span style="color: #AE81FF;">)</span> <span style="color: #FD971F;">-&gt;</span> t g <span style="color: #FD971F;">-&gt;</span> f <span style="color: #AE81FF;">(</span>t h<span style="color: #AE81FF;">)</span>
+</pre>
+</div>
+</section>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
+<script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c',
+rollingLinks: false,
+keyboard: true,
+mouseWheel: false,
+fragmentInURL: false,
+pdfSeparateFragments: true,
+
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'convex', // see README of reveal.js for options
+transitionSpeed: 'default',
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+
+});
+</script>
+</body>
+</html>

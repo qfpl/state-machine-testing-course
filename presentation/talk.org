@@ -27,7 +27,7 @@
   - write unit tests for some small things
   #+BEGIN_SRC haskell
     getLunch "fishy" == TunaSalad
-    getLunch "hungry spicy" == HalfChicken ExtraHot
+    getLunch "hungry spicy" == ExtraHot HalfChicken
   #+END_SRC
   - subcontract end users to suggest regression tests
 
@@ -43,8 +43,8 @@
 ** Generate structured inputs
    randomised inputs for actions
 
-** Generate workflows
-   define actions independently, let the package generate workflows
+** Generate list of actions
+   actions defined independently, package generates a list
 
 ** Shrinking (OMG!)
    you thought shrinking was cool before...
@@ -62,20 +62,13 @@
   - Command
 
 ** Model
-   - abstract model of the thing under test
+   - /abstract model/ of the thing under test
    - *not the thing itself*
 
 ** Command
    - represents /transitions/
    - *not states*
  
-** Bits of a Command
-   - pre conditions
-   - generator
-   - executor
-   - model update function
-   - post conditions
-
 ** Given
    [[./images/mach.png]]
 
@@ -85,10 +78,17 @@
 ** Not this
    [[./images/mach_states.png]]
 
+* Parts & Flow
+  - generation (maybe)
+  - pre-condition(s)
+  - execution
+  - post-condition(s)
+  - update
+
 * Machines that grow
   new feature ~ new Command(s)
 
-* Examples?
+* Examples
   - Wordpress API (a tiny bit of it)
   - LevelDB
 
@@ -102,10 +102,10 @@
    - https://www.youtube.com/watch?v=NcJOiQlzlXQ
   
 * References
-  - LevelDB example
-    - https://github.com/strangeloop/lambdajam2013/blob/master/slides/Norton-QuickCheck.html
   - Wordpress example
     - http://qfpl.io/posts/intro-to-state-machine-testing-1/
+  - LevelDB example
+    - https://github.com/strangeloop/lambdajam2013/blob/master/slides/Norton-QuickCheck.html
   - Turnstile
     - https://teh.id.au/posts/2017/07/15/state-machine-testing/index.html
   - Water Jug Puzzle
