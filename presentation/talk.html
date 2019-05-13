@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Property Base Your State Machine</title>
+<meta name="author" content="Sean Chalmers, Jack Kelly"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/moon.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide">
+<h1>Property Base Your State Machine</h1><h2>Sean Chalmers, Jack Kelly</h2><h4>Queensland&nbsp;Functional&nbsp;Programming&nbsp;Lab</h4><h3><a href="mailto:"></a></h3>
+</section>
+
+<section>
+<section id="slide-org8bda3d3">
+<h2 id="org8bda3d3">Programs are weird</h2>
+<p>
+Complex, Dependent, Interactive, Insidious
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgf828cc6">
+<h2 id="orgf828cc6">Testing weird is hard</h2>
+<ul>
+<li>manual testing? <code>[cries in Quality Assurance]</code></li>
+<li>which processes do you test?</li>
+<li>test for failure?</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgcf90bb4">
+<h2 id="orgcf90bb4">Cost : Benefit</h2>
+<ul>
+<li>multi-step testing can be arduous and brittle
+<ul>
+<li>input and process are static</li>
+<li>coverage</li>
+<li>new feature? have fun!</li>
+
+</ul></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org4753472">
+<h2 id="org4753472">Do what we can</h2>
+<ul>
+<li>eat the cost for some big things</li>
+<li>write unit tests for some small things</li>
+
+</ul>
+<div class="org-src-container">
+
+<pre  class="src src-haskell"><span style="color: #A6E22E;">getLunch</span> <span style="color: #E6DB74;">"fishy"</span> <span style="color: #FD971F;">==</span> <span style="color: #66D9EF;">TunaSalad</span>
+<span style="color: #A6E22E;">getLunch</span> <span style="color: #E6DB74;">"hungry spicy"</span> <span style="color: #FD971F;">==</span> <span style="color: #66D9EF;">ExtraHot</span> <span style="color: #66D9EF;">HalfChicken</span>
+</pre>
+</div>
+<ul>
+<li>subcontract end users to suggest regression tests</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org12f76b7">
+<h2 id="org12f76b7">Property-based awesome</h2>
+<ul>
+<li>unleash the power of \(\forall\)</li>
+<li>shrinking</li>
+<li>powerful design tool
+<ul>
+<li>'<code>forAll text</code>' becomes '<code>forAll lunchType</code>'</li>
+
+</ul></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org22a7fca">
+<h2 id="org22a7fca">Property-based state machine testing</h2>
+<p>
+property-based testing, lifted to the level of <b>application behaviour</b>.
+</p>
+
+</section>
+<section id="slide-org350e882">
+<h3 id="org350e882">Generate structured inputs</h3>
+<p>
+randomised inputs for actions
+</p>
+
+</section>
+<section id="slide-org3ff503b">
+<h3 id="org3ff503b">Generate list of actions</h3>
+<p>
+actions defined independently, package generates a list
+</p>
+
+</section>
+<section id="slide-orga4f0f73">
+<h3 id="orga4f0f73">Shrinking (OMG!)</h3>
+<p>
+you thought shrinking was cool before&#x2026;
+</p>
+
+</section>
+<section id="slide-org90875ab">
+<h3 id="org90875ab">Useful feedback</h3>
+<p>
+a failure will produce:
+</p>
+<ul>
+<li>the sequence of actions</li>
+<li>their respective inputs</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgd9e19d2">
+<h2 id="orgd9e19d2">OMG</h2>
+<p>
+Right?
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org08cf5d7">
+<h2 id="org08cf5d7">Moving parts</h2>
+<ul>
+<li>Model</li>
+<li>Command</li>
+
+</ul>
+
+</section>
+<section id="slide-org7e17f86">
+<h3 id="org7e17f86">Model</h3>
+<ul>
+<li><i>abstract model</i> of the thing under test</li>
+<li><b>not the thing itself</b></li>
+
+</ul>
+
+</section>
+<section id="slide-org401a4d4">
+<h3 id="org401a4d4">Command</h3>
+<ul>
+<li>represents <i>transitions</i></li>
+<li><b>not states</b></li>
+
+</ul>
+
+</section>
+<section id="slide-orgfa741f6">
+<h3 id="orgfa741f6">Given</h3>
+
+<div class="figure">
+<p><img src="./images/mach.png" alt="mach.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-org1375215">
+<h3 id="org1375215">Not this</h3>
+
+<div class="figure">
+<p><img src="./images/mach_states.png" alt="mach_states.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-orgeb5c07c">
+<h3 id="orgeb5c07c">Test this</h3>
+
+<div class="figure">
+<p><img src="./images/mach_transitions.png" alt="mach_transitions.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgae1e240">
+<h2 id="orgae1e240">Parts &amp; Flow</h2>
+<ul>
+<li>generation (maybe)</li>
+<li>pre-condition(s)</li>
+<li>execution</li>
+<li>post-condition(s)</li>
+<li>update</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org0b63def">
+<h2 id="org0b63def">Machines that grow</h2>
+<p>
+new feature ~ new Command(s)
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgd615022">
+<h2 id="orgd615022">Examples</h2>
+<ul>
+<li>Wordpress API (a tiny bit of it)</li>
+<li>LevelDB</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orge5b568e">
+<h2 id="orge5b568e">Come to the workshop!</h2>
+<p>
+Learn the weirding way!
+</p>
+<ul>
+<li><a href="https://github.com/qfpl/state-machine-testing-course/">https://github.com/qfpl/state-machine-testing-course/</a></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgcf03db9">
+<h2 id="orgcf03db9">Bonus Round</h2>
+<p>
+Use classification to understand your test-case distribution
+</p>
+<ul>
+<li>John Hughes: Building on developer intuitions
+<ul>
+<li><a href="https://www.youtube.com/watch?v=NcJOiQlzlXQ">https://www.youtube.com/watch?v=NcJOiQlzlXQ</a></li>
+
+</ul></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org51ec077">
+<h2 id="org51ec077">References</h2>
+<ul>
+<li>Wordpress example
+<ul>
+<li><a href="http://qfpl.io/posts/intro-to-state-machine-testing-1/">http://qfpl.io/posts/intro-to-state-machine-testing-1/</a></li>
+
+</ul></li>
+<li>LevelDB example
+<ul>
+<li><a href="https://github.com/strangeloop/lambdajam2013/blob/master/slides/Norton-QuickCheck.html">https://github.com/strangeloop/lambdajam2013/blob/master/slides/Norton-QuickCheck.html</a></li>
+
+</ul></li>
+<li>Turnstile
+<ul>
+<li><a href="https://teh.id.au/posts/2017/07/15/state-machine-testing/index.html">https://teh.id.au/posts/2017/07/15/state-machine-testing/index.html</a></li>
+
+</ul></li>
+<li>Water Jug Puzzle
+<ul>
+<li><a href="http://nchammas.com/writing/how-not-to-die-hard-with-hypothesis">http://nchammas.com/writing/how-not-to-die-hard-with-hypothesis</a></li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
+<script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c',
+rollingLinks: false,
+keyboard: true,
+mouseWheel: false,
+fragmentInURL: false,
+pdfSeparateFragments: true,
+
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'convex', // see README of reveal.js for options
+transitionSpeed: 'default',
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+
+});
+</script>
+</body>
+</html>

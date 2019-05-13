@@ -1,0 +1,112 @@
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/reveal.js/3.0.0/
+#+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%a</h2><h4>Queensland&nbsp;Functional&nbsp;Programming&nbsp;Lab</h4><h3>%e</h3>
+
+#+OPTIONS: num:nil
+#+OPTIONS: toc:nil
+
+#+TITLE: Property Base Your State Machine
+#+AUTHOR: Sean Chalmers, Jack Kelly
+#+EMAIL:
+
+* Programs are weird
+  Complex, Dependent, Interactive, Insidious
+
+* Testing weird is hard
+  - manual testing? =[cries in Quality Assurance]=
+  - which processes do you test?
+  - test for failure?
+
+* Cost : Benefit
+  - multi-step testing can be arduous and brittle
+    - input and process are static
+    - coverage
+    - new feature? have fun!
+
+* Do what we can
+  - eat the cost for some big things
+  - write unit tests for some small things
+  #+BEGIN_SRC haskell
+    getLunch "fishy" == TunaSalad
+    getLunch "hungry spicy" == ExtraHot HalfChicken
+  #+END_SRC
+  - subcontract end users to suggest regression tests
+
+* Property-based awesome
+  - unleash the power of $\forall$
+  - shrinking
+  - powerful design tool
+    - '=forAll text=' becomes '=forAll lunchType='
+
+* Property-based state machine testing
+  property-based testing, lifted to the level of *application behaviour*.
+  
+** Generate structured inputs
+   randomised inputs for actions
+
+** Generate list of actions
+   actions defined independently, package generates a list
+
+** Shrinking (OMG!)
+   you thought shrinking was cool before...
+
+** Useful feedback
+   a failure will produce:
+   - the sequence of actions
+   - their respective inputs
+
+* OMG
+  Right?
+
+* Moving parts
+  - Model
+  - Command
+
+** Model
+   - /abstract model/ of the thing under test
+   - *not the thing itself*
+
+** Command
+   - represents /transitions/
+   - *not states*
+ 
+** Given
+   [[./images/mach.png]]
+
+** Not this
+   [[./images/mach_states.png]]
+
+** Test this
+   [[./images/mach_transitions.png]]
+
+* Parts & Flow
+  - generation (maybe)
+  - pre-condition(s)
+  - execution
+  - post-condition(s)
+  - update
+
+* Machines that grow
+  new feature ~ new Command(s)
+
+* Examples
+  - Wordpress API (a tiny bit of it)
+  - LevelDB
+
+* Come to the workshop!
+  Learn the weirding way!
+  - https://github.com/qfpl/state-machine-testing-course/
+
+* Bonus Round
+  Use classification to understand your test-case distribution
+  - John Hughes: Building on developer intuitions
+    - https://www.youtube.com/watch?v=NcJOiQlzlXQ
+  
+* References
+  - Wordpress example
+    - http://qfpl.io/posts/intro-to-state-machine-testing-1/
+  - LevelDB example
+    - https://github.com/strangeloop/lambdajam2013/blob/master/slides/Norton-QuickCheck.html
+  - Turnstile
+    - https://teh.id.au/posts/2017/07/15/state-machine-testing/index.html
+  - Water Jug Puzzle
+    - http://nchammas.com/writing/how-not-to-die-hard-with-hypothesis

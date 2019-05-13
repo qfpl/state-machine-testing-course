@@ -1,0 +1,18 @@
+digraph {
+  rankdir=LR;
+
+  node [fontcolor="grey",color="grey",shape=point,label=""] ENTRY;
+
+  node [shape=circle];
+
+  Locked[width=1,label="Locked"];
+  Unlocked[height=1,width=1,label="Unlocked"];
+
+  ENTRY -> Locked;
+
+  Locked -> Locked [label="Push"];
+  Locked -> Unlocked [label="Coin"];
+
+  Unlocked -> Unlocked [label = "Coin"];
+  Unlocked -> Locked [label = "Push"];
+}

@@ -1,0 +1,45 @@
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/reveal.js/3.0.0/
+# #+REVEAL_TITLE_SLIDE: <h1>%t</h1><h2>%a</h2><h4>Queensland&nbsp;Functional&nbsp;Programming&nbsp;Lab</h4><h3>%e</h3>
+
+#+OPTIONS: num:nil
+#+OPTIONS: toc:nil
+
+#+TITLE: Property-based state machine testing
+#+AUTHOR: Sean Chalmers, Jack Kelly
+#+EMAIL:
+
+* Workshop
+  https://github.com/qfpl/state-machine-testing-course
+  
+* Command
+  #+BEGIN_SRC haskell
+    data Command g m (state :: (* -> *) -> *) = forall input output.
+
+    (HTraversable input, Show (input Symbolic), Typeable output) =>
+
+    Command {
+
+        commandGen :: state Symbolic -> Maybe (g (input Symbolic))
+
+      , commandExecute :: input Concrete -> m output
+
+      , commandCallbacks :: [Callback input output state]
+ 
+      }
+  #+END_SRC
+  =g= is often MonadGen, =m= often MonadTest, MonadIO
+
+* Callbacks
+  #+BEGIN_SRC haskell
+    Require :: (state Symbolic -> input Symbolic -> Bool)
+
+    Update :: (forall v. Ord1 v => state v -> input v -> Var output v -> state v)
+  
+    Ensure :: (state Concrete -> state Concrete -> input Concrete -> output -> Test ())
+  #+END_SRC
+  
+* HTraversable
+  #+BEGIN_SRC haskell
+    class HTraversable t where
+      htraverse :: Applicative f => (forall a. g a -> f (h a)) -> t g -> f (t h)
+  #+END_SRC
