@@ -54,18 +54,14 @@ Solutions are on the `solutions` branch, one commit per level.
 You will need to run a few additional commands when using [stack](https://docs.haskellstack.org/en/stable/README/):
 
 ```bash
-
-# initialise
+# Initialise
 $ stack init
 
-# add dependencies
-$ stack add hedgehog
-$ stack add tasty
-$ stack add tasty-hedgehog
+# Replace `level01` with the level you are working on
+$ stack test :level01
 
-# watch files - swap out for relevant directory name
-$ stack test --file-watch :level01
-
+# REPL, if you want it
+$ stack ghci :level01
 ```
 
 ## Course Structure
