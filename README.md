@@ -49,6 +49,25 @@ a course about testing, each level is a separate `test-suite` in the
 
 Solutions are on the `solutions` branch, one commit per level.
 
+## Running with stack
+
+You will need to run a few additional commands when using [stack](https://docs.haskellstack.org/en/stable/README/):
+
+```bash
+
+# initialise
+$ stack init
+
+# add dependencies
+$ stack add hedgehog
+$ stack add tasty
+$ stack add tasty-hedgehog
+
+# watch files - swap out for relevant directory name
+$ stack test --file-watch :level01
+
+```
+
 ## Course Structure
 
 0. Setting Up
