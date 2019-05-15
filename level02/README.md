@@ -51,7 +51,17 @@ callbacks.
 
 The drink commands we set up in the previous level contain a lot of repeated
 boilerplate. We are able to use generators to express the three options for
-setting drink types as one `Command`. Collapse the following three `Command`s:
+setting drink types as one `Command`. Collapse the following three data types:
+
+* `SetDrinkCoffee`
+* `SetDrinkHotChocolate`
+* `SetDrinkTea`
+
+Into a single data type:
+
+* `SetDrinkType`
+
+Next collapse the following three `Command`s:
 
 * `cSetDrinkHotChocolate`
 * `cSetDrinkCoffee`

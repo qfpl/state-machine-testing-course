@@ -275,7 +275,7 @@ run to test our system. Note that the call to `C.reset` is _after_ the
 
 # Your Task
 
-Complete the definitions of `setDrinkHotChocolate` and `setDrinkTea`,
+Complete the definitions of `cSetDrinkHotChocolate` and `cSetDrinkTea`,
 and define necessary types and `HTraversable` instances for these
 commands. You'll retain more if you type out the other two commands by
 hand, and use typed holes and a running `ghcid` session so you can
