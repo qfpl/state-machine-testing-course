@@ -52,8 +52,9 @@ cSetDrinkCoffee
   => C.Machine
   -> Command g m Model
 cSetDrinkCoffee mach = Command gen exec
-  [ Update $ \(Model _ hasMug) _ _ -> Model Coffee hasMug
-  , Ensure $ \_ _ _ drink -> case drink of
+  [ Update $ \(Model _oldDrinkType hasMug) _input _execResult
+      -> Model Coffee hasMug
+  , Ensure $ \_oldModel _newModel _input drink -> case drink of
       C.Coffee{} -> success
       _ -> failure
   ]
@@ -71,8 +72,9 @@ cSetDrinkHotChocolate
   => C.Machine
   -> Command g m Model
 cSetDrinkHotChocolate mach = Command gen exec
-  [ Update $ \(Model _ hasMug) _ _ -> Model HotChocolate hasMug
-  , Ensure $ \_ _ _ drink -> case drink of
+  [ Update $ \(Model _oldDrinkType hasMug) _input _execResult
+      -> Model HotChocolate hasMug
+  , Ensure $ \_oldModel _newModel _input drink -> case drink of
       C.HotChocolate -> success
       _ -> failure
   ]
@@ -90,8 +92,9 @@ cSetDrinkTea
   => C.Machine
   -> Command g m Model
 cSetDrinkTea mach = Command gen exec
-  [ Update $ \(Model _ hasMug) _ _ -> Model Tea hasMug
-  , Ensure $ \_ _ _ drink -> case drink of
+  [ Update $ \(Model _oldDrinkType hasMug) _input _execResult
+      -> Model Tea hasMug
+  , Ensure $ \_oldModel _newModel _input drink -> case drink of
       C.Tea{} -> success
       _ -> failure
   ]

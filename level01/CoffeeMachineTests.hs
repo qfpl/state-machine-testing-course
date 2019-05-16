@@ -29,8 +29,8 @@ cSetDrinkCoffee
   => C.Machine
   -> Command g m Model
 cSetDrinkCoffee mach = Command gen exec
-  [ Update $ \_ _ _ -> Model Coffee
-  , Ensure $ \_ _ _ drink -> case drink of
+  [ Update $ \_oldModel _input _execResult -> Model Coffee
+  , Ensure $ \_oldModel _newModel _input drink -> case drink of
       C.Coffee{} -> success
       _ -> failure
   ]

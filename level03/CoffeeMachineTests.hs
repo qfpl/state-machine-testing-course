@@ -53,12 +53,12 @@ cSetDrinkType
   => C.Machine
   -> Command g m Model
 cSetDrinkType mach = Command gen exec
-  [ Update $ \m (SetDrinkType d) _ -> m
+  [ Update $ \m (SetDrinkType d) _execResult -> m
       & modelDrinkType .~ d
       & modelMilk      .~ 0
       & modelSugar     .~ 0
 
-  , Ensure $ \_ newM _ drink -> case (_modelDrinkType newM, drink) of
+  , Ensure $ \_oldM newM _input drink -> case (_modelDrinkType newM, drink) of
       (Coffee, C.Coffee{})           -> success
       (HotChocolate, C.HotChocolate) -> success
       (Tea, C.Tea{})                 -> success
@@ -82,9 +82,9 @@ cTakeMug
   => C.Machine
   -> Command g m Model
 cTakeMug mach = Command gen exec
-  [ Require $ \m _ -> m ^. modelHasMug
-  , Update $ \m _ _ -> m & modelHasMug .~ False
-  , Ensure $ \_ _ _ -> assert . isNothing
+  [ Require $ \m _input -> m ^. modelHasMug
+  , Update $ \m _input _execResult -> m & modelHasMug .~ False
+  , Ensure $ \_oldM _newM _input -> assert . isNothing
   ]
   where
     gen :: MonadGen g => Model Symbolic -> Maybe (g (TakeMug Symbolic))
@@ -101,9 +101,9 @@ cAddMug
   => C.Machine
   -> Command g m Model
 cAddMug mach = Command gen exec
-  [ Require $ \m _ -> m ^. modelHasMug . to not
-  , Update $ \m _ _ -> m & modelHasMug .~ True
-  , Ensure $ \_ _ _ -> assert . isJust
+  [ Require $ \m _input -> m ^. modelHasMug . to not
+  , Update $ \m _input _execResult -> m & modelHasMug .~ True
+  , Ensure $ \_oldM _newM _input -> assert . isJust
   ]
   where
     gen :: MonadGen g => Model Symbolic -> Maybe (g (AddMug Symbolic))
