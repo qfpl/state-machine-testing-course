@@ -1,4 +1,5 @@
 (("coffee-state" . ((nil . ((dante-target . "coffee-state")))))
+ ("level00" . ((nil . ((dante-target . "level00")))))
  ("level01" . ((nil . ((dante-target . "level01")))))
  ("level02" . ((nil . ((dante-target . "level02")))))
  ("level03" . ((nil . ((dante-target . "level03")))))

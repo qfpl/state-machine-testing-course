@@ -1,6 +1,6 @@
 module Main where
 
-import CoffeeMachineTests (propertyTests)
+import PropertyTests (propertyTests)
 import Test.Tasty (TestTree, defaultMain, testGroup)
 
 tests :: TestTree

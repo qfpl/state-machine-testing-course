@@ -40,6 +40,7 @@ library
 
 test-suite level00
   import:              level-setup
+  other-modules:       PropertyTests
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
   hs-source-dirs:      level00
