@@ -1,6 +1,8 @@
 # Level00
 
-This level is a terse introduction to 'property-based testing'. 
+This level is a terse introduction to 'property-based testing'. If you're
+already comfortable with property-based testing and writing your own generators,
+feel free to move on to Level01.
 
 A significant feature of property-based testing is the randomised generation of
 inputs for a given test. 
@@ -28,3 +30,14 @@ counterexample to the property.
 # Your Task
 
 Complete the tests by filling in the various generators and pre/post-conditions.
+
+
+
+## OPTIONALLY
+
+**NB:** These exercises are for your entertainment and education, they are not required for course.
+
+Complete the Prisms and define property tests to validate that a given prism
+abides by the [prism laws](https://hackage.haskell.org/package/lens/docs/Control-Lens-Prism.html).
+
+The laws are repeated in `LawPropertiesBonus.hs` for your convenience.

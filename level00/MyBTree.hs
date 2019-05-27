@@ -26,7 +26,7 @@ insert k v t = case t of
   Empty -> Node Empty (k, v) Empty
   Node l (k0,v0) r -> case compare k k0 of
     LT -> Node (insert k v l) (k0, v0) r
-    EQ -> Node l (k,v0) r
+    EQ -> Node l (k,v) r
     GT -> Node l (k0, v0) (insert k v r)
 
 deleteKey :: (Eq k, Ord k) => k -> MyBTree k a -> MyBTree k a
@@ -47,3 +47,4 @@ deleteKey k (Node l (k0,v0) r) = case compare k k0 of
   where
     findMin (Node Empty kv _) = kv
     findMin (Node leftT _ _)  = findMin leftT
+    findMin _                 = error "impossible?"
