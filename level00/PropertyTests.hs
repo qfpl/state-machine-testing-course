@@ -8,6 +8,7 @@ import           Control.Lens.TH     (makePrisms)
 
 import           Data.Function       (on)
 import           Data.List           (filter, insertBy, nubBy)
+import           Data.Monoid         (Endo (..))
 
 import           Test.Tasty          (TestTree, testGroup)
 import           Test.Tasty.Hedgehog (testProperty)
@@ -23,7 +24,7 @@ import           LawPropertiesBonus  (myBTreePrismLaws)
 
 ----------------------------------------------------------------------------------------------------
 addTen :: Int -> Int
-addTen = (+10)
+addTen = appEndo . foldMap Endo $ replicate 10 succ
 
 -- A simple property for the 'addTen' function, ensure that:
 --
@@ -40,7 +41,7 @@ prop_addTen = error "prop_addTen not implemented"
 --
 badReverse :: [a] -> [a]
 badReverse []     = []
-badReverse (x:xs) = x : reverse xs
+badReverse (_:xs) = reverse xs
 
 prop_badReverse :: Property
 prop_badReverse = property $ do
@@ -52,6 +53,9 @@ prop_badReverse = property $ do
 
 -- In this set of exercises we will build properties to ensure that our
 -- functions for a given data structure do what we expect.
+--
+-- These examples are lifted from a presentation by John Hughes: "Building on developer intuitions". 
+-- Which may be viewed at: https://www.youtube.com/watch?v=NcJOiQlzlXQ
 
 -- We will start with the following data structure.
 newtype Coin = Coin Int deriving (Eq, Show)
@@ -90,8 +94,11 @@ prop_addCoins_Combined = error "prop_addCoins not implemented"
 
 ----------------------------------------------------------------------------------------------------
 
--- Using the binary search tree that is defined in the MyBTree module, then
+-- Use the binary search tree that is defined in the MyBTree module, to
 -- complete the following functions.
+--
+-- These examples are lifted from a presentation by John Hughes: "Building on developer intuitions". 
+-- Which may be viewed at: https://www.youtube.com/watch?v=NcJOiQlzlXQ
 
 -- To test our assumptions, we'll need to generate random MyBTrees. Using the
 -- constructor functions from the MyBTree module, write a generator that can use
@@ -120,7 +127,7 @@ genMyBTreeVal = liftA2 (,) (Gen.int (Range.linear (-100) 100)) (Gen.enum 'a' 'z'
 --                   |                                            |
 --                   |                                            |
 --                   v                                            v
---          [(1, 'a'), (3,'c')] -> "insert" (2,'b') -> [(1, 'a'), (2,'b'), (3,'c')]
+--          [(1, 'a'), (3,'c')] -> modelInsert (2,'b') -> [(1, 'a'), (2,'b'), (3,'c')]
 --
 prop_MyBTree_Insert :: Property
 prop_MyBTree_Insert = error "prop_MyBTree_Insert not implemented"

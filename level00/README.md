@@ -14,7 +14,7 @@ addTen :: Int -> Int
 ```
 
 If our spec dictates the output should be equal to the input plus ten, over the
-range of 0 to 1000 inclusive. We can express that with a property test:
+range of 0 to 1000 inclusive, we can express that with a property test:
 
 ```haskell
 prop_myFunc :: Property
@@ -31,11 +31,9 @@ counterexample to the property.
 
 Complete the tests by filling in the various generators and pre/post-conditions.
 
+## OPTIONAL EXTENSION
 
-
-## OPTIONALLY
-
-**NB:** These exercises are for your entertainment and education, they are not required for course.
+**NB:** These exercises are for your entertainment and education, they are not required for the course.
 
 Complete the Prisms and define property tests to validate that a given prism
 abides by the [prism laws](https://hackage.haskell.org/package/lens/docs/Control-Lens-Prism.html).

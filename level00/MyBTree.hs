@@ -9,6 +9,10 @@ module MyBTree
   , toListWithKey
   ) where
 
+-- Data structure and functions inspired by a presentation by John Hughes: "Building on developer intuitions". 
+-- Which may be viewed at: https://www.youtube.com/watch?v=NcJOiQlzlXQ
+--
+
 data MyBTree k a
   = Empty
   | Node (MyBTree k a) (k,a) (MyBTree k a)
