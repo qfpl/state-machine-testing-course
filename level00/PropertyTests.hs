@@ -118,18 +118,19 @@ genMyBTreeVal = liftA2 (,) (Gen.int (Range.linear (-100) 100)) (Gen.enum 'a' 'z'
 -- with the laws of that typeclass. This is important as often the
 -- laws of a typeclass cannot be expressed in the types.
 --
--- Implement the 'Eq' instance for 'MyBTree' and then complete the
--- properties below to see if your instance is law abiding.
+-- NOTE: There are _two_ valid 'Eq' instances we could write:
+-- - Structural equality
+-- - Matching set of (key, value) pairs.
+--
+-- Implement the 'Eq' instance for 'MyBTree' that compares for two
+-- trees having a matching set of (key, value) pairs.
 --
 instance (Eq k, Eq a) => Eq (MyBTree k a) where
   (==) :: MyBTree k a -> MyBTree k a -> Bool
-  (==) Empty Empty                             = True
-  (==) (Node l (lk,la) r) (Node l0 (rk,ra) r0) = l == l0 && lk == rk && la == ra && r == r0
-  (==) Empty _                                 = False
-  (==) _ Empty                                 = False
+  (==) a b = toListWithKey a == toListWithKey b
 
 prop_MyBTree_LawfulEqInstance :: Property
-prop_MyBTree_LawfulEqInstance = withTests 1000 . property $ do
+prop_MyBTree_LawfulEqInstance = property $ do
   (x,y,z) <- forAll $ (,,)
              <$> genTree genMyBTreeVal
              <*> genTree genMyBTreeVal

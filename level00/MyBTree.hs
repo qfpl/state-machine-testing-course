@@ -21,7 +21,7 @@ data MyBTree k a
 fromList :: (Foldable f, Ord k) => f (k,a) -> MyBTree k a
 fromList = foldr (uncurry insert) Empty
 
-toListWithKey :: Ord k => MyBTree k a -> [(k,a)]
+toListWithKey :: MyBTree k a -> [(k,a)]
 toListWithKey Empty         = []
 toListWithKey (Node l kv r) = toListWithKey l <> [kv] <> toListWithKey r
 
