@@ -1,10 +1,12 @@
-{-# OPTIONS_GHC -Wno-unused-binds -Wno-unused-imports #-}
-{-# LANGUAGE RankNTypes #-}
+{-# OPTIONS_GHC -fno-warn-orphans -Wno-unused-binds -Wno-unused-imports #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE RankNTypes   #-}
 module PropertyTests (propertyTests) where
 
 import           Control.Applicative (liftA2)
 import           Control.Lens        (Prism', matching, preview, review)
 import           Control.Lens.TH     (makePrisms)
+import           Control.Monad       (when)
 
 import           Data.Function       (on)
 import           Data.List           (filter, insertBy, nubBy)
@@ -20,7 +22,6 @@ import qualified Hedgehog.Range      as Range
 import           MyBTree
 
 -- [OPTIONAL]
-import           LawPropertiesBonus  (myBTreePrismLaws)
 
 ----------------------------------------------------------------------------------------------------
 addTen :: Int -> Int
@@ -54,7 +55,7 @@ prop_badReverse = property $ do
 -- In this set of exercises we will build properties to ensure that our
 -- functions for a given data structure do what we expect.
 --
--- These examples are lifted from a presentation by John Hughes: "Building on developer intuitions". 
+-- These examples are lifted from a presentation by John Hughes: "Building on developer intuitions".
 -- Which may be viewed at: https://www.youtube.com/watch?v=NcJOiQlzlXQ
 
 -- We will start with the following data structure.
@@ -97,7 +98,7 @@ prop_addCoins_Combined = error "prop_addCoins not implemented"
 -- Use the binary search tree that is defined in the MyBTree module, to
 -- complete the following functions.
 --
--- These examples are lifted from a presentation by John Hughes: "Building on developer intuitions". 
+-- These examples are lifted from a presentation by John Hughes: "Building on developer intuitions".
 -- Which may be viewed at: https://www.youtube.com/watch?v=NcJOiQlzlXQ
 
 -- To test our assumptions, we'll need to generate random MyBTrees. Using the
@@ -112,7 +113,44 @@ genTree genKV = fromList <$> Gen.list (Range.linear 0 100) genKV
 genMyBTreeVal :: MonadGen m => m (Int, Char)
 genMyBTreeVal = liftA2 (,) (Gen.int (Range.linear (-100) 100)) (Gen.enum 'a' 'z')
 
--- We're not ready to write a property test for inserting values into our binary
+-- We can also use property based testing to ensure that when we
+-- implement a typeclass instance, that implementation will comply
+-- with the laws of that typeclass. This is important as often the
+-- laws of a typeclass cannot be expressed in the types.
+--
+-- Implement the 'Eq' instance for 'MyBTree' and then complete the
+-- properties below to see if your instance is law abiding.
+--
+instance (Eq k, Eq a) => Eq (MyBTree k a) where
+  (==) :: MyBTree k a -> MyBTree k a -> Bool
+  (==) Empty Empty                             = True
+  (==) (Node l (lk,la) r) (Node l0 (rk,ra) r0) = l == l0 && lk == rk && la == ra && r == r0
+  (==) Empty _                                 = False
+  (==) _ Empty                                 = False
+
+prop_MyBTree_LawfulEqInstance :: Property
+prop_MyBTree_LawfulEqInstance = withTests 1000 . property $ do
+  (x,y,z) <- forAll $ (,,)
+             <$> genTree genMyBTreeVal
+             <*> genTree genMyBTreeVal
+             <*> genTree genMyBTreeVal
+
+  annotate "Reflexivity: x == x = True"
+  (x == x) === True
+
+  annotate "Symmetry: x == y = y == x"
+  (x == y) === (y == x)
+
+  annotate "Transitivity: if x == y && y == x = True then x == z = True"
+  when (x == y && y == z) $ (x == z) === True
+
+  annotate "Substitutivity: if x == y = True and (f :: (Eq a, Eq b) => a -> b) then f x == f y = True"
+  when (x == y) $ (null x == null y) === True
+
+  annotate "Negation: x /= y = not (x == y)"
+  (x /= y) === not (x == y)
+
+-- We're now ready to write a property test for inserting values into our binary
 -- search tree.
 
 -- To do this we need a 'model' that we know is correct to validate our
@@ -140,14 +178,16 @@ prop_MyBTree_Delete = error "prop_MyBTree_Delete not implemented"
   --
 propertyTests :: TestTree
 propertyTests = testGroup "Level00 - Property Tests"
-  [ testProperty "Addition still works" prop_addTen
-  , testProperty "Bad reverse is bad" prop_badReverse
-  , testProperty "Add Coins (Normal)" prop_addCoins_Normal
-  , testProperty "Add Coins (Overflow)" prop_addCoins_Overflow
-  , testProperty "Add Coins (Combined)" prop_addCoins_Combined
+  [
+  --   testProperty "Addition still works" prop_addTen
+  -- , testProperty "Bad reverse is bad" prop_badReverse
+  -- , testProperty "Add Coins (Normal)" prop_addCoins_Normal
+  -- , testProperty "Add Coins (Overflow)" prop_addCoins_Overflow
+  -- , testProperty "Add Coins (Combined)" prop_addCoins_Combined
 
-  , testProperty "BST insert" prop_MyBTree_Insert
-  , testProperty "BST delete" prop_MyBTree_Delete
+    testProperty "Lawful Eq instance for MyBTree" prop_MyBTree_LawfulEqInstance
+  -- , testProperty "BST insert" prop_MyBTree_Insert
+  -- , testProperty "BST delete" prop_MyBTree_Delete
 
   -- OPTIONAL, exercises for this property are in 'LawPropertiesBonus.hs'
   --

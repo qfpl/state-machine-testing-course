@@ -1,0 +1,2 @@
+:set -isrc:level00
+:load level00/Main.hs

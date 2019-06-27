@@ -1,8 +1,8 @@
 {-# OPTIONS_GHC -Wno-unused-binds -Wno-unused-imports #-}
 {-# LANGUAGE RankNTypes #-}
 module LawPropertiesBonus 
-  ( myBTreePrismLaws
-  , firstPrismLaw
+  ( 
+    firstPrismLaw
   , secondPrismLaw
   , thirdPrismLaw
   , _Empty
@@ -44,6 +44,3 @@ secondPrismLaw _gen _p = error "secondPrismLaw not implemented"
 -- matching l s ≡ Left t ==> matching l t ≡ Left s
 thirdPrismLaw :: (Eq a, Show a, Eq s, Show s) => Gen s -> Prism' s a -> Property
 thirdPrismLaw _gen _p = error "thirdPrismLaw not implemented"
-
-myBTreePrismLaws :: Property
-myBTreePrismLaws = error "Law tests for MyBTree prisms not yet implemented"
