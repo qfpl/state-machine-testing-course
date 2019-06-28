@@ -25,6 +25,7 @@ common level-setup
   build-depends:       base >= 4.11 && < 4.13
                      , state-machine-testing-course
                      , hedgehog >= 0.6 && < 0.7
+                     , hedgehog-fn
                      , lens > 4.15 && < 4.18
                      , tasty >= 1.1 && < 1.3
                      , tasty-hedgehog >= 0.2 && < 0.3
@@ -45,6 +46,7 @@ test-suite level00
   build-depends:       base >= 4.11 && < 4.13
                      , state-machine-testing-course
                      , hedgehog >= 0.6 && < 0.7
+                     , hedgehog-fn
                      , lens > 4.15 && < 4.18
                      , tasty >= 1.1 && < 1.3
                      , tasty-hedgehog >= 0.2 && < 0.3

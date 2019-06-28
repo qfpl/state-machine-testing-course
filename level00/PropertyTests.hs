@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans -Wno-unused-binds -Wno-unused-imports #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE RankNTypes   #-}
+{-# LANGUAGE TypeApplications #-}
 module PropertyTests (propertyTests) where
 
 import           Control.Applicative (liftA2)
@@ -18,6 +19,7 @@ import           Test.Tasty.Hedgehog (testProperty)
 import           Hedgehog
 import qualified Hedgehog.Gen        as Gen
 import qualified Hedgehog.Range      as Range
+import qualified Hedgehog.Function   as Fn
 
 import           MyBTree
 
@@ -57,7 +59,7 @@ prop_badReverse = property $ do
 --
 -- These examples are lifted from a presentation by John Hughes: "Building on developer intuitions".
 -- Which may be viewed at: https://www.youtube.com/watch?v=NcJOiQlzlXQ
-
+--
 -- We will start with the following data structure.
 newtype Coin = Coin Int deriving (Eq, Show)
 
@@ -93,6 +95,12 @@ prop_addCoins_Overflow = error "prop_addCoins_Overflow not implemented"
 prop_addCoins_Combined :: Property
 prop_addCoins_Combined = error "prop_addCoins not implemented"
 
+----------------------------------NOTE-----------------------------------
+-- If you're crusing through these exercises, jump straight to         --
+-- 'level01' instead of working through absolutely everything. The     --
+-- state machine testing is the focus of the course, after all!.       --
+-------------------------------------------------------------------------
+
 ----------------------------------------------------------------------------------------------------
 
 -- Use the binary search tree that is defined in the MyBTree module, to
@@ -113,17 +121,23 @@ genTree genKV = fromList <$> Gen.list (Range.linear 0 100) genKV
 genMyBTreeVal :: MonadGen m => m (Int, Char)
 genMyBTreeVal = liftA2 (,) (Gen.int (Range.linear (-100) 100)) (Gen.enum 'a' 'z')
 
+genIntTree :: MonadGen m => m (MyBTree Int Int)
+genIntTree = genTree $ liftA2 (,) (Gen.int (Range.linear (-100) 100)) (Gen.int (Range.linear 99 399))
+
 -- We can also use property based testing to ensure that when we
 -- implement a typeclass instance, that implementation will comply
 -- with the laws of that typeclass. This is important as often the
 -- laws of a typeclass cannot be expressed in the types.
 --
--- NOTE: There are _two_ valid 'Eq' instances we could write:
--- - Structural equality
--- - Matching set of (key, value) pairs.
+-- The Eq instance from deriving Eq is too granular: trees with the
+-- same content but different structure will be considered unequal,
+-- which will be surprising to our callers.
 --
 -- Implement the 'Eq' instance for 'MyBTree' that compares for two
 -- trees having a matching set of (key, value) pairs.
+--
+-- The properties and more info can be found in the documentation for the 'Eq' class on Hackage:
+-- https://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Eq.html#t:Eq
 --
 instance (Eq k, Eq a) => Eq (MyBTree k a) where
   (==) :: MyBTree k a -> MyBTree k a -> Bool
@@ -145,15 +159,30 @@ prop_MyBTree_LawfulEqInstance = property $ do
   annotate "Transitivity: if x == y && y == x = True then x == z = True"
   when (x == y && y == z) $ (x == z) === True
 
-  annotate "Substitutivity: if x == y = True and (f :: (Eq a, Eq b) => a -> b) then f x == f y = True"
-  when (x == y) $ (null x == null y) === True
-
   annotate "Negation: x /= y = not (x == y)"
   (x /= y) === not (x == y)
 
+  ----- Use 'hedgehog-fn' to generate functions to test substitutivity.
+
+  -- There is no 'Generic' instance for Char, so generate some
+  -- 'MyBTree Int Int' to satisfy the requirements for 'hedgehog-fn'
+  -- function generation.
+  (i,j) <- forAll $ liftA2 (,) genIntTree genIntTree
+  g <- Fn.forAllFn $ Fn.fn @(MyBTree Int Int) Gen.bool 
+
+  annotate "Substitutivity: if x == y = True and (g :: (Eq a, Eq b) => a -> b) then f x == f y = True"
+  when (i == j) $ (g i == g j) === True
+  -----
+
+----------------------------------NOTE-----------------------------------
+-- If you're crusing through these exercises, jump straight to         --
+-- 'level01' instead of working through absolutely everything. The     --
+-- state machine testing is the focus of the course, after all!.       --
+-------------------------------------------------------------------------
+
 -- We're now ready to write a property test for inserting values into our binary
 -- search tree.
-
+--
 -- To do this we need a 'model' that we know is correct to validate our
 -- assumptions for the binary search tree. The simpler the better so we can be
 -- confident that our representation is correct.
