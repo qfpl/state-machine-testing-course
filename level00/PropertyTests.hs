@@ -137,7 +137,7 @@ genIntTree = genTree $ liftA2 (,) (Gen.int (Range.linear (-100) 100)) (Gen.int (
 -- trees having a matching set of (key, value) pairs.
 --
 -- The properties and more info can be found in the documentation for the 'Eq' class on Hackage:
--- https://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Eq.html#t:Eq
+-- https://hackage.haskell.org/package/base/docs/Data-Eq.html#t:Eq
 --
 instance (Eq k, Eq a) => Eq (MyBTree k a) where
   (==) :: MyBTree k a -> MyBTree k a -> Bool
@@ -162,12 +162,13 @@ prop_MyBTree_LawfulEqInstance = property $ do
   annotate "Negation: x /= y = not (x == y)"
   (x /= y) === not (x == y)
 
-  ----- Use 'hedgehog-fn' to generate functions to test substitutivity.
+  ----- An example of using 'hedgehog-fn' to generate functions to test substitutivity.
 
   -- There is no 'Generic' instance for Char, so generate some
   -- 'MyBTree Int Int' to satisfy the requirements for 'hedgehog-fn'
   -- function generation.
   (i,j) <- forAll $ liftA2 (,) genIntTree genIntTree
+  -- Generate a function of the following type: 'g :: MyBTree Int Int -> Bool'
   g <- Fn.forAllFn $ Fn.fn @(MyBTree Int Int) Gen.bool 
 
   annotate "Substitutivity: if x == y = True and (g :: (Eq a, Eq b) => a -> b) then f x == f y = True"

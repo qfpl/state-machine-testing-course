@@ -55,6 +55,8 @@ test-suite level00
                      , MyBTree
                      -- [OPTIONAL]
                      , LawPropertiesBonus
+                     -- [For reference]
+                     , ExampleModelProperties
 
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
