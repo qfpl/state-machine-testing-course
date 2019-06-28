@@ -48,7 +48,7 @@ badReverse (_:xs) = reverse xs
 
 prop_badReverse :: Property
 prop_badReverse = property $ do
-  xs <- forAll (Gen.list (Range.linear 0 1000) Gen.bool)
+  xs <- forAll $ Gen.list (Range.linear 0 1000) Gen.bool
   badReverse (badReverse xs) === xs
   -- [BONUS]: Are there other properties for reversing a list that could make this test more robust?
 
@@ -149,7 +149,6 @@ prop_MyBTree_LawfulEqInstance = property $ do
              <$> genTree genMyBTreeVal
              <*> genTree genMyBTreeVal
              <*> genTree genMyBTreeVal
-
   annotate "Reflexivity: x == x = True"
   (x == x) === True
 
@@ -217,15 +216,22 @@ propertyTests = testGroup "Level00 - Property Tests"
   -- , testProperty "Add Coins (Combined)" prop_addCoins_Combined
 
     testProperty "Lawful Eq instance for MyBTree" prop_MyBTree_LawfulEqInstance
+  , testProperty "Don't use structural equality" prop_avoid_structural_eq
   -- , testProperty "BST insert" prop_MyBTree_Insert
   -- , testProperty "BST delete" prop_MyBTree_Delete
-
-  -- OPTIONAL, exercises for this property are in 'LawPropertiesBonus.hs'
-  --
-  -- These implementing prisms and writing property tests to validate that the
-  -- given prism is law abiding. It is an optional exercise for your own
-  -- enjoyment and to demonstrate that property based testing can provide
-  -- _immense_ power for validating necessary assumptions.
-  --
-  -- , testProperty "Prism Laws Hold for MyBTree" myBTreePrismLaws
   ]
+
+----------------------------------------------------------------------------------------------------
+-- Extra test to make sure you're not using structural equality.
+prop_avoid_structural_eq :: Property
+prop_avoid_structural_eq = withTests 1 . property $ do
+  let
+    t1 = fromList [(1,'a'), (2, 'b'), (3, 'c')]
+    t2 = Node (Node (Node Empty (1,'a') Empty) (2, 'b') Empty) (3,'c') Empty
+
+  (t1 == t2) /== (t1 `structuralEq` t2)
+  where
+    structuralEq Empty Empty                               = True
+    structuralEq (Node l0 (k0,a0) r0) (Node l1 (k1,a1) r1) = l0 == l1 && k0 == k1 && a0 == a1 && r0 == r1
+    structuralEq Empty _                                   = False
+    structuralEq _ Empty                                   = False

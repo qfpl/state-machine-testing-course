@@ -27,7 +27,7 @@ instance (Arg k, Arg v) => Arg (MyBTree k v)
 instance (Vary k, Vary v) => Vary (MyBTree k v)
 
 fromList :: (Foldable f, Ord k) => f (k,a) -> MyBTree k a
-fromList = foldr (uncurry insert) Empty
+fromList = foldl (\m (k, a) -> insert k a m) Empty
 
 toListWithKey :: MyBTree k a -> [(k,a)]
 toListWithKey Empty         = []

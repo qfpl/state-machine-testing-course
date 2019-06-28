@@ -53,8 +53,6 @@ test-suite level00
 
   other-modules:       PropertyTests
                      , MyBTree
-                     -- [OPTIONAL]
-                     , LawPropertiesBonus
                      -- [For reference]
                      , ExampleModelProperties
 
