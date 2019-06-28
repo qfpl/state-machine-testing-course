@@ -216,20 +216,38 @@ propertyTests = testGroup "Level00 - Property Tests"
   -- , testProperty "Add Coins (Combined)" prop_addCoins_Combined
 
     testProperty "Lawful Eq instance for MyBTree" prop_MyBTree_LawfulEqInstance
-  , testProperty "Don't use structural equality" prop_avoid_structural_eq
   -- , testProperty "BST insert" prop_MyBTree_Insert
   -- , testProperty "BST delete" prop_MyBTree_Delete
+
+  , testProperty "Using intended Eq instance implementation" prop_desired_eq_instance
   ]
 
 ----------------------------------------------------------------------------------------------------
--- Extra test to make sure you're not using structural equality.
-prop_avoid_structural_eq :: Property
-prop_avoid_structural_eq = withTests 1 . property $ do
+-- Extra test to make sure you're using the intended Eq instance,
+-- other instances should cause this test to fail. Will need more
+-- tests as participants become more tricksy, precious.
+--
+prop_desired_eq_instance :: Property
+prop_desired_eq_instance = withTests 1 . property $ do
   let
-    t1 = fromList [(1,'a'), (2, 'b'), (3, 'c')]
-    t2 = Node (Node (Node Empty (1,'a') Empty) (2, 'b') Empty) (3,'c') Empty
+    kvs = [(1,'a'), (2, 'b'), (3, 'c')]
+    kvsDiffVal = [(1,'a'), (2, 'd'), (3, 'c')]
+    kvsDiffKey = [(1,'a'), (2, 'b'), (5, 'c')]
 
+    -- These will contain matching keys and values but will be structurally different.
+    t1 = fromList kvs           -- Node Empty (1,'a') (Node Empty (2,'b') (Node Empty (3, 'c') Empty))
+    t2 = fromList (reverse kvs) -- Node (Node (Node Empty (1,'a') Empty) (2, 'b') Empty) (3,'c') Empty
+    t3 = fromList kvsDiffVal
+    t4 = fromList kvsDiffKey
+
+  annotate "found structural equality"
   (t1 == t2) /== (t1 `structuralEq` t2)
+
+  annotate "found key only equality"
+  (t1 == t3) === False
+
+  annotate "found value only equality"
+  (t1 == t4) === False
   where
     structuralEq Empty Empty                               = True
     structuralEq (Node l0 (k0,a0) r0) (Node l1 (k1,a1) r1) = l0 == l1 && k0 == k1 && a0 == a1 && r0 == r1
