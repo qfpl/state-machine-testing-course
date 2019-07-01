@@ -32,16 +32,16 @@ data Model k v
 
 -- We need to evalute our DSL using 'MyBTree'
 eval :: Ord k => Model k v -> MyBTree k v
-eval (Insert k v m) = insert k v (eval m)
-eval (Delete k m) = deleteKey k (eval m)
+eval (Insert k v m) = insert k v $ eval m
+eval (Delete k m) = deleteKey k $ eval m
 eval EmptyModel = Empty
 
 -- We also need to be able to evaluate the actions against a
--- reference. For this we will use the 'Set' type from the
+-- reference. For this we will use the 'Map' type from the
 -- 'containers' package.
 model :: Ord k => Model k v -> Map k v
-model (Insert k v m) = Map.insert k v (model m)
-model (Delete k m) = Map.delete k (model m)
+model (Insert k v m) = Map.insert k v $ model m
+model (Delete k m) = Map.delete k $ model m
 model EmptyModel = Map.empty
 
 -- We can then write a general property that can accept a 'Model',
@@ -61,12 +61,12 @@ prop_mybtree m = toListWithKey (eval m) === Map.toAscList (model m)
 
 -- Some unit tests
 prop_single_insert :: Property
-prop_single_insert = withTests 1 . property $
-  prop_mybtree (Insert 1 'a' EmptyModel)
+prop_single_insert = withTests 1 . property . prop_mybtree $
+  Insert 1 'a' EmptyModel
 
 prop_single_delete :: Property
-prop_single_delete = withTests 1 . property $
-  prop_mybtree (Delete 1 (Insert 1 'a' EmptyModel))
+prop_single_delete = withTests 1 . property . prop_mybtree $
+  Delete 1 (Insert 1 'a' EmptyModel)
 
 -- These unit tests leave something to be desired but hopefully they
 -- serve as a sufficient demonstration of the point. Namely, they lack
@@ -74,10 +74,11 @@ prop_single_delete = withTests 1 . property $
 
 -- About that generator...
 --
--- Our model is a recursive structure, so we leverage the functions in
--- Hedgehog to manage that recursion for us. Lest we have an infinite
--- model. This also allows Hedgehog greater control of shrinking which
+-- Our model is a recursive structure. Hedgehog provides functions to
+-- manage recursive generators, lest they produce infinite structures by
+-- accident. This also allows Hedgehog greater control of shrinking which
 -- provides greater accuracy for us.
+--
 genModel :: (Show k, Show v, Eq v, Ord k, MonadGen m) => m k -> m v -> m (Model k v)
 genModel genK genV = Gen.recursive Gen.choice
   -- Hedgehog shrinks towards the non-recursive base case(s)

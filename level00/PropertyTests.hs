@@ -121,9 +121,6 @@ genTree genKV = fromList <$> Gen.list (Range.linear 0 100) genKV
 genMyBTreeVal :: MonadGen m => m (Int, Char)
 genMyBTreeVal = liftA2 (,) (Gen.int (Range.linear (-100) 100)) (Gen.enum 'a' 'z')
 
-genIntTree :: MonadGen m => m (MyBTree Int Int)
-genIntTree = genTree $ liftA2 (,) (Gen.int (Range.linear (-100) 100)) (Gen.int (Range.linear 99 399))
-
 -- We can also use property based testing to ensure that when we
 -- implement a typeclass instance, that implementation will comply
 -- with the laws of that typeclass. This is important as often the
@@ -141,36 +138,41 @@ genIntTree = genTree $ liftA2 (,) (Gen.int (Range.linear (-100) 100)) (Gen.int (
 --
 instance (Eq k, Eq a) => Eq (MyBTree k a) where
   (==) :: MyBTree k a -> MyBTree k a -> Bool
-  (==) a b = toListWithKey a == toListWithKey b
+  (==) = error "Eq instance for MyBTree not yet implemented"
 
 prop_MyBTree_LawfulEqInstance :: Property
 prop_MyBTree_LawfulEqInstance = property $ do
-  (x,y,z) <- forAll $ (,,)
-             <$> genTree genMyBTreeVal
-             <*> genTree genMyBTreeVal
-             <*> genTree genMyBTreeVal
+  (x,y,z) <- forAll $ (,,) <$> genTree genMyBTreeVal <*> genTree genMyBTreeVal <*> genTree genMyBTreeVal
+
   annotate "Reflexivity: x == x = True"
-  (x == x) === True
+  failure
 
   annotate "Symmetry: x == y = y == x"
-  (x == y) === (y == x)
+  failure
 
   annotate "Transitivity: if x == y && y == x = True then x == z = True"
-  when (x == y && y == z) $ (x == z) === True
+  failure
 
   annotate "Negation: x /= y = not (x == y)"
-  (x /= y) === not (x == y)
+  failure
 
-  ----- An example of using 'hedgehog-fn' to generate functions to test substitutivity.
+  -- An example of using 'hedgehog-fn' to generate functions to test
+  -- substitutivity. We've includeded this rather than leave it as an
+  -- exercise as function generation can be quite wild.
+  --
+  -- There is no 'Generic' instance for Char, Int however does have
+  -- such an instance. So generate 'MyBTree Int Int' to satisfy the
+  -- requirements for 'hedgehog-fn' function generation.
+  let
+    genKey = Gen.int (Range.linear (-100) 100)
+    genVal = Gen.int (Range.linear 200 500)
+    genIntTree = genTree $ liftA2 (,) genKey genVal
 
-  -- There is no 'Generic' instance for Char, so generate some
-  -- 'MyBTree Int Int' to satisfy the requirements for 'hedgehog-fn'
-  -- function generation.
   (i,j) <- forAll $ liftA2 (,) genIntTree genIntTree
-  -- Generate a function of the following type: 'g :: MyBTree Int Int -> Bool'
+  -- This generates a function of the following type: 'g :: MyBTree Int Int -> Bool'
   g <- Fn.forAllFn $ Fn.fn @(MyBTree Int Int) Gen.bool 
 
-  annotate "Substitutivity: if x == y = True and (g :: (Eq a, Eq b) => a -> b) then f x == f y = True"
+  annotate "Substitutivity: if x == y = True and g is a function whose return type is an instance of Eq, then g x == g y = True"
   when (i == j) $ (g i == g j) === True
   -----
 
@@ -205,28 +207,30 @@ prop_MyBTree_Delete :: Property
 prop_MyBTree_Delete = error "prop_MyBTree_Delete not implemented"
 
 ----------------------------------------------------------------------------------------------------
-  --
+--
 propertyTests :: TestTree
 propertyTests = testGroup "Level00 - Property Tests"
   [
-  --   testProperty "Addition still works" prop_addTen
-  -- , testProperty "Bad reverse is bad" prop_badReverse
-  -- , testProperty "Add Coins (Normal)" prop_addCoins_Normal
-  -- , testProperty "Add Coins (Overflow)" prop_addCoins_Overflow
-  -- , testProperty "Add Coins (Combined)" prop_addCoins_Combined
+    testProperty "Addition still works" prop_addTen
+  , testProperty "Bad reverse is bad" prop_badReverse
+  , testProperty "Add Coins (Normal)" prop_addCoins_Normal
+  , testProperty "Add Coins (Overflow)" prop_addCoins_Overflow
+  , testProperty "Add Coins (Combined)" prop_addCoins_Combined
 
-    testProperty "Lawful Eq instance for MyBTree" prop_MyBTree_LawfulEqInstance
-  -- , testProperty "BST insert" prop_MyBTree_Insert
-  -- , testProperty "BST delete" prop_MyBTree_Delete
+  , testProperty "Lawful Eq instance for MyBTree" prop_MyBTree_LawfulEqInstance
+  , testProperty "BST insert" prop_MyBTree_Insert
+  , testProperty "BST delete" prop_MyBTree_Delete
 
   , testProperty "Using intended Eq instance implementation" prop_desired_eq_instance
   ]
 
-----------------------------------------------------------------------------------------------------
--- Extra test to make sure you're using the intended Eq instance,
--- other instances should cause this test to fail. Will need more
--- tests as participants become more tricksy, precious.
---
+----------------------------------------------------------------------
+--                                                                  --
+-- Extra test to make sure you're using the intended Eq instance,   --
+-- other instances should cause this test to fail. Will need more   --
+-- tests as participants become more tricksy, precious.             --
+--                                                                  --
+----------------------------------------------------------------------
 prop_desired_eq_instance :: Property
 prop_desired_eq_instance = withTests 1 . property $ do
   let
