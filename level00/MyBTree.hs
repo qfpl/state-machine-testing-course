@@ -11,7 +11,7 @@ module MyBTree
   ) where
 
 import GHC.Generics
-
+import Data.Foldable (foldl')
 import Hedgehog.Function
 
 -- Data structure and functions inspired by a presentation by John Hughes: "Building on developer intuitions". 
