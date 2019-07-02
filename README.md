@@ -49,6 +49,42 @@ a course about testing, each level is a separate `test-suite` in the
 
 Solutions are on the `solutions` branch, one commit per level.
 
+## Running tests with `ghcid`
+
+[`ghcid`](https://github.com/ndmitchell/ghcid) is a helpful tool that
+helps to automate the 'edit-save-build' workflow. `ghcid` can also
+execute code or perform other actions after a successful build. In
+this case we're going to setup `ghcid` to run our tests whenever our
+code is in a buildable state.
+
+1) Create a `dev.ghci` script in the root of this project to prepare our repl
+and load the required modules:
+
+```
+:set -isrc:levelNN
+:load levelNN/Main.hs
+```
+
+The first line indicates which folders `ghci` will include when looking for any
+of our code. We can provide multiple directories by providing a colon (`:`)
+separated list.
+
+The second line loads the module that contains the function we want to execute
+when the code is buildable. In this case it is `main :: IO ()` function that
+runs our tests.
+
+2) Tell `ghcid` to use our `dev.ghci` and also what command to run when
+everything is 'All good'. Additionally we will instruct `ghcid` to ignore
+warnings:
+
+```shell
+$ ghcid -c 'ghci -ghci-script="dev.ghci"' --test=:main -W
+```
+
+We use `ghci` instead of `cabal new-repl` so we can provide the `dev.ghci` to
+setup our repl environment. The `--test=:main` is the repl command that will be
+executed. Finally `-W` tells `ghcid` to ignore any warnings from compilation.
+
 ## Running with stack
 
 You will need to run a few additional commands when using [stack](https://docs.haskellstack.org/en/stable/README/):

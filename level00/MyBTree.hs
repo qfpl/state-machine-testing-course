@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveFoldable    #-}
 {-# LANGUAGE DeriveFunctor     #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DeriveGeneric     #-}
 module MyBTree
   ( MyBTree (..)
   , insert
@@ -9,6 +10,10 @@ module MyBTree
   , toListWithKey
   ) where
 
+import GHC.Generics
+import Data.Foldable (foldl')
+import Hedgehog.Function
+
 -- Data structure and functions inspired by a presentation by John Hughes: "Building on developer intuitions". 
 -- Which may be viewed at: https://www.youtube.com/watch?v=NcJOiQlzlXQ
 --
@@ -16,12 +21,15 @@ module MyBTree
 data MyBTree k a
   = Empty
   | Node (MyBTree k a) (k,a) (MyBTree k a)
-  deriving (Show, Functor, Traversable, Foldable)
+  deriving (Show, Functor, Traversable, Foldable, Generic)
+
+instance (Arg k, Arg v) => Arg (MyBTree k v)
+instance (Vary k, Vary v) => Vary (MyBTree k v)
 
 fromList :: (Foldable f, Ord k) => f (k,a) -> MyBTree k a
-fromList = foldr (uncurry insert) Empty
+fromList = foldl' (\m (k, a) -> insert k a m) Empty
 
-toListWithKey :: Ord k => MyBTree k a -> [(k,a)]
+toListWithKey :: MyBTree k a -> [(k,a)]
 toListWithKey Empty         = []
 toListWithKey (Node l kv r) = toListWithKey l <> [kv] <> toListWithKey r
 
