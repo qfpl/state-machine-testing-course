@@ -11,6 +11,7 @@ support for testing stateful systems.
     * [Docs](https://github.com/rickynils/scalacheck/blob/master/doc/UserGuide.md#stateful-testing)
     * [Presentation](http://parleys.com/play/53a7d2d0e4b0543940d9e566)
   * [Hedgehog](https://bintray.com/hedgehogqa/scala-hedgehog)
+    * [State-Based Property Testing Tutorial](https://github.com/hedgehogqa/scala-hedgehog/blob/master/doc/state-tutorial.md)
 
 * R: 
   * [Hedgehog](https://cran.r-project.org/web/packages/hedgehog/index.html)
