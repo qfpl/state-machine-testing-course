@@ -4,8 +4,8 @@ import Hedgehog (MonadGen, PropertyT, Property, property, forAll, (===), withTes
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
-import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
+import Data.Map (Map)
+import qualified Data.Map as Map
 
 import MyBTree
 

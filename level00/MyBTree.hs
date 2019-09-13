@@ -8,13 +8,15 @@ module MyBTree
   , deleteKey
   , fromList
   , toListWithKey
+  , keys
+  , valid
   ) where
 
 import GHC.Generics
 import Data.Foldable (foldl')
 import Hedgehog.Function
 
--- Data structure and functions inspired by a presentation by John Hughes: "Building on developer intuitions". 
+-- Data structure and functions inspired by a presentation by John Hughes: "Building on developer intuitions".
 -- Which may be viewed at: https://www.youtube.com/watch?v=NcJOiQlzlXQ
 --
 
@@ -32,6 +34,17 @@ fromList = foldl' (\m (k, a) -> insert k a m) Empty
 toListWithKey :: MyBTree k a -> [(k,a)]
 toListWithKey Empty         = []
 toListWithKey (Node l kv r) = toListWithKey l <> [kv] <> toListWithKey r
+
+keys :: MyBTree k a -> [k]
+keys = fmap fst . toListWithKey
+
+valid :: Ord k => MyBTree k a -> Bool
+valid Empty = True
+valid (Node l (k,_) r) =
+  valid l &&            -- left branch is a valid tree
+  valid r &&            -- right branch is a valid tree
+  all (< k) (keys l) && -- keys to the left are less than the current key
+  all (> k) (keys r)    -- keys to the right are greater than the current key
 
 insert :: Ord k => k -> a -> MyBTree k a -> MyBTree k a
 insert k v t = case t of

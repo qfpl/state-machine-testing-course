@@ -109,17 +109,37 @@ prop_addCoins_Combined = error "prop_addCoins not implemented"
 -- These examples are lifted from a presentation by John Hughes: "Building on developer intuitions".
 -- Which may be viewed at: https://www.youtube.com/watch?v=NcJOiQlzlXQ
 
--- To test our assumptions, we'll need to generate random MyBTrees. Using the
--- constructor functions from the MyBTree module, write a generator that can use
--- a given generator to populate the tree.
-genTree :: (Ord k, MonadGen m) => m (k,v) -> m (MyBTree k v)
-genTree genKV = fromList <$> Gen.list (Range.linear 0 100) genKV
+-- To test our assumptions, we'll need to generate random MyBTrees.
+-- Use the constructors from the MyBTree module and write a
+-- generator for MyBTrees.
+genTree0 :: (Ord k, MonadGen g) => g k -> g v -> g (MyBTree k v)
+genTree0 genK genV = Gen.recursive Gen.choice
+  -- Non-recursive component of our tree
+  [ Gen.constant Empty ]
+  -- Recursive component of our tree
+  [ nodeGen ]
+  where
+    nodeGen = do
+      k <- genK
+      v <- genV
+      let
+        genLK = Gen.filter (< k) genK
+        genRK = Gen.filter (> k) genK
+
+      Gen.subterm2 (genTree0 genLK genV) (genTree0 genRK genV) (\l r -> Node l (k,v) r)
+
+genTree :: (Ord k, MonadGen m) => (m k, m v) -> m (MyBTree k v)
+genTree = uncurry genTree0
 
 -- To populate our tree, we need to generate some keys and their respective
 -- values. We will make Hedgehog do this for us by reusing some of the built-in
 -- generators.
-genMyBTreeVal :: MonadGen m => m (Int, Char)
-genMyBTreeVal = liftA2 (,) (Gen.int (Range.linear (-100) 100)) (Gen.enum 'a' 'z')
+genMyBTreeVal :: MonadGen m => (m Int, m Char)
+genMyBTreeVal = (Gen.int (Range.linear 0 1000), Gen.enum 'a' 'z')
+
+-- Confirm that we're generating valid data
+prop_tree_gen_valid :: Property
+prop_tree_gen_valid = property $ forAll (genTree genMyBTreeVal) >>= assert . valid
 
 -- We can also use property based testing to ensure that when we
 -- implement a typeclass instance, that implementation will comply
@@ -166,11 +186,11 @@ prop_MyBTree_LawfulEqInstance = property $ do
   let
     genKey = Gen.int (Range.linear (-100) 100)
     genVal = Gen.int (Range.linear 200 500)
-    genIntTree = genTree $ liftA2 (,) genKey genVal
+    genIntTree = genTree0 genKey genVal
 
   (i,j) <- forAll $ liftA2 (,) genIntTree genIntTree
   -- This generates a function of the following type: 'g :: MyBTree Int Int -> Bool'
-  g <- Fn.forAllFn $ Fn.fn @(MyBTree Int Int) Gen.bool 
+  g <- Fn.forAllFn $ Fn.fn @(MyBTree Int Int) Gen.bool
 
   annotate "Substitutivity: if x == y = True and g is a function whose return type is an instance of Eq, then g x == g y = True"
   when (i == j) $ (g i == g j) === True
@@ -222,6 +242,7 @@ propertyTests = testGroup "Level00 - Property Tests"
   , testProperty "BST delete" prop_MyBTree_Delete
 
   , testProperty "Using intended Eq instance implementation" prop_desired_eq_instance
+  , testProperty "MyBTree generator is valid" prop_tree_gen_valid
   ]
 
 ----------------------------------------------------------------------
@@ -234,7 +255,7 @@ propertyTests = testGroup "Level00 - Property Tests"
 prop_desired_eq_instance :: Property
 prop_desired_eq_instance = withTests 1 . property $ do
   let
-    kvs = [(1,'a'), (2, 'b'), (3, 'c')]
+    kvs = [(1,'a'), (2, 'b'), (3, 'c')] :: [(Int,Char)]
     kvsDiffVal = [(1,'a'), (2, 'd'), (3, 'c')]
     kvsDiffKey = [(1,'a'), (2, 'b'), (5, 'c')]
 
