@@ -1,5 +1,5 @@
-{ mkDerivation, base, hedgehog, hedgehog-fn, lens, mtl, stdenv
-, tasty, tasty-hedgehog
+{ mkDerivation, base, containers, hedgehog, hedgehog-fn, lens, mtl
+, stdenv, tasty, tasty-hedgehog
 }:
 mkDerivation {
   pname = "state-machine-testing-course";
@@ -7,7 +7,7 @@ mkDerivation {
   src = ./.;
   libraryHaskellDepends = [ base lens mtl ];
   testHaskellDepends = [
-    base hedgehog hedgehog-fn lens tasty tasty-hedgehog
+    base containers hedgehog hedgehog-fn lens tasty tasty-hedgehog
   ];
   description = "Introductory course for property-based state-machine testing";
   license = stdenv.lib.licenses.bsd3;
